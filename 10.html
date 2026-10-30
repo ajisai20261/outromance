@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OUTROMANCE: 婚外10年シミュレーター 〜既婚者たちの裏歴史〜 | Ajisai Game Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;600;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #08090d;
+      --card-bg: rgba(18, 20, 29, 0.85);
+      --accent-purple: #9d4edd;
+      --accent-cyan: #06b6d4;
+      --accent-rose: #f43f5e;
+      --accent-gold: #f59e0b;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: #f1f5f9;
+      font-family: 'Noto Sans JP', sans-serif;
+      overflow-x: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-serif-jp { font-family: 'Noto Serif JP', serif; }
+    .font-cinzel { font-family: 'Cinzel', serif; }
+
+    /* 背景アンビエントネオン */
+    .bg-ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(circle at 15% 15%, rgba(157, 78, 221, 0.16) 0%, transparent 45%),
+                  radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.14) 0%, transparent 45%),
+                  radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.08) 0%, transparent 55%);
+    }
+
+    /* 画面赤フラッシュ（身バレ危機） */
+    @keyframes redFlash {
+      0% { background-color: rgba(239, 68, 68, 0.45); }
+      100% { background-color: transparent; }
+    }
+    .red-flash-active {
+      animation: redFlash 0.6s ease-out;
+    }
+
+    /* プログレスバーのリアルタイム伸縮 */
+    .stat-bar-fill {
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 相性S・激レアのパルス光輪 */
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.9; }
+      50% { transform: scale(1.35); opacity: 0.2; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    .ring-pulse-rare {
+      position: relative;
+    }
+    .ring-pulse-rare::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 9999px;
+      border: 2px solid #f59e0b;
+      animation: pulseRing 1.2s infinite ease-out;
+      pointer-events: none;
+    }
+
+    /* スプラッシュロゴの登場＆フェードアウト */
+    @keyframes splashSequence {
+      0% { opacity: 0; transform: scale(0.85); filter: blur(8px); }
+      20% { opacity: 1; transform: scale(1); filter: blur(0px); }
+      75% { opacity: 1; transform: scale(1.02); filter: blur(0px); }
+      100% { opacity: 0; transform: scale(1.08); filter: blur(6px); visibility: hidden; }
+    }
+    .splash-anim {
+      animation: splashSequence 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+
+    /* プロローグの順次フェードイン（2/3のスピードでゆったり表示） */
+    .fade-seq {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .fade-seq.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 下部固定コントローラー */
+    .sticky-bottom-bar {
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: rgba(13, 15, 23, 0.88);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between selection:bg-purple-500 selection:text-white">
+  <div class="bg-ambient"></div>
+  <div id="flashOverlay" class="fixed inset-0 pointer-events-none z-50 transition-colors"></div>
+
+  <!-- 常設ヘッダー -->
+  <header class="relative z-30 w-full max-w-xl mx-auto px-4 py-3 flex items-center justify-between border-b border-white/5">
+    <div class="flex items-center gap-2">
+      <!-- 紫陽花SVGロゴ -->
+      <svg class="w-7 h-7 text-purple-400 drop-shadow-[0_0_8px_rgba(157,78,221,0.5)]" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad1" x1="10" y1="5" x2="26" y2="33" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#c084fc"/>
+            <stop offset="1" stop-color="#818cf8"/>
+          </linearGradient>
+          <linearGradient id="grad2" x1="20" y1="16" x2="32" y2="28" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#f472b6"/>
+            <stop offset="1" stop-color="#c084fc"/>
+          </linearGradient>
+          <linearGradient id="grad3" x1="4" y1="16" x2="16" y2="28" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#38bdf8"/>
+            <stop offset="1" stop-color="#818cf8"/>
+          </linearGradient>
+        </defs>
+        <path d="M18 5L20.5 10.5L26 13L20.5 15.5L18 21L15.5 15.5L10 13L15.5 10.5L18 5Z" fill="url(#grad1)"/>
+        <path d="M26 16L27.8 20.2L32 22L27.8 23.8L26 28L24.2 23.8L20 22L24.2 20.2L26 16Z" fill="url(#grad2)"/>
+        <path d="M10 16L11.8 20.2L16 22L11.8 23.8L10 28L8.2 23.8L4 22L8.2 20.2L10 16Z" fill="url(#grad3)"/>
+        <path d="M18 21L19.8 25.2L24 27L19.8 28.8L18 33L16.2 28.8L12 27L16.2 25.2L18 21Z" fill="url(#grad1)"/>
+        <circle cx="18" cy="18" r="3" fill="#ffffff" fill-opacity="0.9"/>
+      </svg>
+      <div>
+        <div class="font-cinzel text-xs tracking-wider text-purple-300 font-bold leading-none">AJISAI</div>
+        <div class="text-[9px] text-slate-400 tracking-tighter scale-90 -ml-1">GAME STUDIO</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="soundToggleBtn" onclick="toggleSound()" class="px-2.5 py-1 rounded-full text-[11px] bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 flex items-center gap-1.5 transition">
+        <span id="soundIcon">🔇</span>
+        <span id="soundText">音響: OFF</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main class="relative z-10 flex-1 w-full max-w-xl mx-auto px-4 py-3 flex flex-col justify-center">
+
+    <!-- ==================== STEP 0: シネマティック・プロローグ ==================== -->
+    <section id="step0" class="min-h-[82vh] flex flex-col items-center justify-center relative overflow-hidden text-center py-6">
+      
+      <!-- スプラッシュ画面（開始0s〜1.2s） -->
+      <div id="splashScreen" class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none splash-anim">
+        <svg class="w-20 h-20 text-purple-400 drop-shadow-[0_0_24px_rgba(157,78,221,0.85)] mb-3" viewBox="0 0 36 36" fill="none">
+          <path d="M18 4L21 11L28 14L21 17L18 24L15 17L8 14L15 11L18 4Z" fill="url(#grad1)"/>
+          <path d="M28 17L30 22L35 24L30 26L28 31L26 26L21 24L26 22L28 17Z" fill="url(#grad2)"/>
+          <path d="M8 17L10 22L15 24L10 26L8 31L6 26L1 24L6 22L8 17Z" fill="url(#grad3)"/>
+          <circle cx="18" cy="18" r="3.5" fill="#ffffff"/>
+        </svg>
+        <div class="font-cinzel text-2xl font-bold tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-cyan-300">
+          AJISAI
+        </div>
+        <div class="text-[11px] font-medium tracking-[0.4em] text-slate-400 mt-1">GAME STUDIO PRESENTS</div>
+      </div>
+
+      <!-- プロローグ本文（約3.8秒で流暢に完了） -->
+      <div id="prologueWrapper" class="w-full flex flex-col items-center justify-center opacity-0 transition-opacity duration-500">
+        
+        <div class="w-full flex justify-end mb-2">
+          <button onclick="skipPrologue()" class="text-xs text-slate-400 hover:text-purple-300 border border-slate-800 bg-slate-900/60 px-3 py-1 rounded-full transition tracking-wider">
+            SKIP ››
+          </button>
+        </div>
+
+        <!-- 映画のナレーション風にサイズ・字間・行間を美しく統一したタイポグラフィ -->
+        <div class="space-y-6 font-serif-jp text-slate-200 text-sm sm:text-[15px] tracking-[0.16em] leading-loose max-w-md px-3 mx-auto">
+          <p id="pText1" class="fade-seq text-slate-200 font-normal">
+            世界最大の人口を誇る、東京首都圏。
+          </p>
+
+          <p id="pText2" class="fade-seq text-slate-300 font-light">
+            2020年代<br>
+            点在する繁華街と、それらを結ぶ鉄道網。
+          </p>
+
+          <p id="pText3" class="fade-seq font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">
+            そして世界屈指の治安に守られた水面下で――<br>
+            既婚者同士の恋愛、“婚外”が静かに広がっていた。
+          </p>
+
+          <div id="pTitleCard" class="fade-seq pt-3 pb-2 my-2 border-y border-purple-500/20">
+            <div class="text-[10px] sm:text-[11px] font-cinzel font-bold tracking-[0.3em] text-purple-400 uppercase mb-1.5">OUTROMANCE : SECRET CHRONICLE</div>
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_0_20px_rgba(157,78,221,0.65)]">
+              婚外10年シミュレーター
+            </h1>
+            <div class="text-xs sm:text-sm font-bold text-pink-300 tracking-[0.2em] mt-1.5">〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.85)] font-black text-sm sm:text-base mx-0.5">裏</span>歴史〜</div>
+          </div>
+
+          <p id="pText4" class="fade-seq text-white font-normal drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+            そしてあなたもまた、婚外の道に足を踏み入れる。
+          </p>
+        </div>
+
+        <!-- スタートボタン -->
+        <div id="pActionBtn" class="fade-seq mt-6 w-full max-w-xs">
+          <button onclick="goToStep1A()" class="w-full py-3.5 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
+            <span>スタート ▶</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== STEP 1-A: プレイヤー・配偶者基本設定 ==================== -->
+    <section id="step1a" class="hidden space-y-4 py-3">
+      <div class="text-center space-y-1">
+        <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-A</span>
+        <h2 class="text-lg font-bold text-white">あなたの属性と家庭環境</h2>
+        <p class="text-xs text-slate-400">あなた自身と、共にある配偶者のプロフィール</p>
+      </div>
+
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3.5 shadow-xl">
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">あなたのお名前（ニックネーム可）</label>
+          <input type="text" id="userName" value="ユウスケ" maxlength="12" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">性別</label>
+            <select id="userGender" onchange="onGenderChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              <option value="male" selected>男性</option>
+              <option value="female">女性</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">活動拠点（1都3県）</label>
+            <select id="userPref" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              <option value="tokyo" selected>東京都</option>
+              <option value="kanagawa">神奈川県</option>
+              <option value="saitama">埼玉県</option>
+              <option value="chiba">千葉県</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">開始年齢</label>
+            <select id="userAge" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              <option value="35">35歳</option>
+              <option value="40" selected>40歳</option>
+              <option value="45">45歳</option>
+              <option value="50">50歳</option>
+              <option value="55">55歳</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">配偶者の年齢</label>
+            <select id="spouseAge" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              <!-- JSで25〜65歳を生成 -->
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">配偶者のお名前（妻 / 夫）</label>
+          <input type="text" id="spouseName" value="智子" maxlength="12" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+        </div>
+      </div>
+
+      <button onclick="goToStep1B()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+        <span>能力値を決定する ✨</span>
+        <span>›</span>
+      </button>
+    </section>
+
+    <!-- ==================== STEP 1-B: 能力値・婚外予算割り振り ==================== -->
+    <section id="step1b" class="hidden space-y-4 py-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-B</span>
+          <h2 class="text-lg font-bold text-white">能力値と婚外活動費</h2>
+        </div>
+        <button onclick="rerollStats()" class="text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-purple-300 hover:bg-slate-700 flex items-center gap-1 transition">
+          <span>再抽選 🔄</span>
+        </button>
+      </div>
+
+      <!-- 配分可能ポイント情報 -->
+      <div class="bg-purple-950/40 border border-purple-800/60 rounded-xl p-3 flex items-center justify-between">
+        <div>
+          <div class="text-[11px] text-purple-200">配分可能ポイント（基礎15＋抽選）</div>
+          <div class="text-xs text-slate-400">自由に振り分けて自分と活動スタイルを最適化</div>
+        </div>
+        <div class="text-right">
+          <span id="remainPoints" class="text-2xl font-black text-purple-300">5</span>
+          <span class="text-xs text-slate-400"> pt</span>
+        </div>
+      </div>
+
+      <!-- 最優先：婚外活動費（予算 Lv.0〜10） -->
+      <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-3.5 space-y-2">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>💳 婚外活動費（アプリ課金・ホテル代・逢瀬予算）</span>
+            </div>
+            <div class="text-[10px] text-purple-300">高予算ほど上質な出会いと長期関係を維持（1pt＝予算+2）</div>
+          </div>
+          <span id="valBudget" class="text-base font-black text-pink-300">Lv.6</span>
+        </div>
+        <!-- 伸縮バー -->
+        <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-purple-900/50">
+          <div id="barBudget" class="stat-bar-fill h-full bg-gradient-to-r from-purple-500 to-pink-500 w-[60%]"></div>
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button onclick="adjustStat('budget', -1)" class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-white font-bold hover:bg-slate-700 active:scale-95">−</button>
+          <button onclick="adjustStat('budget', 1)" class="w-8 h-8 rounded-lg bg-purple-700 border border-purple-600 text-white font-bold hover:bg-purple-600 active:scale-95">＋</button>
+        </div>
+      </div>
+
+      <!-- 基礎パラメータ（外見・性欲・体力） -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-3">
+        <div class="text-xs font-semibold text-slate-400">自己投資ステータス</div>
+
+        <!-- 外見 -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-amber-300 font-medium">✨ 外見・身だしなみ</span>
+            <span id="valLooks" class="font-bold text-white">5 / 10</span>
+          </div>
+          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+            <div id="barLooks" class="stat-bar-fill h-full bg-amber-400 w-[50%]"></div>
+          </div>
+          <div class="flex justify-end gap-2 pt-0.5">
+            <button onclick="adjustStat('looks', -1)" class="px-2 py-0.5 text-xs bg-slate-800 rounded border border-slate-700">−</button>
+            <button onclick="adjustStat('looks', 1)" class="px-2 py-0.5 text-xs bg-slate-700 rounded border border-slate-600 text-amber-300">＋</button>
+          </div>
+        </div>
+
+        <!-- 性欲 -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-rose-400 font-medium">🔥 性欲・モチベーション</span>
+            <span id="valLibido" class="font-bold text-white">6 / 10</span>
+          </div>
+          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+            <div id="barLibido" class="stat-bar-fill h-full bg-rose-500 w-[60%]"></div>
+          </div>
+          <div class="flex justify-end gap-2 pt-0.5">
+            <button onclick="adjustStat('libido', -1)" class="px-2 py-0.5 text-xs bg-slate-800 rounded border border-slate-700">−</button>
+            <button onclick="adjustStat('libido', 1)" class="px-2 py-0.5 text-xs bg-slate-700 rounded border border-slate-600 text-rose-300">＋</button>
+          </div>
+        </div>
+
+        <!-- 体力 -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-cyan-400 font-medium">⚡ 体力・スケジュール管理</span>
+            <span id="valStamina" class="font-bold text-white">5 / 10</span>
+          </div>
+          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+            <div id="barStamina" class="stat-bar-fill h-full bg-cyan-400 w-[50%]"></div>
+          </div>
+          <div class="flex justify-end gap-2 pt-0.5">
+            <button onclick="adjustStat('stamina', -1)" class="px-2 py-0.5 text-xs bg-slate-800 rounded border border-slate-700">−</button>
+            <button onclick="adjustStat('stamina', 1)" class="px-2 py-0.5 text-xs bg-slate-700 rounded border border-slate-600 text-cyan-300">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 固定ステータス（家庭・環境） -->
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 grid grid-cols-2 gap-3 text-xs">
+        <div>
+          <span class="text-slate-400">本業年収水準:</span>
+          <span id="lblIncome" class="font-bold text-emerald-400 ml-1">Lv.6</span>
+        </div>
+        <div>
+          <span class="text-slate-400">子ども負担度:</span>
+          <span id="lblChildBurden" class="font-bold text-slate-300 ml-1">Lv.5</span>
+        </div>
+        <div>
+          <span class="text-slate-400">配偶者好感度:</span>
+          <span id="lblSpouseAffection" class="font-bold text-slate-300 ml-1">Lv.5</span>
+        </div>
+        <div>
+          <span class="text-slate-400">配偶者の監視警戒:</span>
+          <span id="lblSpouseAlert" class="font-bold text-amber-400 ml-1">Lv.3</span>
+        </div>
+      </div>
+
+      <!-- 希望並行人数 ＆ ターゲット年代設定 -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-3">
+        <div class="space-y-1">
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-semibold text-slate-200">希望並行人数（同時交際の上限）</label>
+            <span class="text-[10px] text-pink-400 font-bold" id="lblConcurrentDesc">分散満喫</span>
+          </div>
+          <select id="userMaxConcurrent" onchange="updateConcurrentDesc()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="1">1人（一途・10年純白伴侶狙い）</option>
+            <option value="2" selected>2人（分散満喫・リスクと充足のバランス）</option>
+            <option value="3">3人（積極交際・スリルと多重関係）</option>
+            <option value="4">4人（限界突破・首都圏の婚外覇王狙い）</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ターゲット年代設定 -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-1.5">
+        <label class="text-xs font-semibold text-slate-300">希望ターゲット年代</label>
+        <select id="targetAgePref" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+          <option value="younger">年下狙い（難易度高・20〜30代の激レア率UP）</option>
+          <option value="same" selected>同年代（±3歳差・安定した長期交際）</option>
+          <option value="older">年上狙い（難易度低・落ち着いた大人の関係）</option>
+        </select>
+      </div>
+
+      <button onclick="startSimulation()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.3)] transition active:scale-95 flex items-center justify-center gap-2">
+        <span>10年の婚外に旅立つ！ 🚀</span>
+      </button>
+    </section>
+
+    <!-- ==================== STEP 2: 10年（120ヶ月）シミュレーション画面 ==================== -->
+    <section id="step2" class="hidden space-y-4 pb-20">
+      
+      <!-- ステータス概要バー -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
+        <div>
+          <span id="simCurrentAge" class="text-base font-bold text-white">42歳 0ヶ月</span>
+          <span id="simProgressMonth" class="text-slate-400 ml-2">（0 / 120ヶ月）</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <span class="text-slate-400 text-[10px]">並行人数</span>
+            <div id="simActiveCount" class="font-bold text-purple-400 text-sm">0 / 4人</div>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-400 text-[10px]">累計交際</span>
+            <div id="simTotalPartners" class="font-bold text-pink-400 text-sm">0人</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 120ヶ月マトリクス（12ヶ月×10年） -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-1.5 shadow-xl">
+        <div class="flex justify-between items-center text-[10px] text-slate-400 px-1">
+          <span>10年マトリクス（タップで詳細ログ確認）</span>
+          <span>1年 ＝ 横12ヶ月</span>
+        </div>
+        <div id="matrixGrid" class="grid grid-cols-12 gap-1 bg-slate-950 p-2 rounded-lg border border-slate-800/80">
+          <!-- JSで120個のドットを生成 -->
+        </div>
+      </div>
+
+      <!-- リアルタイム：月別並行パートナー＆四季の情景カード -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-2">
+        <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-1.5">
+          <div class="font-bold text-slate-200 flex items-center gap-1.5">
+            <span id="seasonBadge">🌸 4月</span>
+            <span id="monthTitleLog">夜桜の季節の逢瀬</span>
+          </div>
+          <span id="alertStateText" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">平穏</span>
+        </div>
+
+        <!-- パートナー別アクションリスト（最大4人） -->
+        <div id="currentMonthPartnersLog" class="space-y-1.5 min-h-[72px]">
+          <div class="text-xs text-slate-500 italic py-3 text-center">まだパートナーはいません。アプリを巡回中……</div>
+        </div>
+      </div>
+
+      <!-- 配偶者の動向とヒヤリハットログ -->
+      <div class="bg-slate-950 border border-slate-850 rounded-xl p-3 text-xs space-y-1">
+        <div class="text-slate-400 font-semibold flex items-center gap-1">
+          <span>🏠 家庭の気配:</span>
+          <span id="spouseNameLog" class="text-slate-300">智子 (42歳)</span>
+        </div>
+        <p id="spouseSituationLog" class="text-slate-400 leading-relaxed text-[11px]">
+          平穏な週末。特に怪しまれることもなく日常が過ぎている。
+        </p>
+      </div>
+
+      <!-- ドットクリック時のインライン振り返りポップアップ -->
+      <div id="clickMonthDetail" class="hidden bg-purple-950/70 border border-purple-700/80 rounded-xl p-3 text-xs space-y-1">
+        <div class="flex justify-between font-bold text-purple-200">
+          <span id="detailMonthHeader">43歳 8月の記憶</span>
+          <button onclick="closeClickDetail()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+        <div id="detailMonthContent" class="text-slate-300 space-y-1 text-[11px]"></div>
+      </div>
+
+    </section>
+
+    <!-- ==================== STEP 3: 10年総括・最終リザルト ==================== -->
+    <section id="step3" class="hidden space-y-5 py-4 pb-12">
+      
+      <!-- エンディング称号バナー -->
+      <div class="text-center space-y-2">
+        <div class="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest bg-gradient-to-r from-purple-900 to-pink-900 border border-purple-500/50 text-purple-200">
+          10-YEAR RESULT TITLE
+        </div>
+        <h2 id="resTitleBadge" class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 drop-shadow-[0_0_12px_rgba(244,63,94,0.4)]">
+          『奇跡の純白伴侶』
+        </h2>
+        <div class="text-xs font-bold text-pink-300 tracking-wider">〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.85)] font-black text-sm mx-0.5">裏</span>歴史〜</div>
+        <p id="resEndingDesc" class="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed"></p>
+      </div>
+
+      <!-- 最後のパートナー（または生涯の伴侶）特大ハイライト -->
+      <div id="lastPartnerCard" class="bg-gradient-to-b from-purple-950/40 to-slate-900/90 border border-purple-500/40 rounded-2xl p-4 space-y-3 shadow-xl">
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] tracking-wider text-pink-400 font-bold uppercase" id="lastPartnerRole">最後のパートナーの記憶</span>
+            <h3 id="lastPartnerNameAge" class="text-lg font-bold text-white">エリコ (44歳)</h3>
+            <div id="lastPartnerPeriod" class="text-xs text-purple-300">46歳3ヶ月 〜 52歳0ヶ月（5年9ヶ月）</div>
+          </div>
+          <div id="lastPartnerChemistry" class="px-2.5 py-1 rounded-lg text-xs font-black bg-pink-950 border border-pink-700 text-pink-300">
+            相性 S
+          </div>
+        </div>
+
+        <!-- LINE風吹き出しUI（男女別） -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-1.5">
+          <div class="text-[10px] text-slate-400 flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+            <span>別れ際の最後のLINEメッセージ</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-200 text-xs leading-relaxed italic" id="lastPartnerLineText">
+            「生まれ変わったら奥さんより先に私を一番に見つけてね……本当に幸せだったよ。」
+          </div>
+        </div>
+      </div>
+
+      <!-- 10年総括スタッツ（グリッド） -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 grid grid-cols-2 gap-3 text-center">
+        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+          <div class="text-[10px] text-slate-400">累計パートナー</div>
+          <div id="resTotalCount" class="text-xl font-black text-pink-400">8人</div>
+        </div>
+        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+          <div class="text-[10px] text-slate-400">肌を重ねた回数</div>
+          <div id="resSexCount" class="text-xl font-black text-rose-400">142回</div>
+        </div>
+        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+          <div class="text-[10px] text-slate-400">密会・正味時間</div>
+          <div id="resTotalHours" class="text-xl font-black text-cyan-400">680時間</div>
+          <div class="text-[9px] text-slate-500">（約28.3日分）</div>
+        </div>
+        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+          <div class="text-[10px] text-slate-400">10年概算出費</div>
+          <div id="resTotalMoney" class="text-xl font-black text-amber-300">約320万円</div>
+          <div class="text-[9px] text-slate-500">（月平均 約2.6万円）</div>
+        </div>
+      </div>
+
+      <!-- 象徴的パートナーTOP3 ＆ 全交際履歴アコーディオン -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div class="text-xs font-bold text-slate-200">心に刻まれた象徴的パートナー</div>
+        <div id="topPartnersList" class="space-y-2"></div>
+
+        <div id="allHistoryWrapper" class="hidden pt-2 border-t border-slate-800 space-y-2">
+          <div class="text-[11px] font-semibold text-slate-400">すべての交際履歴</div>
+          <div id="allPartnersList" class="space-y-1.5 text-xs"></div>
+        </div>
+
+        <button id="toggleAllPartnersBtn" onclick="toggleAllPartners()" class="w-full py-2 text-xs text-purple-400 hover:text-purple-300 border border-purple-900/60 rounded-xl bg-purple-950/30 transition">
+          すべての交際履歴（全0人）を確認する ▼
+        </button>
+      </div>
+
+      <!-- 10年総括エピローグ -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2 font-serif-jp text-xs leading-relaxed text-slate-300">
+        <div class="text-[10px] font-sans font-bold text-purple-400 uppercase tracking-widest">10-Year Epilogue</div>
+        <div id="epilogueText" class="space-y-2"></div>
+      </div>
+
+      <!-- シェア ＆ 保存アクションボタン群 -->
+      <div class="space-y-2.5 pt-2">
+        <button onclick="generateSquareCard()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+          <span>📷 正方形の成績表カードを保存（1080×1080）</span>
+        </button>
+
+        <button onclick="shareOnX()" class="w-full py-3 px-6 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 transition active:scale-95 flex items-center justify-center gap-2">
+          <span>𝕏 で結果をポスト・シェア</span>
+        </button>
+
+        <button onclick="restartApp()" class="w-full py-2.5 text-xs text-slate-400 hover:text-white transition">
+          ↺ もう一度最初からシミュレーションする
+        </button>
+      </div>
+
+      <!-- アフィリエイトPR枠 -->
+      <div class="bg-gradient-to-b from-slate-900 to-purple-950/30 border border-purple-900/40 rounded-2xl p-4 space-y-3 mt-4 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] tracking-wider text-purple-400 font-bold uppercase">Sponsored PR</span>
+          <span class="text-[9px] text-slate-500">首都圏で選ばれている既婚者向け公式サービス</span>
+        </div>
+        <div class="space-y-2">
+          <a href="#" class="block p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-purple-500 transition group">
+            <div class="flex justify-between font-bold text-slate-200 group-hover:text-purple-300">
+              <span>既婚者クラブ</span>
+              <span class="text-xs text-pink-400">首都圏会員数 No.1 ›</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mt-0.5">累計会員40万人突破。ブラウザ完結でアプリアイコンが残らない安心設計。</div>
+          </a>
+          <a href="#" class="block p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-purple-500 transition group">
+            <div class="flex justify-between font-bold text-slate-200 group-hover:text-purple-300">
+              <span>Healmate（ヒールメイト）</span>
+              <span class="text-xs text-purple-400">真剣セカンドパートナー ›</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mt-0.5">大人の精神的な繋がりと心の癒やしを重視する会員制コミュニティ。</div>
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== 下部固定フロートコントローラー（Step 2進行中のみ表示） ==================== -->
+  <div id="stickyController" class="hidden fixed bottom-0 left-0 right-0 z-40 sticky-bottom-bar px-4 py-2.5">
+    <div class="max-w-xl mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <button id="pausePlayBtn" onclick="togglePauseSimulation()" class="w-9 h-9 rounded-xl bg-purple-700/80 hover:bg-purple-600 border border-purple-500 text-white flex items-center justify-center font-bold text-sm transition active:scale-95">
+          ⏸️
+        </button>
+        <button onclick="skipToEndOfTwoYears()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-[11px] text-slate-300 hover:bg-slate-700 transition">
+          2年後へスキップ ⏩
+        </button>
+      </div>
+
+      <div class="text-right">
+        <div id="stickyMonthText" class="text-xs font-bold text-white">42歳 4ヶ月</div>
+        <div id="stickySpeedText" class="text-[9px] text-purple-300">0.7秒/月 進行中</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2年ごとの節目モーダル（能力調整優先レイアウト） ==================== -->
+  <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl my-auto">
+      
+      <!-- タイトル ＆ 加齢アラート -->
+      <div class="text-center space-y-1">
+        <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold" id="twoYearHeaderTag">24-Month Milestone</span>
+        <h3 class="text-lg font-bold text-white" id="twoYearTitle">44歳を迎えて（2年経過）</h3>
+        <!-- 加齢減退アラート（動的生成） -->
+        <div id="twoYearAgeDropBanner" class="p-2 rounded-lg bg-rose-950/60 border border-rose-800/50 text-[11px] text-rose-300">
+          ⚠️ 加齢による能力変化: 外見 -1 / 体力 -1
+        </div>
+      </div>
+
+      <!-- 最上部：現在交際中のパートナー動向 -->
+      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
+        <div class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+          <span>💖 現在継続中のパートナー</span>
+        </div>
+        <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs"></div>
+      </div>
+
+      <!-- 再投資ポイント案内 -->
+      <div class="bg-purple-950/40 border border-purple-800/50 rounded-xl p-3 flex justify-between items-center">
+        <div>
+          <div class="text-xs font-bold text-purple-200">再配分可能ポイント</div>
+          <div class="text-[10px] text-slate-400">昇給＆生活費見直しによる余剰リソース</div>
+        </div>
+        <div class="text-right">
+          <span id="twoYearRemainPoints" class="text-2xl font-black text-purple-300">4</span>
+          <span class="text-xs text-slate-400"> pt</span>
+        </div>
+      </div>
+
+      <!-- 優先1：婚外活動費（予算 Lv.0〜10・0リセット済） -->
+      <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-3 space-y-1.5">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-white">💳 婚外活動費（予算）</span>
+          <span id="twoYearValBudget" class="font-black text-pink-300">Lv.0</span>
+        </div>
+        <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-purple-900/50">
+          <div id="twoYearBarBudget" class="stat-bar-fill h-full bg-gradient-to-r from-purple-500 to-pink-500 w-[0%]"></div>
+        </div>
+        <div class="flex justify-end gap-2 pt-0.5">
+          <button onclick="adjustTwoYearStat('budget', -1)" class="px-2.5 py-0.5 text-xs bg-slate-800 rounded border border-slate-700 text-white font-bold">−</button>
+          <button onclick="adjustTwoYearStat('budget', 1)" class="px-2.5 py-0.5 text-xs bg-purple-700 rounded border border-purple-600 text-white font-bold">＋</button>
+        </div>
+      </div>
+
+      <!-- 優先2：アンチエイジング投資（外見・性欲・体力） -->
+      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2.5">
+        <div class="text-[11px] font-semibold text-slate-400">アンチエイジング再投資</div>
+        
+        <!-- 外見 -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-amber-300">✨ 外見・身だしなみ</span>
+            <span id="twoYearValLooks" class="font-bold text-white">4 / 10</span>
+          </div>
+          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+            <div id="twoYearBarLooks" class="stat-bar-fill h-full bg-amber-400 w-[40%]"></div>
+          </div>
+          <div class="flex justify-end gap-2">
+            <button onclick="adjustTwoYearStat('looks', -1)" class="px-2 text-xs bg-slate-800 rounded border border-slate-700">−</button>
+            <button onclick="adjustTwoYearStat('looks', 1)" class="px-2 text-xs bg-slate-700 rounded border border-slate-600 text-amber-300">＋</button>
+          </div>
+        </div>
+
+        <!-- 体力 -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-cyan-400">⚡ 体力・生活管理</span>
+            <span id="twoYearValStamina" class="font-bold text-white">4 / 10</span>
+          </div>
+          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+            <div id="twoYearBarStamina" class="stat-bar-fill h-full bg-cyan-400 w-[40%]"></div>
+          </div>
+          <div class="flex justify-end gap-2">
+            <button onclick="adjustTwoYearStat('stamina', -1)" class="px-2 text-xs bg-slate-800 rounded border border-slate-700">−</button>
+            <button onclick="adjustTwoYearStat('stamina', 1)" class="px-2 text-xs bg-slate-700 rounded border border-slate-600 text-cyan-300">＋</button>
+          </div>
+        </div>
+
+        <!-- 性欲 -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs">
+            <span class="text-rose-400">🔥 性欲・意欲</span>
+            <span id="twoYearValLibido" class="font-bold text-white">5 / 10</span>
+          </div>
+          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+            <div id="twoYearBarLibido" class="stat-bar-fill h-full bg-rose-500 w-[50%]"></div>
+          </div>
+          <div class="flex justify-end gap-2">
+            <button onclick="adjustTwoYearStat('libido', -1)" class="px-2 text-xs bg-slate-800 rounded border border-slate-700">−</button>
+            <button onclick="adjustTwoYearStat('libido', 1)" class="px-2 text-xs bg-slate-700 rounded border border-slate-600 text-rose-300">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 並行人数上限 ＆ 狙うターゲット年代の再設定 -->
+      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2.5">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-semibold text-slate-300">同時交際上限の変更</span>
+          <select id="twoYearMaxPartners" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+            <option value="1">1人（一途・純愛）</option>
+            <option value="2">2人（分散満喫）</option>
+            <option value="3">3人（積極交際）</option>
+            <option value="4">4人（限界突破）</option>
+          </select>
+        </div>
+        <div class="flex justify-between items-center text-xs border-t border-slate-900 pt-2">
+          <span class="font-semibold text-slate-300">今後のターゲット年代</span>
+          <select id="twoYearTargetAgePref" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+            <option value="younger">年下狙い</option>
+            <option value="same">同年代（±3歳）</option>
+            <option value="older">年上狙い</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- メインボタン：次の2年間へ -->
+      <button onclick="resumeNextTwoYears()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+        <span>この設定で次の2年間を進める ›</span>
+      </button>
+
+      <!-- 下部アコーディオン：直近24ヶ月クロニクル -->
+      <div class="pt-2 border-t border-slate-800 space-y-2">
+        <details class="text-xs text-slate-300 group">
+          <summary class="cursor-pointer font-bold text-purple-300 hover:text-purple-200 flex justify-between py-1">
+            <span>直近24ヶ月の月別クロニクル振り返り</span>
+            <span class="group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="pt-2">
+            <div id="twoYearChronicleScroll" class="max-h-40 overflow-y-auto space-y-1 p-2 bg-slate-950 rounded-lg border border-slate-800 text-[10px] leading-relaxed"></div>
+          </div>
+        </details>
+      </div>
+
+      <!-- 自主引退ボタン -->
+      <button onclick="retireFromTwoYear()" class="w-full py-2 rounded-lg text-xs text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-900 bg-slate-950/40 transition">
+        ここで婚外活動を終える（自主引退）
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ==================== 画像長押し保存プレビューモーダル ==================== -->
+  <div id="imageSaveModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-purple-500/40 rounded-2xl max-w-sm w-full p-4 space-y-3 text-center shadow-2xl">
+      <div class="text-xs font-bold text-purple-300">画像を長押しして「写真に追加」</div>
+      <div class="rounded-xl overflow-hidden border border-slate-800 shadow-lg">
+        <img id="generatedCardImage" class="w-full h-auto block" alt="10年成績表カード">
+      </div>
+      <button onclick="closeImageModal()" class="w-full py-2 rounded-xl text-xs bg-slate-800 text-slate-300 hover:bg-slate-700">
+        閉じる
+      </button>
+    </div>
+  </div>
+
+  <canvas id="exportCanvas" width="1080" height="1080" class="hidden"></canvas>
+
+  <script>
+    /* ============================================================
+       マスタデータ & グローバル状態管理
+       ============================================================ */
+    const FEMALE_NAMES = ["エリコ", "ユミ", "サオリ", "チヒロ", "マイ", "アヤカ", "マキ", "ノリコ", "レイコ", "リカ", "マユミ", "アスカ", "ミサキ", "ナナ", "カナコ", "シホ", "トモコ", "ジュンコ", "リエ", "ナツキ", "ヒトミ", "ケイコ", "モモコ", "アキコ", "ユカ", "アズサ", "ミホ", "サクラ", "ハルカ", "ミワ"];
+    const MALE_NAMES = ["ケンジ", "タクヤ", "シンゴ", "ダイスケ", "マサト", "ヒロシ", "タカシ", "ユウスケ", "トモヤ", "ジュン", "リク", "ソウタ", "コウジ", "アキヒロ", "ケント", "リュウタ", "マコト", "ナオキ", "ユウキ", "ショウタ", "カツヤ", "ヒデキ", "シンイチ", "テツヤ", "ヨウスケ", "タツヤ", "トオル", "カズキ", "ミノル", "ハジメ"];
+    const FEMALE_JOBS = ["美容サロン経営", "アパレル管理職", "外資系アシスタント", "看護師", "ピアノ講師", "Webディレクター", "ヨガインストラクター", "医療事務", "大手生保営業", "貿易事務", "インテリアデザイナー", "CA（客室乗務員）"];
+    const MALE_JOBS = ["総合商社勤務", "外資系金融", "ITメガベンチャー役員", "企業弁護士", "大学病院医師", "経営コンサル", "広告代理店プロデューサー", "設計事務所代表", "公認会計士", "私立高校教諭"];
+
+    // 視認性の高い4色の固有パレット（ピンク、バイオレット、シアン、アンバー）
+    const PARTNER_COLORS = ["#ec4899", "#8b5cf6", "#06b6d4", "#f59e0b"];
+
+    let isSoundOn = false;
+    let audioCtx = null;
+
+    let appState = {
+      user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 40, spouseName: "智子", spouseAge: 38 },
+      stats: { looks: 5, libido: 6, stamina: 5, budget: 6, income: 6, childBurden: 5, spouseAffection: 5, spouseAlert: 3, targetAgePref: "same", maxPartners: 2 },
+      tempPoints: 5,
+      sim: {
+        currentMonth: 0,
+        currentAge: 40,
+        isPaused: false,
+        intervalId: null,
+        partners: [],
+        activePartnerIds: [],
+        totalPartnerCounter: 0,
+        monthlyHistory: [],
+        isRetired: false,
+        isDivorced: false,
+        isRemarried: false,
+        endingType: null,
+        endingPartner: null,
+        lastMilestone: -1
+      },
+      twoYearTemp: { points: 4, looks: 4, libido: 5, stamina: 4, budget: 0 }
+    };
+
+    // 配偶者年齢のセレクト生成（25〜65歳まで幅広く網羅）
+    function initSpouseAgeOptions() {
+      const sel = document.getElementById("spouseAge");
+      if (!sel) return;
+      sel.innerHTML = "";
+      for (let a = 25; a <= 65; a++) {
+        const opt = document.createElement("option");
+        opt.value = a;
+        opt.innerText = a + "歳";
+        if (a === 38) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleSound() {
+      initAudio();
+      isSoundOn = !isSoundOn;
+      const icon = document.getElementById("soundIcon");
+      const text = document.getElementById("soundText");
+      if (icon) icon.innerText = isSoundOn ? "🔊" : "🔇";
+      if (text) text.innerText = isSoundOn ? "音響: ON" : "音響: OFF";
+      if (isSoundOn) playTone(587.33, 0.12, "sine");
+    }
+
+    function playTone(freq, duration, type="sine") {
+      if (!isSoundOn || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function playAlarm() {
+      if (!isSoundOn || !audioCtx) return;
+      playTone(180, 0.35, "sawtooth");
+    }
+
+    function playRareChime() {
+      if (!isSoundOn || !audioCtx) return;
+      playTone(523.25, 0.15, "triangle");
+      setTimeout(() => playTone(659.25, 0.15, "triangle"), 100);
+      setTimeout(() => playTone(783.99, 0.25, "triangle"), 200);
+    }
+
+    function triggerVibrate(pattern) {
+      if ("vibrate" in navigator) {
+        try { navigator.vibrate(pattern); } catch(e) {}
+      }
+    }
+
+    /* ============================================================
+       STEP 0: テンポアップしたシネマティック・プロローグ演出（約3.8秒）
+       ============================================================ */
+    let prologueTimers = [];
+
+    function runCinematicPrologue() {
+      // 既存タイマーをクリア
+      prologueTimers.forEach(t => clearTimeout(t));
+      prologueTimers = [];
+
+      const splash = document.getElementById("splashScreen");
+      const wrapper = document.getElementById("prologueWrapper");
+      const t1 = document.getElementById("pText1");
+      const t2 = document.getElementById("pText2");
+      const t3 = document.getElementById("pText3");
+      const tTitle = document.getElementById("pTitleCard");
+      const t4 = document.getElementById("pText4");
+      const btn = document.getElementById("pActionBtn");
+
+      if (splash) {
+        splash.style.display = "flex";
+        splash.classList.remove("splash-anim");
+        void splash.offsetWidth; // リフローによるアニメーション強制再トリガー
+        splash.classList.add("splash-anim");
+      }
+      if (wrapper) {
+        wrapper.classList.remove("opacity-100");
+        wrapper.classList.add("opacity-0");
+      }
+      [t1, t2, t3, tTitle, t4, btn].forEach(el => el && el.classList.remove("visible"));
+
+      // 1.8秒でスプラッシュが消え、プロローグ領域がフェードイン
+      prologueTimers.push(setTimeout(() => {
+        if (splash) splash.style.display = "none";
+        if (wrapper) {
+          wrapper.classList.remove("opacity-0");
+          wrapper.classList.add("opacity-100");
+        }
+      }, 1750));
+
+      // 約2/3のスピードで情緒豊かに順次フェードイン（全体で約5.8秒で完了）
+      prologueTimers.push(setTimeout(() => t1 && t1.classList.add("visible"), 2100));
+      prologueTimers.push(setTimeout(() => t2 && t2.classList.add("visible"), 3000));
+      prologueTimers.push(setTimeout(() => t3 && t3.classList.add("visible"), 3900));
+      prologueTimers.push(setTimeout(() => tTitle && tTitle.classList.add("visible"), 4700));
+      prologueTimers.push(setTimeout(() => t4 && t4.classList.add("visible"), 5300));
+      prologueTimers.push(setTimeout(() => btn && btn.classList.add("visible"), 5800));
+    }
+
+    function skipPrologue() {
+      prologueTimers.forEach(t => clearTimeout(t));
+      const splash = document.getElementById("splashScreen");
+      const wrapper = document.getElementById("prologueWrapper");
+      if (splash) splash.style.display = "none";
+      if (wrapper) {
+        wrapper.classList.remove("opacity-0");
+        wrapper.classList.add("opacity-100");
+      }
+
+      ["pText1", "pText2", "pText3", "pTitleCard", "pText4", "pActionBtn"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add("visible");
+      });
+    }
+
+    function goToStep1A() {
+      initAudio();
+      if (isSoundOn) playTone(440, 0.15);
+      triggerVibrate(20);
+      document.getElementById("step0").classList.add("hidden");
+      document.getElementById("step1a").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function onGenderChange() {
+      const g = document.getElementById("userGender").value;
+      if (g === "female") {
+        document.getElementById("userName").value = "マイ";
+        document.getElementById("spouseName").value = "ケンイチ";
+      } else {
+        document.getElementById("userName").value = "ユウスケ";
+        document.getElementById("spouseName").value = "智子";
+      }
+    }
+
+    function updateConcurrentDesc() {
+      const val = document.getElementById("userMaxConcurrent").value;
+      const descMap = {
+        "1": "一途・純愛",
+        "2": "分散満喫",
+        "3": "積極交際",
+        "4": "限界突破・覇王"
+      };
+      document.getElementById("lblConcurrentDesc").innerText = descMap[val] || "";
+    }
+
+    /* ============================================================
+       STEP 1-A -> 1-B: ベルカーブ乱数による初期能力値決定
+       ============================================================ */
+    function rollBellCurve15() {
+      const r = (Math.random() + Math.random() + Math.random() + Math.random()) / 4;
+      return Math.max(1, Math.min(15, Math.round(r * 14) + 1));
+    }
+
+    function goToStep1B() {
+      appState.user.name = document.getElementById("userName").value.trim() || "名無し";
+      appState.user.gender = document.getElementById("userGender").value;
+      appState.user.pref = document.getElementById("userPref").value;
+      appState.user.startAge = parseInt(document.getElementById("userAge").value);
+      appState.user.spouseAge = parseInt(document.getElementById("spouseAge").value);
+      appState.user.spouseName = document.getElementById("spouseName").value.trim() || "配偶者";
+
+      rerollStats();
+
+      document.getElementById("step1a").classList.add("hidden");
+      document.getElementById("step1b").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function rerollStats() {
+      const rollPt = rollBellCurve15();
+      appState.tempPoints = rollPt;
+      
+      appState.stats.looks = 4;
+      appState.stats.libido = 4;
+      appState.stats.stamina = 4;
+      appState.stats.budget = 4;
+
+      appState.stats.income = 6;
+      appState.stats.childBurden = Math.max(2, Math.min(8, 10 - Math.floor((appState.user.startAge - 35) / 3)));
+      appState.stats.spouseAffection = 5;
+      appState.stats.spouseAlert = 3;
+
+      renderStep1B();
+      if (isSoundOn) playTone(523.25, 0.12);
+    }
+
+    function renderStep1B() {
+      document.getElementById("remainPoints").innerText = appState.tempPoints;
+      
+      document.getElementById("valBudget").innerText = "Lv." + appState.stats.budget;
+      document.getElementById("barBudget").style.width = (appState.stats.budget * 10) + "%";
+
+      document.getElementById("valLooks").innerText = appState.stats.looks + " / 10";
+      document.getElementById("barLooks").style.width = (appState.stats.looks * 10) + "%";
+
+      document.getElementById("valLibido").innerText = appState.stats.libido + " / 10";
+      document.getElementById("barLibido").style.width = (appState.stats.libido * 10) + "%";
+
+      document.getElementById("valStamina").innerText = appState.stats.stamina + " / 10";
+      document.getElementById("barStamina").style.width = (appState.stats.stamina * 10) + "%";
+
+      document.getElementById("lblIncome").innerText = "Lv." + appState.stats.income;
+      document.getElementById("lblChildBurden").innerText = "Lv." + appState.stats.childBurden;
+      document.getElementById("lblSpouseAffection").innerText = "Lv." + appState.stats.spouseAffection;
+      document.getElementById("lblSpouseAlert").innerText = "Lv." + appState.stats.spouseAlert;
+    }
+
+    function adjustStat(type, delta) {
+      if (delta > 0) {
+        if (appState.tempPoints <= 0) return;
+        if (type === "budget") {
+          if (appState.stats.budget >= 10) return;
+          appState.stats.budget = Math.min(10, appState.stats.budget + 2);
+          appState.tempPoints -= 1;
+        } else {
+          if (appState.stats[type] >= 10) return;
+          appState.stats[type] += 1;
+          appState.tempPoints -= 1;
+        }
+      } else {
+        if (type === "budget") {
+          if (appState.stats.budget <= 0) return;
+          appState.stats.budget = Math.max(0, appState.stats.budget - 2);
+          appState.tempPoints += 1;
+        } else {
+          if (appState.stats[type] <= 1) return;
+          appState.stats[type] -= 1;
+          appState.tempPoints += 1;
+        }
+      }
+      renderStep1B();
+      triggerVibrate(12);
+    }
+
+    /* ============================================================
+       STEP 2: 120ヶ月シミュレーションエンジン
+       ============================================================ */
+    function startSimulation() {
+      appState.stats.maxConcurrent = parseInt(document.getElementById("userMaxConcurrent").value) || 2;
+      appState.stats.targetAgePref = document.getElementById("targetAgePref").value;
+      appState.sim.currentMonth = 0;
+      appState.sim.currentAge = appState.user.startAge;
+      appState.sim.lastMilestoneMonth = -1;
+      appState.sim.isPaused = false;
+      appState.sim.isSkipping = false;
+      appState.sim.partners = [];
+      appState.sim.activePartnerIds = [];
+      appState.sim.totalPartnerCounter = 0;
+      appState.sim.monthlyHistory = [];
+      appState.sim.isRetired = false;
+      appState.sim.isDivorced = false;
+      appState.sim.isRemarried = false;
+
+      document.getElementById("step1b").classList.add("hidden");
+      document.getElementById("step2").classList.remove("hidden");
+      document.getElementById("stickyController").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      initMatrixGrid();
+      runNextMonth();
+    }
+
+    function initMatrixGrid() {
+      const grid = document.getElementById("matrixGrid");
+      grid.innerHTML = "";
+      for (let i = 0; i < 120; i++) {
+        const dot = document.createElement("div");
+        dot.id = "dot-" + i;
+        dot.className = "w-full aspect-square rounded-full bg-slate-800 border border-slate-700/60 transition-all duration-300 cursor-pointer hover:scale-125";
+        dot.onclick = () => showClickMonthDetail(i);
+        grid.appendChild(dot);
+      }
+    }
+
+    function runNextMonth() {
+      if (appState.sim.isPaused) return;
+
+      if (appState.sim.currentMonth >= 120) {
+        finishSimulation();
+        return;
+      }
+
+      // 2年（24, 48, 72, 96ヶ月）ごとの節目チェック（重複実行をlastMilestoneMonthで完全に遮断）
+      if (appState.sim.currentMonth > 0 && 
+          appState.sim.currentMonth % 24 === 0 && 
+          appState.sim.currentMonth !== appState.sim.lastMilestoneMonth) {
+        pauseForTwoYearMilestone();
+        return;
+      }
+
+      simulateOneMonth();
+      appState.sim.currentMonth++;
+
+      appState.sim.intervalId = setTimeout(runNextMonth, 700);
+    }
+
+    function togglePauseSimulation() {
+      appState.sim.isPaused = !appState.sim.isPaused;
+      const btn = document.getElementById("pausePlayBtn");
+      if (appState.sim.isPaused) {
+        clearTimeout(appState.sim.intervalId);
+        btn.innerText = "▶️";
+      } else {
+        btn.innerText = "⏸️";
+        runNextMonth();
+      }
+    }
+
+    function skipToEndOfTwoYears() {
+      appState.sim.isSkipping = true;
+      // フラッシュ演出を即座に消去
+      document.getElementById("flashOverlay").className = "fixed inset-0 pointer-events-none z-50 transition-colors";
+
+      let nextMile = (Math.floor(appState.sim.currentMonth / 24) + 1) * 24;
+      if (nextMile <= appState.sim.currentMonth) nextMile += 24;
+      nextMile = Math.min(120, nextMile);
+
+      while (appState.sim.currentMonth < nextMile && !appState.sim.isDivorced && !appState.sim.isRemarried) {
+        simulateOneMonth(true); // true = 演出完全サイレント
+        appState.sim.currentMonth++;
+      }
+      appState.sim.isSkipping = false;
+
+      if (appState.sim.currentMonth % 24 === 0 && appState.sim.currentMonth < 120 && appState.sim.currentMonth !== appState.sim.lastMilestoneMonth) {
+        pauseForTwoYearMilestone();
+      } else if (appState.sim.currentMonth >= 120) {
+        finishSimulation();
+      }
+    }
+
+    function simulateOneMonth(isSilent = false) {
+      const mIdx = appState.sim.currentMonth;
+      const calYear = Math.floor(mIdx / 12);
+      const calMonth = (mIdx % 12) + 1;
+      const currentRealAge = appState.user.startAge + calYear;
+      const ageMonthPart = mIdx % 12;
+
+      document.getElementById("simCurrentAge").innerText = `${currentRealAge}歳 ${ageMonthPart}ヶ月`;
+      document.getElementById("simProgressMonth").innerText = `(${mIdx + 1} / 120ヶ月)`;
+      document.getElementById("stickyMonthText").innerText = `${currentRealAge}歳 ${calMonth}月`;
+
+      let departingIds = [];
+      let activePartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
+
+      activePartners.forEach(p => {
+        p.durationMonths++;
+        p.datesCount++;
+        if (p.chemistry === "S") p.sexCount += Math.floor(Math.random() * 2) + 2;
+        else if (p.chemistry === "A") p.sexCount += Math.floor(Math.random() * 2) + 1;
+        else if (p.chemistry === "B") p.sexCount += 1;
+        else if (p.chemistry === "C" && Math.random() < 0.4) p.sexCount += 1;
+
+        let breakRate = 0.08;
+        if (p.chemistry === "S") breakRate = 0.02;
+        if (p.chemistry === "A") breakRate = 0.04;
+        if (p.chemistry === "C") breakRate = 0.28;
+        if (appState.stats.budget >= 8) breakRate *= 0.7;
+        if (appState.stats.budget <= 2) breakRate *= 1.6;
+
+        if (p.durationMonths >= 2 && Math.random() < breakRate) {
+          departingIds.push(p.id);
+          p.endMonth = mIdx;
+          p.endAge = currentRealAge;
+        }
+      });
+
+      departingIds.forEach(id => {
+        appState.sim.activePartnerIds = appState.sim.activePartnerIds.filter(pid => pid !== id);
+      });
+
+      // 希望並行人数を上限枠として適用
+      const maxAllowed = appState.stats.maxConcurrent || 2;
+      const emptySlots = maxAllowed - appState.sim.activePartnerIds.length;
+
+      if (emptySlots > 0) {
+        let meetBase = (appState.user.gender === "female") ? 0.45 : 0.30;
+        meetBase += (appState.stats.looks - 5) * 0.04;
+        meetBase += (appState.stats.budget - 5) * 0.03;
+        meetBase = Math.max(0.18, Math.min(0.85, meetBase));
+
+        if (Math.random() < meetBase) {
+          const newPartner = createPartner(mIdx, currentRealAge);
+          appState.sim.partners.push(newPartner);
+          appState.sim.activePartnerIds.push(newPartner.id);
+          appState.sim.totalPartnerCounter++;
+
+          if (!isSilent && (newPartner.chemistry === "S" || newPartner.isRare20s)) {
+            playRareChime();
+            triggerVibrate([40, 60, 40]);
+          }
+        }
+      }
+
+      // 身バレ演出（サイレント進行・スキップ時・一時停止時は発火しない）
+      checkSpouseAlertAndFlash(mIdx, isSilent);
+      updateMatrixDot(mIdx);
+      renderRealtimeMonthlyLog(mIdx, calMonth);
+
+      document.getElementById("simActiveCount").innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
+      document.getElementById("simTotalPartners").innerText = `${appState.sim.totalPartnerCounter}人`;
+    }
+
+    function createPartner(startMonth, playerAge) {
+      const isTargetMale = (appState.user.gender === "female");
+      const namePool = isTargetMale ? MALE_NAMES : FEMALE_NAMES;
+      const jobPool = isTargetMale ? MALE_JOBS : FEMALE_JOBS;
+      const name = namePool[Math.floor(Math.random() * namePool.length)];
+      const job = jobPool[Math.floor(Math.random() * jobPool.length)];
+
+      let partnerAge = playerAge;
+      let isRare20s = false;
+      const pref = appState.stats.targetAgePref;
+
+      if (pref === "younger") {
+        const diff = Math.floor(Math.random() * 14) + 6;
+        partnerAge = Math.max(24, playerAge - diff);
+        if (partnerAge < 30) isRare20s = true;
+      } else if (pref === "older") {
+        partnerAge = playerAge + Math.floor(Math.random() * 8) + 2;
+      } else {
+        partnerAge = playerAge + (Math.floor(Math.random() * 7) - 3);
+      }
+
+      const chemRoll = Math.random() + (appState.stats.libido * 0.02);
+      let chemistry = "B";
+      if (chemRoll > 0.88) chemistry = "S";
+      else if (chemRoll > 0.65) chemistry = "A";
+      else if (chemRoll < 0.22) chemistry = "C";
+
+      // 同時交際パートナー間で色が重複しないように割り当て
+      const currentActive = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
+      const usedColors = currentActive.map(p => p.color);
+      const availableColor = PARTNER_COLORS.find(c => !usedColors.includes(c)) || PARTNER_COLORS[appState.sim.totalPartnerCounter % PARTNER_COLORS.length];
+
+      return {
+        id: "p_" + Date.now() + "_" + Math.floor(Math.random()*1000),
+        name,
+        job,
+        startAge: partnerAge,
+        endAge: partnerAge,
+        startMonth,
+        endMonth: null,
+        durationMonths: 1,
+        datesCount: 1,
+        sexCount: (chemistry === "S" ? 2 : 1),
+        chemistry,
+        color: availableColor,
+        isRare20s,
+        lastLine: ""
+      };
+    }
+
+    function checkSpouseAlertAndFlash(mIdx, isSilent = false) {
+      const activeCount = appState.sim.activePartnerIds.length;
+      let riskRate = (appState.stats.spouseAlert * 0.02) + (activeCount * 0.015);
+      if (appState.stats.stamina <= 3) riskRate += 0.04;
+      if (appState.stats.budget >= 8) riskRate += 0.025;
+
+      const alertBadge = document.getElementById("alertStateText");
+
+      if (Math.random() < riskRate && activeCount > 0) {
+        // 通常のStep 2進行中かつ非サイレント時のみフラッシュ・警告音・バイブを実行
+        if (!isSilent && !appState.sim.isSkipping && !appState.sim.isPaused) {
+          const overlay = document.getElementById("flashOverlay");
+          overlay.classList.add("red-flash-active");
+          setTimeout(() => overlay.classList.remove("red-flash-active"), 600);
+          playAlarm();
+          triggerVibrate([100, 50, 100]);
+        }
+
+        alertBadge.innerText = "⚠️ 身バレ危機！";
+        alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700 animate-pulse";
+
+        const spouseEvents = [
+          `休日の夕方、スマホのポップアップ通知を${appState.user.spouseName}に凝視され冷や汗が流れた。`,
+          `「最近、出張多くない？」と${appState.user.spouseName}から真顔で問い詰められ、必死に誤魔化した。`,
+          `カード明細の高級フレンチの引き落としを見咎められ、接待だと嘘を重ねた。`
+        ];
+        document.getElementById("spouseSituationLog").innerText = spouseEvents[Math.floor(Math.random() * spouseEvents.length)];
+      } else {
+        alertBadge.innerText = (activeCount > 2) ? "多忙密会" : "平穏";
+        alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40";
+        document.getElementById("spouseSituationLog").innerText = `${appState.user.spouseName}は平穏に日常を過ごしている。`;
+      }
+    }
+
+    function updateMatrixDot(mIdx) {
+      const dot = document.getElementById("dot-" + mIdx);
+      if (!dot) return;
+
+      const currentPartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
+      
+      if (currentPartners.length === 0) {
+        dot.style.background = "#1e293b";
+      } else if (currentPartners.length === 1) {
+        dot.style.background = currentPartners[0].color;
+      } else {
+        const step = 100 / currentPartners.length;
+        let grad = "conic-gradient(";
+        currentPartners.forEach((p, idx) => {
+          grad += `${p.color} ${idx * step}% ${(idx + 1) * step}%, `;
+        });
+        grad = grad.slice(0, -2) + ")";
+        dot.style.background = grad;
+      }
+
+      if (currentPartners.some(p => p.chemistry === "S" || p.isRare20s)) {
+        dot.classList.add("ring-pulse-rare");
+      }
+    }
+
+    function renderRealtimeMonthlyLog(mIdx, calMonth) {
+      const seasons = ["", "新春の気配", "初春・バレンタイン", "年度末の歓送迎", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
+      document.getElementById("seasonBadge").innerText = `${calMonth}月`;
+      document.getElementById("monthTitleLog").innerText = seasons[calMonth];
+
+      const listContainer = document.getElementById("currentMonthPartnersLog");
+      const currentPartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
+
+      if (currentPartners.length === 0) {
+        listContainer.innerHTML = `<div class="text-xs text-slate-500 italic py-3 text-center">今月はアポなし。家庭と仕事に専念中……</div>`;
+        return;
+      }
+
+      let html = "";
+      const usedTexts = new Set();
+      const monthLogRecord = [];
+
+      currentPartners.forEach(p => {
+        const actionText = generateMonthlyActionText(p, calMonth, usedTexts);
+        usedTexts.add(actionText);
+        monthLogRecord.push({ id: p.id, name: p.name, color: p.color, action: actionText });
+
+        html += `
+          <div class="flex items-center gap-2 p-1.5 rounded-lg bg-slate-950/70 border border-slate-800 text-xs">
+            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${p.color}"></span>
+            <span class="font-bold text-slate-200 flex-shrink-0">${p.name} <span class="text-[10px] text-purple-300">(${p.startAge + Math.floor(p.durationMonths/12)}歳)</span>:</span>
+            <span class="text-slate-300 truncate text-[11px]">${actionText}</span>
+          </div>
+        `;
+      });
+      listContainer.innerHTML = html;
+
+      appState.sim.monthlyHistory[mIdx] = {
+        month: mIdx,
+        calMonth,
+        partners: monthLogRecord
+      };
+    }
+
+    /* 同一月内で複数人が同じテキストにならないようバリエーション管理 */
+    function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
+      const isInitial = partner.durationMonths <= 2;
+      const isHighChem = (partner.chemistry === "S" || partner.chemistry === "A");
+
+      let pool = [];
+      if (isInitial) {
+        pool = [
+          "初アポ。お互いに指輪を外した日焼け跡を見つめながら乾杯。",
+          "昼の短時間ランチ。「怪しい人じゃなくて良かった」と笑い合う。",
+          "初ホテル。お互いの家庭の詮索はしない暗黙のルールで抱き合った。",
+          "駅前カフェで待ち合わせ。メッセージ通りの上品な笑顔に安堵。"
+        ];
+      } else {
+        switch (month) {
+          case 1:
+            pool = [
+              "年始の家族時間を終え、ホテルで飢えたように抱き合った。",
+              "初詣帰りに待ち合わせ、人目を忍んで神社近くの個室茶房へ。",
+              "「今年もよろしくね」と、新春の冷たい空気の中で手を繋いだ。"
+            ];
+            break;
+          case 2:
+            pool = [
+              "人目を盗んで小さなチョコを手渡され、甘い密会へ。",
+              "バレンタイン直前。人通りの少ない地下街のバーで乾杯。",
+              "「本命にはあげられないから」とホテルで照れながらチョコを渡された。"
+            ];
+            break;
+          case 3:
+            pool = [
+              "年度末の繁忙期、仕事帰りに駆け込みでバーとホテルへ。",
+              "歓送迎会の合間を縫って、短い時間だけの逢瀬を重ねた。",
+              "春風の冷たい夜、お互いの仕事の愚痴をホテルで癒やし合う。"
+            ];
+            break;
+          case 4:
+            pool = [
+              "人通りの少ない目黒川沿いで、息を潜めて夜桜散歩。",
+              "新年度の緊張感をほどくように、静かな隠れ家ホテルへ。",
+              "桜舞い散る夜、コートを脱ぎ捨てて互いの温もりを確かめ合った。"
+            ];
+            break;
+          case 5:
+            pool = [
+              "大型連休の家族旅行中、トイレから届いたLINEに胸が疼いた。",
+              "連休明けの平日昼下がり、久しぶりの逢瀬に飢えたように抱き合う。",
+              "初夏の風が心地よいテラス席で、人目を気にしつつランチデート。"
+            ];
+            break;
+          case 6:
+            pool = [
+              "ゲリラ豪雨を口実に、急遽シティホテルのデイユースへ。",
+              "梅雨の湿気の中、汗ばむ肌を重ねて秘密の午後を過ごした。",
+              "濡れた傘を並べて、雨音を聞きながらベッドの中で囁き合う。"
+            ];
+            break;
+          case 7:
+            pool = isHighChem ? [
+              "薄着の季節。「肌が綺麗だね」とホテルで囁かれた。",
+              "夏の夜風に吹かれながら、湾岸エリアのホテルで夜通し過ごした。"
+            ] : [
+              "駅近の個室居酒屋で短時間のサク飲み密会。",
+              "夏のボーナスで少し贅沢な個室ディナーを楽しんだ。"
+            ];
+            break;
+          case 8:
+            pool = [
+              "お盆の帰省期間。全パートナーと連絡自粛の沈黙週間。",
+              "酷暑の午後、キンキンに冷えたホテルの部屋で肌を寄せ合った。",
+              "家族行事の合間を縫い、30分だけ駅のホーム越しに密会。"
+            ];
+            break;
+          case 9:
+            pool = [
+              "少し涼しくなった夜、湾岸エリアを当てもなくドライブ。",
+              "初秋の気配に少し寂しさを感じながら、ホテルで深く愛し合う。",
+              "「秋服も似合うね」と褒められ、穏やかな大人の逢瀬。"
+            ];
+            break;
+          case 10:
+            pool = [
+              "平日に有休を合わせ、隠れ家個室の和食ランチへ。",
+              "紅葉の気配を感じながら、郊外のホテルでゆっくり羽を伸ばした。",
+              "お互いの家庭の悩みを語り合い、精神的な繋がりを深める。"
+            ];
+            break;
+          case 11:
+            pool = [
+              "寒くなった手を、コートのポケットの中でそっと握られた。",
+              "街のイルミネーションを遠目に、人気のない路地裏のバーへ。",
+              "冷えた身体を温め合うように、ホテルで長い抱擁を交わす。"
+            ];
+            break;
+          case 12:
+            pool = [
+              "家庭があるからこそ、23日の昼間に平日フライング乾杯。",
+              "忘年会の口実で、終電を気にせずホテルで今年最後の密会。",
+              "小さなプレゼントをそっと手渡し、切ない年末の別れ。"
+            ];
+            break;
+          default:
+            pool = ["個室ディナーのあと、いつものホテルで濃密な2時間。"];
+        }
+      }
+
+      // 未使用テキストを優先選択
+      const choices = pool.filter(t => !usedTexts.has(t));
+      if (choices.length > 0) {
+        return choices[Math.floor(Math.random() * choices.length)];
+      }
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function showClickMonthDetail(mIdx) {
+      const history = appState.sim.monthlyHistory[mIdx];
+      const box = document.getElementById("clickMonthDetail");
+      const hTitle = document.getElementById("detailMonthHeader");
+      const hContent = document.getElementById("detailMonthContent");
+
+      const age = appState.user.startAge + Math.floor(mIdx / 12);
+      const m = (mIdx % 12) + 1;
+      hTitle.innerText = `${age}歳 ${m}月の記憶`;
+
+      if (!history || history.partners.length === 0) {
+        hContent.innerHTML = `<div>この月はパートナーはおらず、家庭と仕事に専念していました。</div>`;
+      } else {
+        let txt = "";
+        history.partners.forEach(p => {
+          txt += `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:${p.color}"></span><strong>${p.name}:</strong> ${p.action}</div>`;
+        });
+        hContent.innerHTML = txt;
+      }
+      box.classList.remove("hidden");
+    }
+
+    function closeClickDetail() {
+      document.getElementById("clickMonthDetail").classList.add("hidden");
+    }
+
+    /* ============================================================
+       2年ごとの節目（加齢減退・予算0リセット再配分）
+       ============================================================ */
+    function pauseForTwoYearMilestone() {
+      clearTimeout(appState.sim.intervalId);
+      appState.sim.isPaused = true;
+
+      const overlay = document.getElementById("flashOverlay");
+      if (overlay) overlay.classList.remove("red-flash-active");
+
+      const mIdx = appState.sim.currentMonth;
+      const currentAge = appState.user.startAge + Math.floor(mIdx / 12);
+
+      // 【加齢減少ロジックの改善】
+      // 合計0〜4pt減少、平均2ptの自然な確率分布
+      // 0pt: 10%, 1pt: 20%, 2pt: 40%, 3pt: 20%, 4pt: 10% (期待値 2.0pt)
+      const r = Math.random();
+      let dropTotal = 2;
+      if (r < 0.10) dropTotal = 0;
+      else if (r < 0.30) dropTotal = 1;
+      else if (r < 0.70) dropTotal = 2;
+      else if (r < 0.90) dropTotal = 3;
+      else dropTotal = 4;
+
+      // 3ステータス（looks, stamina, libido）にランダム配分
+      let looksDrop = 0, staminaDrop = 0, libidoDrop = 0;
+      for (let i = 0; i < dropTotal; i++) {
+        const pick = Math.floor(Math.random() * 3);
+        if (pick === 0 && appState.stats.looks - looksDrop > 1) looksDrop++;
+        else if (pick === 1 && appState.stats.stamina - staminaDrop > 1) staminaDrop++;
+        else if (pick === 2 && appState.stats.libido - libidoDrop > 1) libidoDrop++;
+        else staminaDrop++; // フォールバック
+      }
+
+      appState.stats.looks = Math.max(1, appState.stats.looks - looksDrop);
+      appState.stats.stamina = Math.max(1, appState.stats.stamina - staminaDrop);
+      appState.stats.libido = Math.max(1, appState.stats.libido - libidoDrop);
+
+      // 動的バナー生成
+      const banner = document.getElementById("twoYearAgeDropBanner");
+      if (banner) {
+        if (dropTotal === 0) {
+          banner.className = "p-2 rounded-lg bg-emerald-950/60 border border-emerald-800/50 text-[11px] text-emerald-300";
+          banner.innerHTML = `✨ <strong>奇跡の若さをキープ！</strong> 加齢による能力減退なし（合計 -0pt）`;
+        } else {
+          banner.className = "p-2 rounded-lg bg-rose-950/60 border border-rose-800/50 text-[11px] text-rose-300";
+          banner.innerHTML = `⚠️ <strong>加齢による能力減退:</strong> 合計 -${dropTotal}pt (外見 -${looksDrop} / 体力 -${staminaDrop} / 性欲 -${libidoDrop})`;
+        }
+      }
+
+      appState.stats.budget = 0;
+
+      appState.twoYearTemp.points = 4;
+      appState.twoYearTemp.budget = 0;
+      appState.twoYearTemp.looks = appState.stats.looks;
+      appState.twoYearTemp.stamina = appState.stats.stamina;
+      appState.twoYearTemp.libido = appState.stats.libido;
+
+      document.getElementById("twoYearHeaderTag").innerText = `${mIdx}ヶ月目の節目`;
+      document.getElementById("twoYearTitle").innerText = `${currentAge}歳を迎えて（${mIdx/12}年経過）`;
+      
+      const twoYearMaxSelect = document.getElementById("twoYearMaxPartners");
+      if (twoYearMaxSelect) twoYearMaxSelect.value = String(appState.stats.maxPartners || 2);
+
+      const twoYearTargetSelect = document.getElementById("twoYearTargetAgePref");
+      if (twoYearTargetSelect) twoYearTargetSelect.value = appState.stats.targetAgePref || "same";
+
+      renderTwoYearModal();
+      renderTwoYearChronicle(mIdx);
+
+      document.getElementById("twoYearModal").classList.remove("hidden");
+      if (isSoundOn) playTone(440, 0.2);
+    }
+
+    function renderTwoYearModal() {
+      document.getElementById("twoYearRemainPoints").innerText = appState.twoYearTemp.points;
+      
+      document.getElementById("twoYearValBudget").innerText = "Lv." + appState.twoYearTemp.budget;
+      document.getElementById("twoYearBarBudget").style.width = (appState.twoYearTemp.budget * 10) + "%";
+
+      document.getElementById("twoYearValLooks").innerText = appState.twoYearTemp.looks + " / 10";
+      document.getElementById("twoYearBarLooks").style.width = (appState.twoYearTemp.looks * 10) + "%";
+
+      document.getElementById("twoYearValStamina").innerText = appState.twoYearTemp.stamina + " / 10";
+      document.getElementById("twoYearBarStamina").style.width = (appState.twoYearTemp.stamina * 10) + "%";
+
+      document.getElementById("twoYearValLibido").innerText = appState.twoYearTemp.libido + " / 10";
+      document.getElementById("twoYearBarLibido").style.width = (appState.twoYearTemp.libido * 10) + "%";
+    }
+
+    function adjustTwoYearStat(type, delta) {
+      if (delta > 0) {
+        if (appState.twoYearTemp.points <= 0) return;
+        if (type === "budget") {
+          if (appState.twoYearTemp.budget >= 10) return;
+          appState.twoYearTemp.budget = Math.min(10, appState.twoYearTemp.budget + 2);
+          appState.twoYearTemp.points -= 1;
+        } else {
+          if (appState.twoYearTemp[type] >= 10) return;
+          appState.twoYearTemp[type] += 1;
+          appState.twoYearTemp.points -= 1;
+        }
+      } else {
+        if (type === "budget") {
+          if (appState.twoYearTemp.budget <= 0) return;
+          appState.twoYearTemp.budget = Math.max(0, appState.twoYearTemp.budget - 2);
+          appState.twoYearTemp.points += 1;
+        } else {
+          if (appState.twoYearTemp[type] <= 1) return;
+          appState.twoYearTemp[type] -= 1;
+          appState.twoYearTemp.points += 1;
+        }
+      }
+      renderTwoYearModal();
+      triggerVibrate(12);
+    }
+
+    function renderTwoYearChronicle(currentMonth) {
+      // 最上部：現在交際中のパートナー動向
+      const activeList = document.getElementById("twoYearActivePartnersList");
+      const active = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
+      if (active.length === 0) {
+        activeList.innerHTML = `<div class="text-[11px] text-slate-500 py-1">現在交際中のパートナーはいません。</div>`;
+      } else {
+        let h = "";
+        active.forEach(p => {
+          h += `
+            <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full" style="background:${p.color}"></span>
+                <span class="font-bold text-white">${p.name} (${p.startAge + Math.floor(p.durationMonths/12)}歳)</span>
+                <span class="text-slate-400 text-[10px]">${p.job}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-purple-300 font-bold text-[10px]">交際${p.durationMonths}ヶ月</span>
+                <span class="px-1.5 py-0.5 rounded bg-pink-950 border border-pink-700 text-pink-300 text-[9px] ml-1 font-bold">相性 ${p.chemistry}</span>
+              </div>
+            </div>
+          `;
+        });
+        activeList.innerHTML = h;
+      }
+
+      // 直近24ヶ月スクロール
+      const scrollBox = document.getElementById("twoYearChronicleScroll");
+      let scrollHtml = "";
+      const startM = Math.max(0, currentMonth - 24);
+      for (let m = startM; m < currentMonth; m++) {
+        const hist = appState.sim.monthlyHistory[m];
+        const age = appState.user.startAge + Math.floor(m / 12);
+        const calM = (m % 12) + 1;
+        if (hist && hist.partners.length > 0) {
+          scrollHtml += `<div class="border-b border-slate-900 pb-1 mb-1"><span class="font-bold text-slate-400">【${age}歳 ${calM}月】</span>`;
+          hist.partners.forEach(p => {
+            scrollHtml += `<div class="pl-2 text-slate-300">・${p.name}: ${p.action}</div>`;
+          });
+          scrollHtml += `</div>`;
+        }
+      }
+      scrollBox.innerHTML = scrollHtml || `<div class="text-slate-500">直近の記録はありません。</div>`;
+    }
+
+    function resumeNextTwoYears() {
+      appState.stats.looks = appState.twoYearTemp.looks;
+      appState.stats.stamina = appState.twoYearTemp.stamina;
+      appState.stats.libido = appState.twoYearTemp.libido;
+      appState.stats.budget = appState.twoYearTemp.budget;
+
+      const twoYearMaxSelect = document.getElementById("twoYearMaxPartners");
+      if (twoYearMaxSelect) {
+        appState.stats.maxPartners = parseInt(twoYearMaxSelect.value) || 2;
+      }
+
+      const twoYearTargetSelect = document.getElementById("twoYearTargetAgePref");
+      if (twoYearTargetSelect) {
+        appState.stats.targetAgePref = twoYearTargetSelect.value;
+      }
+
+      document.getElementById("twoYearModal").classList.add("hidden");
+      appState.sim.isPaused = false;
+      const pauseBtn = document.getElementById("pausePlayBtn");
+      if (pauseBtn) pauseBtn.innerText = "⏸️";
+
+      simulateOneMonth(false);
+      appState.sim.currentMonth++;
+      appState.sim.intervalId = setTimeout(runNextMonth, 700);
+    }
+
+    function retireFromTwoYear() {
+      clearTimeout(appState.sim.intervalId);
+      document.getElementById("twoYearModal").classList.add("hidden");
+
+      appState.sim.isRetired = true;
+      const mIdx = appState.sim.currentMonth;
+
+      appState.sim.partners.forEach(p => {
+        if (appState.sim.activePartnerIds.includes(p.id)) {
+          p.endMonth = mIdx;
+          p.endAge = appState.user.startAge + Math.floor(mIdx / 12);
+        }
+      });
+      appState.sim.activePartnerIds = [];
+
+      finishSimulation();
+    }
+
+    /* ============================================================
+       STEP 3: リザルト・称号判定・画像出力への遷移
+       ============================================================ */
+    function finishSimulation() {
+      clearTimeout(appState.sim.intervalId);
+
+      const mIdx = appState.sim.currentMonth;
+      // 120ヶ月完走時に交際中だったパートナーの終了年齢と期間を確定
+      appState.sim.partners.forEach(p => {
+        if (!p.endAge || appState.sim.activePartnerIds.includes(p.id)) {
+          p.endMonth = mIdx;
+          p.endAge = p.startAge + Math.floor(p.durationMonths / 12);
+        }
+      });
+      appState.sim.activePartnerIds = [];
+
+      const step2 = document.getElementById("step2");
+      const sticky = document.getElementById("stickyController");
+      const step3 = document.getElementById("step3");
+      if (step2) step2.classList.add("hidden");
+      if (sticky) sticky.classList.add("hidden");
+      if (step3) step3.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      calculateAndRenderResult();
+    }
+
+    /* 称号連動のラストLINEメッセージ自動生成 */
+    function generateLastLineText(partner, isFemalePlayer, titleBadge) {
+      if (titleBadge.includes("純白伴侶")) {
+        return isFemalePlayer
+          ? "「10年間、私の人生を彩ってくれて本当にありがとう。あなたに出会えた奇跡を一生忘れません。」"
+          : "「10年もの長い間、俺だけを想ってくれてありがとう。お前は俺の人生最高の誇りだよ。」";
+      }
+      if (titleBadge.includes("婚外覇王")) {
+        return isFemalePlayer
+          ? "「お互いたくさん遊んだし、最高に刺激的な夜だったね。大人のルールを守って楽しめたこと、感謝してるよ。」"
+          : "「首都圏の夜をお前と駆け抜けたこと、一生の裏歴史で最高の思い出だ。またどこかで。」";
+      }
+      if (titleBadge.includes("静寂の帰還者")) {
+        return isFemalePlayer
+          ? "「そっか……寂しいけど、あなたのそういう家庭を一番に想う誠実なところが好きだったよ。元気でね。」"
+          : "「うん、わかってたよ。あなたと過ごした時間は大切に胸にしまっておくね。奥さんと仲良くね。」";
+      }
+      if (titleBadge.includes("歳の差")) {
+        return isFemalePlayer
+          ? "「年の差なんて感じないくらい、男としての余裕と包容力に甘えさせてもらいました。本当にありがとう。」"
+          : "「俺みたいな年上に付き合ってくれてありがとう。お前のおかげで10歳若返った気分だったよ。」";
+      }
+      if (titleBadge.includes("分散満喫")) {
+        return isFemalePlayer
+          ? "「お互い家庭を壊さず、程よい距離感で楽しめたね。大人の恋として満点だったよ。」"
+          : "「家庭も守りつつ最高の癒やしをもらえた。絶妙な距離感でいてくれて本当にありがとう。」";
+      }
+
+      // 標準
+      if (partner.chemistry === "S") {
+        return isFemalePlayer
+          ? "「生まれ変わったら、必ず俺が一番にお前を見つける。男としての自信を取り戻せた最高の宝物だった。」"
+          : "「生まれ変わったら奥さんより先に私を一番に見つけてね……女として本当に幸せだったよ。」";
+      }
+      return isFemalePlayer
+        ? "「父親・夫の役目に戻るよ。短い間だったけど、本当に楽しかった。ありがとう。」"
+        : "「ごめんね、今は母親に戻らなきゃいけないの。今まで本当にありがとう。」";
+    }
+
+    function calculateAndRenderResult() {
+      const isFemale = (appState.user.gender === "female");
+      const totalPartners = appState.sim.partners.length;
+      
+      let totalSex = 0;
+      let totalDates = 0;
+      appState.sim.partners.forEach(p => {
+        totalSex += p.sexCount;
+        totalDates += p.datesCount;
+      });
+
+      const totalHours = totalDates * 3.5;
+      const totalDays = (totalHours / 24).toFixed(1);
+
+      const monthlyAppFee = (appState.user.gender === "female") ? 0 : 5000;
+      const monthlyDateCost = appState.stats.budget * 4500;
+      const totalMoney = Math.round(((monthlyAppFee + monthlyDateCost) * appState.sim.currentMonth) / 10000);
+
+      document.getElementById("resTotalCount").innerText = `${totalPartners}人`;
+      document.getElementById("resSexCount").innerText = `${totalSex}回`;
+      document.getElementById("resTotalHours").innerText = `${Math.round(totalHours)}時間`;
+      document.getElementById("resTotalMoney").innerText = `約${totalMoney}万円`;
+
+      let title = "『首都圏の彷徨い人』";
+      let desc = "首都圏の喧騒の中、家庭と日常の狭間で静かに駆け抜けた10年間。";
+
+      if (appState.sim.isRetired) {
+        title = "『静寂の帰還者』";
+        desc = "泥沼に呑まれる前に自らアプリを消し、平穏な家庭の日常へと生還した賢明な選択者。";
+      } else if (totalPartners >= 40) {
+        title = "『首都圏の婚外覇王』";
+        desc = "10年間で多数の異性と関係を紡ぎ、夜の首都圏を完全に支配した伝説のアチーブメント。";
+      } else if (appState.sim.partners.some(p => p.durationMonths >= 80)) {
+        title = "『奇跡の純白伴侶』";
+        desc = "加齢や家庭の波を共に乗り越え、ただ1人の相手と10年近く愛を深め抜いた至高の純愛。";
+      } else if (appState.sim.partners.some(p => Math.abs(p.startAge - appState.user.startAge) >= 18)) {
+        title = "『歳の差婚外の王』";
+        desc = "圧倒的な大人の魅力と包容力で、20歳近い年齢差を軽やかに越えてみせた存在。";
+      } else if (totalPartners >= 2 && totalPartners <= 5) {
+        title = "『分散満喫の達人』";
+        desc = "リスクを最小限に抑えつつ、精神の安定と非日常の刺激を絶妙なバランスで両立させた賢者。";
+      }
+
+      document.getElementById("resTitleBadge").innerText = title;
+      document.getElementById("resEndingDesc").innerText = desc;
+
+      // 称号決定後にラストLINEを動的生成
+      appState.sim.partners.forEach(p => {
+        p.lastLine = generateLastLineText(p, isFemale, title);
+      });
+
+      const lastP = appState.sim.partners[appState.sim.partners.length - 1] || {
+        name: "パートナーなし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", lastLine: "「……」"
+      };
+      document.getElementById("lastPartnerNameAge").innerText = `${lastP.name} (${lastP.endAge}歳)`;
+      document.getElementById("lastPartnerPeriod").innerText = `${lastP.startAge}歳 〜 ${lastP.endAge}歳（交際${lastP.durationMonths}ヶ月）`;
+      document.getElementById("lastPartnerChemistry").innerText = `相性 ${lastP.chemistry}`;
+      document.getElementById("lastPartnerLineText").innerText = lastP.lastLine;
+
+      const sorted = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
+      const top3 = sorted.slice(0, 3);
+      let topHtml = "";
+      top3.forEach(p => {
+        topHtml += `
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-white">${p.name} (${p.startAge}歳)</span>
+              <span class="text-slate-400 ml-1 text-[11px]">${p.job} / 交際${p.durationMonths}ヶ月</span>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-pink-950 border border-pink-700 text-pink-300 font-bold text-[10px]">相性 ${p.chemistry}</span>
+          </div>
+        `;
+      });
+      document.getElementById("topPartnersList").innerHTML = topHtml || `<div class="text-slate-500 text-xs">交際履歴はありません。</div>`;
+
+      let allHtml = "";
+      appState.sim.partners.forEach((p, idx) => {
+        allHtml += `
+          <div class="p-2 rounded bg-slate-950/50 border border-slate-850 flex justify-between items-center">
+            <span>${idx + 1}. ${p.name} (${p.startAge}歳) - ${p.durationMonths}ヶ月</span>
+            <span class="text-purple-400">肌を重ねた回数: ${p.sexCount}回</span>
+          </div>
+        `;
+      });
+      document.getElementById("allPartnersList").innerHTML = allHtml;
+      document.getElementById("toggleAllPartnersBtn").innerText = `すべての交際履歴（全${totalPartners}人）を確認する ▼`;
+
+      document.getElementById("epilogueText").innerHTML = `
+        <p>10年という歳月が過ぎ、首都圏の街並みも電車の車窓も少しずつ色を変えた。</p>
+        <p>誰にも言えない秘密の逢瀬、ホテルのシーツの匂い、駅の改札で交わした切ない最後のハイタッチ。それらはすべて、誰にも知られることなく、あなたの胸の奥深くにだけ静かに刻まれている。</p>
+        <p class="text-purple-300 font-medium">家庭の日常に戻ったあなたの横顔には、あの10年間を生き抜いた者だけが持つ、大人の孤独と温もりが宿っていた。</p>
+      `;
+    }
+
+    function toggleAllPartners() {
+      const wrap = document.getElementById("allHistoryWrapper");
+      const btn = document.getElementById("toggleAllPartnersBtn");
+      if (wrap.classList.contains("hidden")) {
+        wrap.classList.remove("hidden");
+        btn.innerText = "交際履歴を閉じる ▲";
+      } else {
+        wrap.classList.add("hidden");
+        btn.innerText = `すべての交際履歴（全${appState.sim.partners.length}人）を確認する ▼`;
+      }
+    }
+
+    /* 正方形の成績表カード画像（1080×1080px）のCanvas生成（タイトル強調レイアウト） */
+    function generateSquareCard() {
+      const cvs = document.getElementById("exportCanvas");
+      const ctx = cvs.getContext("2d");
+
+      // 背景
+      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1080);
+      bgGrad.addColorStop(0, "#07080d");
+      bgGrad.addColorStop(0.5, "#121422");
+      bgGrad.addColorStop(1, "#090912");
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      // 外枠フレーム
+      ctx.strokeStyle = "rgba(157, 78, 221, 0.35)";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(36, 36, 1008, 1008);
+
+      // スタジオクレジット（右上・控えめに）
+      ctx.fillStyle = "#64748b";
+      ctx.font = "bold 16px 'Cinzel', serif";
+      ctx.textAlign = "right";
+      ctx.fillText("AJISAI GAME STUDIO PRESENTS", 1008, 76);
+      ctx.textAlign = "left";
+
+      // 英語タイトルタグ
+      ctx.fillStyle = "#c084fc";
+      ctx.font = "900 20px 'Cinzel', serif";
+      ctx.fillText("OUTROMANCE : SECRET CHRONICLE", 72, 88);
+
+      // メインタイトル（特大・力強く）
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 52px 'Noto Sans JP', sans-serif";
+      ctx.fillText("婚外10年シミュレーター", 72, 148);
+
+      // サブタイトル（「裏」を色変え・強調）
+      ctx.font = "bold 26px 'Noto Sans JP', sans-serif";
+      ctx.fillStyle = "#f472b6";
+      ctx.fillText("〜既婚者たちの", 72, 192);
+      const preW = ctx.measureText("〜既婚者たちの").width;
+      
+      ctx.fillStyle = "#fb7185";
+      ctx.font = "900 28px 'Noto Sans JP', sans-serif";
+      ctx.fillText("裏", 72 + preW, 192);
+      const uraW = ctx.measureText("裏").width;
+
+      ctx.fillStyle = "#f472b6";
+      ctx.font = "bold 26px 'Noto Sans JP', sans-serif";
+      ctx.fillText("歴史〜", 72 + preW + uraW, 192);
+
+      // 称号バナー
+      const title = document.getElementById("resTitleBadge").innerText;
+      ctx.fillStyle = "#fef08a";
+      ctx.font = "900 54px 'Noto Sans JP', sans-serif";
+      ctx.fillText(title, 72, 276);
+
+      // プレイヤー情報
+      ctx.fillStyle = "#cbd5e1";
+      ctx.font = "22px 'Noto Sans JP', sans-serif";
+      ctx.fillText(`観測者: ${appState.user.name}（開始${appState.user.startAge}歳 / ${appState.user.pref === "tokyo" ? "東京都" : "神奈川県"}） 配偶者: ${appState.user.spouseName} (${appState.user.spouseAge}歳)`, 72, 322);
+
+      // 4大スタッツボックス
+      const stats = [
+        { label: "累計交際人数", val: document.getElementById("resTotalCount").innerText, col: "#f472b6" },
+        { label: "肌を重ねた回数", val: document.getElementById("resSexCount").innerText, col: "#fb7185" },
+        { label: "密会・正味時間", val: document.getElementById("resTotalHours").innerText, col: "#38bdf8" },
+        { label: "10年概算出費", val: document.getElementById("resTotalMoney").innerText, col: "#facc15" }
+      ];
+
+      stats.forEach((s, i) => {
+        const x = 72 + (i % 2) * 480;
+        const y = 370 + Math.floor(i / 2) * 155;
+        ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+        ctx.fillRect(x, y, 440, 125);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, 440, 125);
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "18px 'Noto Sans JP', sans-serif";
+        ctx.fillText(s.label, x + 24, y + 38);
+
+        ctx.fillStyle = s.col;
+        ctx.font = "900 44px 'Noto Sans JP', sans-serif";
+        ctx.fillText(s.val, x + 24, y + 96);
+      });
+
+      // 最後のパートナーの記憶
+      ctx.fillStyle = "rgba(24, 18, 43, 0.85)";
+      ctx.fillRect(72, 700, 936, 210);
+      ctx.strokeStyle = "rgba(168, 85, 247, 0.45)";
+      ctx.strokeRect(72, 700, 936, 210);
+
+      const lastP = appState.sim.partners[appState.sim.partners.length - 1];
+      const pName = lastP ? `${lastP.name} (${lastP.endAge}歳・相性${lastP.chemistry})` : "なし";
+      const pLine = lastP ? lastP.lastLine : "「……」";
+
+      ctx.fillStyle = "#e9d5ff";
+      ctx.font = "bold 24px 'Noto Sans JP', sans-serif";
+      ctx.fillText(`最後のパートナーの記憶: ${pName}`, 96, 750);
+
+      ctx.fillStyle = "#a7f3d0";
+      ctx.font = "italic 22px 'Noto Sans JP', sans-serif";
+      ctx.fillText(pLine, 96, 810);
+
+      // フッタークレジット
+      ctx.fillStyle = "#475569";
+      ctx.font = "16px 'Noto Sans JP', sans-serif";
+      ctx.fillText("OUTROMANCE | 10-Year Simulation 〜既婚者たちの裏歴史〜", 72, 980);
+
+      const dataUrl = cvs.toDataURL("image/png");
+      document.getElementById("generatedCardImage").src = dataUrl;
+      document.getElementById("imageSaveModal").classList.remove("hidden");
+
+      const link = document.createElement("a");
+      link.download = `OUTROMANCE_${appState.user.name}_婚外10年成績表.png`;
+      link.href = dataUrl;
+      link.click();
+    }
+
+    function closeImageModal() {
+      document.getElementById("imageSaveModal").classList.add("hidden");
+    }
+
+    function shareOnX() {
+      const title = document.getElementById("resTitleBadge").innerText;
+      const count = document.getElementById("resTotalCount").innerText;
+      const sex = document.getElementById("resSexCount").innerText;
+      const text = encodeURIComponent(`【婚外10年シミュレーター 〜既婚者たちの裏歴史〜】\n私の10年後の称号は ${title} でした。\n\n・累計交際人数: ${count}\n・肌を重ねた回数: ${sex}\n・首都圏711万人のリアルな十年史\n\n#婚外10年シミュレーター #婚外シミュレーター #既婚者たちの裏歴史 #AjisaiGameStudio #既婚者マチアプ`);
+      window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+    }
+
+    function restartApp() {
+      document.getElementById("step3").classList.add("hidden");
+      document.getElementById("step0").classList.remove("hidden");
+      runCinematicPrologue();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // 画面ロード時に自動実行（iframeプレビュー環境でも確実に発火）
+    function initApp() {
+      initSpouseAgeOptions();
+      runCinematicPrologue();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>

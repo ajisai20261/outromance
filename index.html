@@ -209,29 +209,33 @@
   <!-- メインコンテンツ -->
   <main class="relative z-10 flex-1 w-full max-w-xl mx-auto px-4 py-2 flex flex-col justify-start">
 
-    <!-- ==================== STEP 0: シネマティック・プロローグ（スマホ最適化・上寄り） ==================== -->
-    <section id="step0" onclick="advancePrologue(event)" class="min-h-[75vh] flex flex-col items-center justify-start pt-6 sm:pt-10 relative overflow-hidden text-center cursor-pointer select-none">
-      <div id="prologueWrapper" class="w-full flex flex-col items-center justify-start transition-opacity duration-300">
-        <div class="space-y-3 font-serif-jp text-slate-200 text-sm tracking-[0.14em] leading-normal max-w-md px-3 mx-auto">
-          <p id="pText1" class="fade-seq text-slate-200 font-normal">世界最大の人口を誇る、東京首都圏。</p>
-          <p id="pText2" class="fade-seq text-slate-300 font-light">点在する繁華街と、それらを結ぶ鉄道網。</p>
-          <p id="pText3" class="fade-seq font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">
-            治安に守られた水面下で、既婚者同士の恋愛“婚外”が静かに広がっていた。
+    <!-- ==================== STEP 0: シネマティック・プロローグ（タップ早送り対応） ==================== -->
+    <section id="step0" onclick="advancePrologue(event)" class="min-h-[80vh] flex flex-col items-center justify-start pt-6 sm:pt-8 relative overflow-hidden text-center py-6 cursor-pointer select-none">
+      <div id="prologueWrapper" class="w-full flex flex-col items-center justify-center transition-opacity duration-300">
+        <div class="space-y-4 font-serif-jp text-slate-200 text-sm sm:text-[15px] tracking-[0.16em] leading-[2.2em] max-w-md px-3 mx-auto">
+          <p id="pText1" class="fade-seq text-slate-200 font-normal">
+            2020年代<br>世界最大の人口を誇る、東京首都圏。
           </p>
-          <div id="pTitleCard" class="fade-seq pt-2.5 pb-2 my-1 border-y border-purple-500/20">
-            <div class="text-[10px] font-cinzel font-bold tracking-[0.25em] text-purple-400 uppercase mb-1">OUTROMANCE : SECRET CHRONICLE</div>
+          <p id="pText2" class="fade-seq text-slate-300 font-light">
+            点在する繁華街と、それらを結ぶ鉄道網。<br>そして屈指の治安に守られた水面下で――
+          </p>
+          <p id="pText3" class="fade-seq font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">
+            既婚者同士の恋愛、“婚外”が静かに広がっていた。
+          </p>
+          <div id="pTitleCard" class="fade-seq pt-3 pb-2 my-2 border-y border-purple-500/20">
+            <div class="text-[10px] sm:text-[11px] font-cinzel font-bold tracking-[0.3em] text-purple-400 uppercase mb-1.5">OUTROMANCE : SECRET CHRONICLE</div>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_0_20px_rgba(157,78,221,0.65)]">
               婚外10年シミュレーター
             </h1>
-            <div class="text-xs sm:text-sm font-bold text-pink-300 tracking-[0.18em] mt-1">〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.85)] font-black text-sm sm:text-base mx-0.5">裏</span>歴史〜</div>
+            <div class="text-xs sm:text-sm font-bold text-pink-300 tracking-[0.2em] mt-1.5">〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.85)] font-black text-sm sm:text-base mx-0.5">裏</span>歴史〜</div>
           </div>
           <p id="pText4" class="fade-seq text-white font-normal drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
             あなたも婚外の道に足を踏み入れる。
           </p>
         </div>
 
-        <div id="pActionBtn" class="fade-seq mt-5 w-full max-w-xs">
-          <button onclick="goToStep1A(event)" class="w-full py-3 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
+        <div id="pActionBtn" class="fade-seq mt-6 w-full max-w-xs">
+          <button onclick="goToStep1A(event)" class="w-full py-3.5 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
             <span>スタート ▶</span>
           </button>
         </div>

@@ -143,8 +143,8 @@
 
     .fade-seq {
       opacity: 0;
-      transform: translateY(14px);
-      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(12px);
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .fade-seq.visible {
       opacity: 1;
@@ -207,31 +207,31 @@
   </header>
 
   <!-- メインコンテンツ -->
-  <main class="relative z-10 flex-1 w-full max-w-xl mx-auto px-4 py-3 flex flex-col justify-center">
+  <main class="relative z-10 flex-1 w-full max-w-xl mx-auto px-4 py-2 flex flex-col justify-start">
 
-    <!-- ==================== STEP 0: シネマティック・プロローグ（タップ早送り対応） ==================== -->
-    <section id="step0" onclick="advancePrologue(event)" class="min-h-[80vh] flex flex-col items-center justify-center relative overflow-hidden text-center py-6 cursor-pointer select-none">
-      <div id="prologueWrapper" class="w-full flex flex-col items-center justify-center transition-opacity duration-300">
-        <div class="space-y-6 font-serif-jp text-slate-200 text-sm sm:text-[15px] tracking-[0.16em] leading-loose max-w-md px-3 mx-auto">
+    <!-- ==================== STEP 0: シネマティック・プロローグ（スマホ最適化・上寄り） ==================== -->
+    <section id="step0" onclick="advancePrologue(event)" class="min-h-[75vh] flex flex-col items-center justify-start pt-6 sm:pt-10 relative overflow-hidden text-center cursor-pointer select-none">
+      <div id="prologueWrapper" class="w-full flex flex-col items-center justify-start transition-opacity duration-300">
+        <div class="space-y-3 font-serif-jp text-slate-200 text-sm tracking-[0.14em] leading-normal max-w-md px-3 mx-auto">
           <p id="pText1" class="fade-seq text-slate-200 font-normal">世界最大の人口を誇る、東京首都圏。</p>
-          <p id="pText2" class="fade-seq text-slate-300 font-light">2020年代<br>点在する繁華街と、それらを結ぶ鉄道網。</p>
+          <p id="pText2" class="fade-seq text-slate-300 font-light">点在する繁華街と、それらを結ぶ鉄道網。</p>
           <p id="pText3" class="fade-seq font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">
-            そして世界屈指の治安に守られた水面下で――<br>既婚者同士の恋愛<br>“婚外”が静かに広がっていた。
+            治安に守られた水面下で、既婚者同士の恋愛“婚外”が静かに広がっていた。
           </p>
-          <div id="pTitleCard" class="fade-seq pt-3 pb-2 my-2 border-y border-purple-500/20">
-            <div class="text-[10px] sm:text-[11px] font-cinzel font-bold tracking-[0.3em] text-purple-400 uppercase mb-1.5">OUTROMANCE : SECRET CHRONICLE</div>
+          <div id="pTitleCard" class="fade-seq pt-2.5 pb-2 my-1 border-y border-purple-500/20">
+            <div class="text-[10px] font-cinzel font-bold tracking-[0.25em] text-purple-400 uppercase mb-1">OUTROMANCE : SECRET CHRONICLE</div>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_0_20px_rgba(157,78,221,0.65)]">
               婚外10年シミュレーター
             </h1>
-            <div class="text-xs sm:text-sm font-bold text-pink-300 tracking-[0.2em] mt-1.5">〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.85)] font-black text-sm sm:text-base mx-0.5">裏</span>歴史〜</div>
+            <div class="text-xs sm:text-sm font-bold text-pink-300 tracking-[0.18em] mt-1">〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.85)] font-black text-sm sm:text-base mx-0.5">裏</span>歴史〜</div>
           </div>
           <p id="pText4" class="fade-seq text-white font-normal drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
             あなたも婚外の道に足を踏み入れる。
           </p>
         </div>
 
-        <div id="pActionBtn" class="fade-seq mt-6 w-full max-w-xs">
-          <button onclick="goToStep1A(event)" class="w-full py-3.5 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
+        <div id="pActionBtn" class="fade-seq mt-5 w-full max-w-xs">
+          <button onclick="goToStep1A(event)" class="w-full py-3 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
             <span>スタート ▶</span>
           </button>
         </div>
@@ -239,7 +239,7 @@
     </section>
 
     <!-- ==================== STEP 1-A: プレイヤー基本設定 ==================== -->
-    <section id="step1a" class="hidden space-y-4 py-3">
+    <section id="step1a" class="hidden space-y-4 py-2">
       <div class="text-center space-y-1">
         <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-A</span>
         <h2 class="text-lg font-bold text-white">あなたの属性と開始条件</h2>
@@ -301,7 +301,7 @@
     </section>
 
     <!-- ==================== STEP 1-B: 能力値・本業年収Lv・婚外予算割り振り ==================== -->
-    <section id="step1b" class="hidden space-y-4 py-3">
+    <section id="step1b" class="hidden space-y-4 py-2">
       <div class="flex items-center justify-between">
         <div>
           <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-B</span>
@@ -314,11 +314,11 @@
 
       <div class="bg-purple-950/40 border border-purple-800/60 rounded-xl p-3 flex items-center justify-between">
         <div>
-          <div class="text-[11px] text-purple-200">配分可能ポイント（本業年収が原資）</div>
+          <div class="text-[11px] text-purple-200">配分可能ポイント（本業年収Lv + 1pt）</div>
           <div class="text-xs text-slate-400">本業年収水準を原資に自己投資や活動費へ配分</div>
         </div>
         <div class="text-right">
-          <span id="remainPoints" class="text-2xl font-black text-purple-300">4</span>
+          <span id="remainPoints" class="text-2xl font-black text-purple-300">5</span>
           <span class="text-xs text-slate-400"> pt</span>
         </div>
       </div>
@@ -485,7 +485,7 @@
         </div>
       </div>
 
-      <!-- 2年サイクル（24マス）マトリクス表示（B案: ドーナツ型放射分割＋中央同心円サークルに月絵文字） -->
+      <!-- 2年サイクル（24マス）マトリクス表示 -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-2 shadow-xl">
         <div class="flex justify-between items-center text-[11px] px-1">
           <span id="matrixPhaseTitle" class="font-bold text-purple-300">第1期：1〜2年目（1〜24ヶ月）</span>
@@ -504,7 +504,7 @@
         </div>
         <div class="flex justify-between text-[9px] text-slate-500 px-1">
           <span>※マスをタップすると当時の逢瀬ログを確認できます</span>
-          <span>1月〜12月（放射状分割 ＆ 季節モチーフ）</span>
+          <span>1月〜12月（月絵文字）</span>
         </div>
       </div>
 
@@ -536,6 +536,30 @@
         </p>
       </div>
 
+      <!-- 関係解消・破局時トースト通知（新規） -->
+      <div id="breakupPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-slate-950 via-purple-950/60 to-slate-900 border-2 border-purple-400/80 rounded-xl p-3 shadow-2xl">
+        <div class="flex items-center gap-3">
+          <div class="avatar-frame-lg grayscale contrast-125">
+            <img src="" alt="" id="toastBreakupImg">
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between">
+              <div class="space-y-0.5">
+                <div class="text-[10px] font-bold text-purple-300 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
+                  <span>🍂 PARTNER BREAKUP（逢瀬の終焉）</span>
+                </div>
+                <div class="text-sm font-black text-slate-200" id="toastBreakupName">カナコ (37歳)</div>
+                <div class="text-[10px] text-slate-400" id="toastBreakupPeriod">4ヶ月で関係解消</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p id="toastBreakupQuote" class="text-[10px] text-purple-200 italic pt-1.5 mt-2 border-t border-purple-500/20">
+          「今までありがとう。日常に戻らなきゃいけないの。」
+        </p>
+      </div>
+
       <!-- 月別並行パートナー＆逢瀬スコアログカード -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
         <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-1.5">
@@ -546,8 +570,8 @@
           <span id="alertStateText" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">平穏</span>
         </div>
 
-        <div id="currentMonthPartnersLog" class="space-y-2 min-h-[72px]">
-          <div class="text-xs text-slate-500 italic py-3 text-center">まだパートナーはいません。アプリを巡回中……</div>
+        <div id="currentMonthPartnersLog" class="space-y-2 min-h-[56px]">
+          <div class="text-xs text-slate-500 italic py-2.5 text-center">まだパートナーはいません。アプリを巡回中……</div>
         </div>
       </div>
 
@@ -576,7 +600,7 @@
     </section>
 
     <!-- ==================== STEP 3: 10年総括・最終リザルト ==================== -->
-    <section id="step3" class="hidden space-y-5 py-4 pb-12">
+    <section id="step3" class="hidden space-y-5 py-3 pb-12">
       <!-- プレイヤー軌跡ヘッダー -->
       <div class="text-center space-y-1 border-b border-purple-900/40 pb-3">
         <div class="text-xs text-slate-400 font-medium">
@@ -589,18 +613,17 @@
 
       <div class="text-center space-y-2">
         <div class="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest bg-gradient-to-r from-purple-900 to-pink-900 border border-purple-500/50 text-purple-200">
-          10-YEAR RESULT TITLE
+          婚外称号
         </div>
         <h2 id="resTitleBadge" class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 drop-shadow-[0_0_12px_rgba(244,63,94,0.4)]">
           『奇跡の純白伴侶』
         </h2>
         <!-- 複数達成時の実績クラウンバッジ一覧 -->
         <div id="resAchieveBadgeList" class="flex flex-wrap items-center justify-center gap-1.5 pt-1"></div>
-        <div class="text-xs font-bold text-pink-300 tracking-wider">〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.85)] font-black text-sm mx-0.5">裏</span>歴史〜</div>
-        <p id="resEndingDesc" class="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed"></p>
+        <p id="resEndingDesc" class="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed pt-1"></p>
       </div>
 
-      <!-- やり込みアチーブメント（全カテゴリ体系化） -->
+      <!-- やり込みアチーブメント -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
         <div class="text-[11px] font-bold text-amber-300 flex items-center justify-between">
           <span>🏆 10年アチーブメント（やり込み実績）</span>
@@ -769,30 +792,6 @@
           ↺ もう一度最初からシミュレーションする
         </button>
       </div>
-
-      <!-- PR枠 -->
-      <div class="bg-gradient-to-b from-slate-900 to-purple-950/30 border border-purple-900/40 rounded-2xl p-4 space-y-3 mt-4 text-xs">
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] tracking-wider text-purple-400 font-bold uppercase">PR</span>
-          <span class="text-[9px] text-slate-500">人気の既婚者マッチングサービス</span>
-        </div>
-        <div class="space-y-2">
-          <a href="#" class="block p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-purple-500 transition group">
-            <div class="flex justify-between font-bold text-slate-200 group-hover:text-purple-300">
-              <span>既婚者クラブ</span>
-              <span class="text-xs text-pink-400">首都圏会員数 No.1 ›</span>
-            </div>
-            <div class="text-[10px] text-slate-400 mt-0.5">累計会員40万人突破。ブラウザ完結でアプリアイコンが残らない安心設計。</div>
-          </a>
-          <a href="#" class="block p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-purple-500 transition group">
-            <div class="flex justify-between font-bold text-slate-200 group-hover:text-purple-300">
-              <span>Healmate（ヒールメイト）</span>
-              <span class="text-xs text-purple-400">真剣セカンドパートナー ›</span>
-            </div>
-            <div class="text-[10px] text-slate-400 mt-0.5">大人の精神的な繋がりと心の癒やしを重視する会員制コミュニティ。</div>
-          </a>
-        </div>
-      </div>
     </section>
   </main>
 
@@ -815,9 +814,9 @@
     </div>
   </div>
 
-  <!-- 2年ごとの節目モーダル -->
+  <!-- 2年ごとの節目モーダル（表記シンプル化＆配分ポイント底上げ適用） -->
   <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl my-auto">
+    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3.5 shadow-2xl my-auto">
       <div class="text-center space-y-1">
         <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold" id="twoYearHeaderTag">24-Month Milestone</span>
         <h3 class="text-lg font-bold text-white" id="twoYearTitle">42歳を迎えて（2年経過）</h3>
@@ -827,7 +826,7 @@
       <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
         <div class="text-[11px] font-bold text-amber-300 flex items-center justify-between">
           <span>📊 これまでの到達サマリー</span>
-          <span class="text-[9px] text-slate-500">目標達成への進捗</span>
+          <span class="text-[9px] text-slate-500">進捗</span>
         </div>
         <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
           <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
@@ -843,19 +842,20 @@
             <span id="twoYearSummaryScore" class="font-bold text-amber-300">0 pt</span>
           </div>
         </div>
+        <!-- 最年少・最年長（シンプル表示） -->
         <div class="grid grid-cols-2 gap-1.5 text-[11px]">
           <div class="bg-slate-900 p-1.5 rounded border border-slate-800 flex justify-between items-center">
-            <span class="text-slate-400 text-[10px]">最年少相手:</span>
+            <span class="text-slate-400 text-[10px]">最年少:</span>
             <span id="twoYearSummaryYoungest" class="font-bold text-emerald-300 truncate ml-1">―</span>
           </div>
           <div class="bg-slate-900 p-1.5 rounded border border-slate-800 flex justify-between items-center">
-            <span class="text-slate-400 text-[10px]">最年長相手:</span>
+            <span class="text-slate-400 text-[10px]">最年長:</span>
             <span id="twoYearSummaryOldest" class="font-bold text-cyan-300 truncate ml-1">―</span>
           </div>
         </div>
       </div>
 
-      <!-- 現在交際中のパートナー動向 -->
+      <!-- 現在交際中のパートナー動向（※「交際」削除で「〇〇ヶ月」） -->
       <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
         <div class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
           <span>💖 現在継続中のパートナー</span>
@@ -863,22 +863,22 @@
         <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs"></div>
       </div>
 
-      <!-- 本業年収Lv推移 ＆ 成果レポート -->
+      <!-- 本業年収Lv推移（※カッコ昇給表記削除） -->
       <div class="bg-slate-950/80 border border-emerald-900/60 rounded-xl p-3 flex justify-between items-center text-xs">
         <div>
           <span class="text-slate-400 block text-[10px]">本業年収水準の推移</span>
-          <span id="incomeChangeReport" class="font-bold text-emerald-400 text-sm">Lv.4 → Lv.5 (+1昇給)</span>
+          <span id="incomeChangeReport" class="font-bold text-emerald-400 text-sm">Lv.4 → Lv.5</span>
         </div>
         <div class="text-right text-[10px] text-slate-400">
           次回割り振り原資へ直結
         </div>
       </div>
 
-      <!-- 加齢減退レポート -->
+      <!-- 加齢減退レポート（※カッコ減退表記削除） -->
       <div id="twoYearAgeDropDetail" class="bg-rose-950/40 border border-rose-800/60 rounded-xl p-3 space-y-2">
         <div class="flex justify-between items-center text-xs">
           <span class="font-bold text-rose-300 flex items-center gap-1">📉 加齢による肉体変化</span>
-          <span id="twoYearTotalDropText" class="text-[10px] px-2 py-0.5 rounded bg-rose-900 text-rose-200 font-bold">-2 pt 減少</span>
+          <span id="twoYearTotalDropText" class="text-[10px] px-2 py-0.5 rounded bg-rose-900 text-rose-200 font-bold">-2 pt</span>
         </div>
         <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
           <div class="bg-slate-950/70 p-1.5 rounded border border-rose-900/40">
@@ -896,19 +896,19 @@
         </div>
       </div>
 
-      <!-- 再配分ポイント -->
+      <!-- 再配分ポイント（+1底上げ） -->
       <div class="bg-purple-950/40 border border-purple-800/50 rounded-xl p-3 flex justify-between items-center">
         <div>
           <div class="text-xs font-bold text-purple-200">再配分可能ポイント</div>
-          <div class="text-[10px] text-slate-400">年収Lv ＋ 成果ボーナス − 揉め事ペナルティ</div>
+          <div class="text-[10px] text-slate-400">年収Lv + 1pt ＋ 成果ボーナス − 揉め事ペナルティ</div>
         </div>
         <div class="text-right">
-          <span id="twoYearRemainPoints" class="text-2xl font-black text-purple-300">4</span>
+          <span id="twoYearRemainPoints" class="text-2xl font-black text-purple-300">5</span>
           <span class="text-xs text-slate-400"> pt</span>
         </div>
       </div>
 
-      <!-- 活動費予算（Lv.0リセット常時適用） -->
+      <!-- 活動費予算 -->
       <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-3 space-y-1.5">
         <div class="flex justify-between items-center text-xs">
           <span class="font-bold text-white">💳 婚外活動費（予算 Lv.0リセット済）</span>
@@ -969,7 +969,7 @@
         </div>
       </div>
 
-      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2.5">
+      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2">
         <div class="flex justify-between items-center text-xs">
           <span class="font-semibold text-slate-300">同時交際上限の変更</span>
           <select id="twoYearMaxPartners" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
@@ -1051,8 +1051,23 @@
       chiba: ["本八幡", "船橋", "柏", "幕張", "浦安", "松戸", "市川"]
     };
 
-    const MONTH_EMOJIS = ["", "🎍", "🍫", "🌸", "🌸", "🌿", "☔", "🎋", "🌻", "🌕", "🎃", "🍂", "🎄"];
+    // 3月を🎎、4月を🌸に変更
+    const MONTH_EMOJIS = ["", "🎍", "🍫", "🎎", "🌸", "🌿", "☔", "🎋", "🌻", "🌕", "🎃", "🍂", "🎄"];
     const PARTNER_COLORS = ["#ec4899", "#8b5cf6", "#06b6d4", "#f59e0b"];
+
+    /* 破局時セリフ集（相手の性別に応じた切ない別れの言葉） */
+    const BREAKUP_QUOTES_FEMALE_PARTNER = [
+      "「ごめんね、夫に怪しまれちゃって……これ以上は続けられないの。」",
+      "「母親・妻としての日常に戻らなきゃいけないの。今まで本当にありがとう。」",
+      "「最近忙しくて時間が作れなくなっちゃった。あなたと過ごした時間は忘れないよ。」",
+      "「これ以上好きになると、家庭を壊しちゃいそうだから……さようなら。」"
+    ];
+    const BREAKUP_QUOTES_MALE_PARTNER = [
+      "「家庭の都合で、これ以上会えなくなった。短い間だったけど本当に感謝してる。」",
+      "「妻に少し怪しまれてしまって……これ以上君を巻き込めない。元気でね。」",
+      "「男として自信を取り戻せたよ。潮時だな。幸せになってくれ。」",
+      "「仕事と家族の役目に戻るよ。君と出会えて本当に幸せだった。ありがとう。」"
+    ];
 
     /* ============================================================
        軽量内蔵フォールバックエンジン ＆ AvatarCacheManager
@@ -1065,7 +1080,6 @@
         const isMale = idStr.startsWith("M");
         const num = parseInt(idStr.slice(1)) || 1;
         const isSenior = (num === 17 || num === 18);
-        const isYouth = (num === 19 || num === 20);
 
         ctx.fillStyle = isMale ? "#0d1b2a" : "#2b1022";
         ctx.fillRect(0, 0, 48, 48);
@@ -1114,12 +1128,11 @@
     let isSoundOn = false;
     let audioCtx = null;
     let simTimer = null;
-    let wasRunningBeforeHidden = false;
 
     let appState = {
       user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 40, birthMonth: 4 },
       stats: { looks: 4, libido: 4, stamina: 4, budget: 0, income: 4, childBurden: 5, spouseAffection: 5, spouseAlert: 3, targetAgePref: "same", maxPartners: 2 },
-      tempPoints: 4,
+      tempPoints: 5, // 年収Lv(4) + 1pt
       sim: {
         currentMonth: 0, currentAge: 40, isPaused: false, isSkipping: false,
         partners: [], activePartnerIds: [], totalPartnerCounter: 0,
@@ -1128,7 +1141,7 @@
         metOlder20Plus: false, metYounger20Plus: false,
         crisisCountIn2Years: 0, breakupCountIn2Years: 0
       },
-      twoYearTemp: { points: 4, looks: 4, libido: 4, stamina: 4, budget: 0 }
+      twoYearTemp: { points: 5, looks: 4, libido: 4, stamina: 4, budget: 0 }
     };
 
     function getRealAge(mIdx) {
@@ -1173,6 +1186,11 @@
       setTimeout(() => playTone(659.25, 0.12, "triangle"), 90);
       setTimeout(() => playTone(783.99, 0.22, "triangle"), 180);
     }
+    function playBreakupChime() {
+      if (!isSoundOn || !audioCtx) return;
+      playTone(440.00, 0.15, "sine");
+      setTimeout(() => playTone(349.23, 0.25, "sine"), 120);
+    }
     function playLimitBreakChime() {
       if (!isSoundOn || !audioCtx) return;
       playTone(587.33, 0.15, "triangle");
@@ -1212,7 +1230,7 @@
         document.getElementById("pActionBtn")?.classList.add("visible");
         return;
       }
-      prologueAutoTimer = setTimeout(() => advancePrologue(), 1400);
+      prologueAutoTimer = setTimeout(() => advancePrologue(), 1300);
     }
 
     function goToStep1A(e) {
@@ -1270,7 +1288,8 @@
     function rerollStats() {
       const income = rollIncomeLevel();
       appState.stats.income = income;
-      appState.tempPoints = income;
+      // 初期配分ポイントを一律 +1 底上げ
+      appState.tempPoints = income + 1;
 
       const totalTarget = rollInitialStatsTotal();
       let remain = totalTarget - 9;
@@ -1512,7 +1531,6 @@
       document.getElementById("simProgressMonth").innerText = `(${mIdx + 1} / 120ヶ月)`;
       document.getElementById("stickyMonthText").innerText = `${currentRealAge}歳（${yearNum}年目 ${calMonth}月）`;
 
-      let departingIds = [];
       let activePartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
       let isCrisisHappened = false;
 
@@ -1525,8 +1543,9 @@
       }
 
       const concurrentPenalty = { 1: 0.6, 2: 1.0, 3: 1.8, 4: 2.6 }[appState.stats.maxPartners] || 1.0;
-      const isMale = (appState.user.gender === "male");
+      const isUserMale = (appState.user.gender === "male");
 
+      // 各パートナーの月次更新
       activePartners.forEach(p => {
         p.durationMonths++;
         p.datesCount++;
@@ -1539,13 +1558,19 @@
           appState.sim.globalMaxSexScore = score;
           appState.sim.highestScorePartner = p;
         }
+      });
 
+      // 【厳命事項】月に別れるのは最大1人まで
+      let breakCandidate = null;
+      let highestBreakRoll = 0;
+
+      activePartners.forEach(p => {
         let breakRate = 0.07;
         if (p.chemistry === "S") breakRate = (appState.stats.libido >= 6) ? 0.015 : 0.03;
         else if (p.chemistry === "A") breakRate = 0.04;
         else if (p.chemistry === "C") breakRate = (appState.stats.libido >= 6) ? 0.32 : 0.22;
 
-        if (isMale) {
+        if (isUserMale) {
           if (appState.stats.budget >= 6) breakRate *= 0.65;
           if (appState.stats.budget <= 2) breakRate *= 1.4;
         } else {
@@ -1557,24 +1582,35 @@
         if (p.age <= currentRealAge - 10) breakRate *= 1.35;
         breakRate *= concurrentPenalty;
 
-        if (p.durationMonths >= 2 && Math.random() < breakRate) {
-          departingIds.push(p.id);
-          p.endMonth = mIdx;
-          p.endAge = p.age;
-          appState.sim.breakupCountIn2Years++;
+        if (p.durationMonths >= 2) {
+          const roll = Math.random();
+          if (roll < breakRate && roll > highestBreakRoll) {
+            highestBreakRoll = roll;
+            breakCandidate = p;
+          }
         }
       });
 
-      departingIds.forEach(id => {
-        appState.sim.activePartnerIds = appState.sim.activePartnerIds.filter(pid => pid !== id);
-      });
+      if (breakCandidate) {
+        appState.sim.activePartnerIds = appState.sim.activePartnerIds.filter(pid => pid !== breakCandidate.id);
+        breakCandidate.endMonth = mIdx;
+        breakCandidate.endAge = breakCandidate.age;
+        appState.sim.breakupCountIn2Years++;
 
+        if (!isSilent) {
+          showBreakupPartnerToast(breakCandidate, isUserMale);
+          playBreakupChime();
+          triggerVibrate([60, 40]);
+        }
+      }
+
+      // 【厳命事項】月に新たに付き合うのは最大1人まで
       const maxAllowed = appState.stats.maxPartners || 2;
       const emptySlots = maxAllowed - appState.sim.activePartnerIds.length;
 
       if (emptySlots > 0) {
-        let meetBase = isMale ? 0.28 : 0.42;
-        if (isMale) {
+        let meetBase = isUserMale ? 0.28 : 0.42;
+        if (isUserMale) {
           meetBase += (appState.stats.budget - 4) * 0.05;
           meetBase += (appState.stats.looks - 5) * 0.02;
         } else {
@@ -1596,9 +1632,18 @@
           if (newPartner.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
 
           if (!isSilent) {
-            showNewPartnerToast(newPartner);
-            playRareChime();
-            triggerVibrate([40, 50, 40]);
+            // 破局トーストと重なった場合は少しずらして表示
+            if (breakCandidate) {
+              setTimeout(() => {
+                showNewPartnerToast(newPartner);
+                playRareChime();
+                triggerVibrate([40, 50, 40]);
+              }, 2600);
+            } else {
+              showNewPartnerToast(newPartner);
+              playRareChime();
+              triggerVibrate([40, 50, 40]);
+            }
           }
         }
       }
@@ -1723,14 +1768,36 @@
       else if (p.category === "youth") badgeEl.innerHTML = '<span class="px-1.5 py-0.2 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/40 font-bold ml-1">若手枠</span>';
       else badgeEl.innerHTML = '';
 
-      document.getElementById("toastPartnerQuote").innerText = p.quote || "「秘密の時間を大切にしましょう。」";
+      document.getElementById("toastPartnerQuote").innerText = p.quote || "「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」";
       toast.classList.remove("hidden");
       setTimeout(() => { toast.classList.remove("scale-95", "opacity-0"); toast.classList.add("scale-100", "opacity-100"); }, 10);
       setTimeout(() => {
         toast.classList.remove("scale-100", "opacity-100");
         toast.classList.add("scale-95", "opacity-0");
         setTimeout(() => toast.classList.add("hidden"), 300);
-      }, 3500);
+      }, 3200);
+    }
+
+    function showBreakupPartnerToast(p, isUserMale) {
+      const toast = document.getElementById("breakupPartnerToast");
+      if (!toast) return;
+      document.getElementById("toastBreakupImg").src = AvatarCacheManager.get(p.avatarId);
+      document.getElementById("toastBreakupName").innerText = `${p.name} (${p.age}歳)`;
+      document.getElementById("toastBreakupPeriod").innerText = `${p.durationMonths}ヶ月で関係解消`;
+
+      // 相手の性別に応じた切ない別れセリフ（混同防止）
+      // ユーザーが男性なら相手は女性、ユーザーが女性なら相手は男性
+      const quotePool = isUserMale ? BREAKUP_QUOTES_FEMALE_PARTNER : BREAKUP_QUOTES_MALE_PARTNER;
+      const quote = quotePool[Math.floor(Math.random() * quotePool.length)];
+      document.getElementById("toastBreakupQuote").innerText = quote;
+
+      toast.classList.remove("hidden");
+      setTimeout(() => { toast.classList.remove("scale-95", "opacity-0"); toast.classList.add("scale-100", "opacity-100"); }, 10);
+      setTimeout(() => {
+        toast.classList.remove("scale-100", "opacity-100");
+        toast.classList.add("scale-95", "opacity-0");
+        setTimeout(() => toast.classList.add("hidden"), 300);
+      }, 3200);
     }
 
     function renderAlertAndFlash(isCrisis, isSilent = false) {
@@ -1764,6 +1831,12 @@
       const dot = document.getElementById("grid-dot-" + dotIndex);
       if (!dot) return;
 
+      // 過去のマスの光輪を解除（当月のみ光るようにする）
+      for (let i = 0; i < 24; i++) {
+        const d = document.getElementById("grid-dot-" + i);
+        if (d) d.classList.remove("ring-pulse-rare");
+      }
+
       const currentPartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
       if (currentPartners.length === 0) {
         dot.style.background = "#1e293b";
@@ -1775,11 +1848,12 @@
         currentPartners.forEach((p, idx) => { grad += `${p.color} ${idx * step}% ${(idx + 1) * step}%, `; });
         dot.style.background = grad.slice(0, -2) + ")";
       }
-      if (currentPartners.some(p => p.chemistry === "S" || p.maxSexScore >= 120)) dot.classList.add("ring-pulse-rare");
+      // 現在進行中の当月マスのみ優しくパルス発光
+      dot.classList.add("ring-pulse-rare");
     }
 
     function renderRealtimeMonthlyLog(mIdx, calMonth) {
-      const seasons = ["", "新春の気配", "初春・バレンタイン", "年度末の歓送迎", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
+      const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
       document.getElementById("seasonBadge").innerText = `${calMonth}月`;
       document.getElementById("monthTitleLog").innerText = seasons[calMonth];
 
@@ -1787,7 +1861,7 @@
       const currentPartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
 
       if (currentPartners.length === 0) {
-        listContainer.innerHTML = `<div class="text-xs text-slate-500 italic py-3 text-center">今月はアポなし。家庭と仕事に専念中……</div>`;
+        listContainer.innerHTML = `<div class="text-xs text-slate-500 italic py-2.5 text-center">今月はアポなし。家庭と仕事に専念中……</div>`;
         return;
       }
 
@@ -1802,10 +1876,10 @@
         const score = p.lastSexScore;
         let scoreBadge = "";
         if (score >= 120) {
-          scoreBadge = `<span class="limit-break-badge bg-gradient-to-r from-amber-400 via-pink-400 to-purple-400 text-slate-950 font-black px-1.5 py-0.5 rounded text-[10px] shadow-lg">⚡ 密会: ${score}pt (特異点)</span>`;
+          scoreBadge = `<span class="limit-break-badge bg-gradient-to-r from-amber-400 via-pink-400 to-purple-400 text-slate-950 font-black px-1.5 py-0.5 rounded text-[10px] shadow-lg">⚡ 密会: ${score}pt</span>`;
           if (!appState.sim.isSkipping) playLimitBreakChime();
         } else if (score >= 100) {
-          scoreBadge = `<span class="bg-amber-950 text-amber-300 border border-amber-600 font-bold px-1.5 py-0.5 rounded text-[10px]">密会: ${score}pt (限界突破)</span>`;
+          scoreBadge = `<span class="bg-amber-950 text-amber-300 border border-amber-600 font-bold px-1.5 py-0.5 rounded text-[10px]">密会: ${score}pt</span>`;
         } else if (score >= 80) {
           scoreBadge = `<span class="bg-pink-950 text-pink-300 border border-pink-700 font-bold px-1.5 py-0.5 rounded text-[10px]">密会: ${score}pt</span>`;
         } else {
@@ -1819,20 +1893,20 @@
         monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score });
         const avatarSrc = AvatarCacheManager.get(p.avatarId);
 
+        // 下部のイタリック体セリフ（p.quote）を削除してコンパクト化
         html += `
-          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-3 text-xs">
+          <div class="p-2 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center gap-2.5 text-xs">
             <div class="avatar-frame"><img src="${avatarSrc}" alt="${p.name}"></div>
-            <div class="flex-1 min-w-0 space-y-1">
+            <div class="flex-1 min-w-0 space-y-0.5">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 truncate">
                   <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
-                  <span class="font-bold text-slate-200">${p.name} <span class="text-[10px] text-purple-300">(${p.age}歳 / ${p.job} / ${p.area})</span></span>
+                  <span class="font-bold text-slate-200 truncate">${p.name} <span class="text-[10px] text-purple-300 font-normal">(${p.age}歳 / ${p.area})</span></span>
                   ${catBadge}
                 </div>
-                <div>${scoreBadge}</div>
+                <div class="flex-shrink-0 ml-1.5">${scoreBadge}</div>
               </div>
-              <div class="text-slate-300 text-[11px] leading-relaxed">${actionText}</div>
-              <div class="text-[10px] text-slate-500 italic truncate">${p.quote || ''}</div>
+              <div class="text-slate-300 text-[11px] leading-tight truncate">${actionText}</div>
             </div>
           </div>
         `;
@@ -1906,7 +1980,7 @@
     function closeClickDetail() { document.getElementById("clickMonthDetail").classList.add("hidden"); }
 
     /* ============================================================
-       2年ごとの節目モーダル処理
+       2年ごとの節目モーダル処理（※改修：表記シンプル化＆配分+1底上げ）
        ============================================================ */
     function pauseForTwoYearMilestone() {
       pauseSimulationInternal();
@@ -1923,22 +1997,12 @@
       document.getElementById("twoYearSummaryLongest").innerText = sortedByDur[0] ? `${sortedByDur[0].durationMonths}ヶ月` : "0ヶ月";
       document.getElementById("twoYearSummaryScore").innerText = `${appState.sim.globalMaxSexScore} pt`;
 
+      // 最年少・最年長表示のシンプル化（「最年少: 43歳」等）
       const youngest = [...appState.sim.partners].sort((a,b) => a.startAge - b.startAge)[0];
       const oldest = [...appState.sim.partners].sort((a,b) => b.startAge - a.startAge)[0];
 
-      if (youngest) {
-        const diff = youngest.startAge - currentAge;
-        document.getElementById("twoYearSummaryYoungest").innerText = `${youngest.name} (${youngest.startAge}歳 / ${diff >= 0 ? '+' : ''}${diff}歳)`;
-      } else {
-        document.getElementById("twoYearSummaryYoungest").innerText = "―";
-      }
-
-      if (oldest) {
-        const diff = oldest.startAge - currentAge;
-        document.getElementById("twoYearSummaryOldest").innerText = `${oldest.name} (${oldest.startAge}歳 / ${diff >= 0 ? '+' : ''}${diff}歳)`;
-      } else {
-        document.getElementById("twoYearSummaryOldest").innerText = "―";
-      }
+      document.getElementById("twoYearSummaryYoungest").innerText = youngest ? `${youngest.startAge}歳` : "―";
+      document.getElementById("twoYearSummaryOldest").innerText = oldest ? `${oldest.startAge}歳` : "―";
 
       // 加齢減退（平均2pt）
       const r = Math.random();
@@ -1980,10 +2044,11 @@
       appState.stats.stamina = Math.max(1, appState.stats.stamina - staminaDrop);
       appState.stats.libido = Math.max(1, appState.stats.libido - libidoDrop);
 
-      document.getElementById("twoYearTotalDropText").innerText = `-${dropTotal} pt 減少`;
-      document.getElementById("dropDetailLooks").innerText = `${prevLooks} → ${appState.stats.looks} (-${looksDrop})`;
-      document.getElementById("dropDetailStamina").innerText = `${prevStamina} → ${appState.stats.stamina} (-${staminaDrop})`;
-      document.getElementById("dropDetailLibido").innerText = `${prevLibido} → ${appState.stats.libido} (-${libidoDrop})`;
+      // 加齢変化のカッコ表記（-1など）を削除
+      document.getElementById("twoYearTotalDropText").innerText = `-${dropTotal} pt`;
+      document.getElementById("dropDetailLooks").innerText = `${prevLooks} → ${appState.stats.looks}`;
+      document.getElementById("dropDetailStamina").innerText = `${prevStamina} → ${appState.stats.stamina}`;
+      document.getElementById("dropDetailLibido").innerText = `${prevLibido} → ${appState.stats.libido}`;
 
       // 年収変動
       let bonus = 0, penalty = 0;
@@ -2012,12 +2077,12 @@
       }
 
       appState.stats.income = Math.max(2, Math.min(8, appState.stats.income + incomeDelta));
-      const deltaSign = incomeDelta > 0 ? `+${incomeDelta} 昇給` : (incomeDelta === 0 ? "±0 維持" : `${incomeDelta} 減退`);
-      document.getElementById("incomeChangeReport").innerText = `Lv.${prevIncome} → Lv.${appState.stats.income} (${deltaSign})`;
+      // 年収推移のカッコ昇給表記削除
+      document.getElementById("incomeChangeReport").innerText = `Lv.${prevIncome} → Lv.${appState.stats.income}`;
 
-      // 予算Lv.0リセット ＆ 再配分
+      // 予算Lv.0リセット ＆ 再配分ポイント（一律 +1 底上げ）
       appState.stats.budget = 0;
-      const reallocPoints = Math.max(2, appState.stats.income + bonus - penalty);
+      const reallocPoints = Math.max(2, appState.stats.income + 1 + bonus - penalty);
 
       appState.twoYearTemp.points = reallocPoints;
       appState.twoYearTemp.budget = 0;
@@ -2091,6 +2156,7 @@
         let h = "";
         active.forEach(p => {
           const avatarSrc = AvatarCacheManager.get(p.avatarId);
+          // 「交際」を削除して「〇〇ヶ月」のみ表示
           h += `
             <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
               <div class="flex items-center gap-2">
@@ -2101,7 +2167,7 @@
                 </div>
               </div>
               <div class="text-right">
-                <span class="text-purple-300 font-bold text-[10px]">交際${p.durationMonths}ヶ月</span>
+                <span class="text-purple-300 font-bold text-[10px]">${p.durationMonths}ヶ月</span>
                 <span class="px-1.5 py-0.5 rounded bg-pink-950 border border-pink-700 text-pink-300 text-[9px] ml-1 font-bold">最高 ${p.maxSexScore}pt</span>
               </div>
             </div>
@@ -2223,7 +2289,7 @@
       document.getElementById("resTotalHours").innerText = `${Math.round(totalHours)}時間`;
       document.getElementById("resFinalIncome").innerText = `Lv.${appState.stats.income}`;
 
-      // 実績判定（出逢い時年齢差チェック）
+      // 実績判定
       let hasOlder20 = appState.sim.metOlder20Plus;
       let hasYounger20 = appState.sim.metYounger20Plus;
       let hasOlder10 = false, hasYounger10 = false;
@@ -2242,7 +2308,6 @@
       const achScore120 = appState.sim.globalMaxSexScore >= 120;
       const achGrandSlam = (ach100Kills && ach5Years && achScore120 && hasOlder20 && hasYounger20);
 
-      // 中間実績
       const ach50Kills = totalPartners >= 50;
       const ach3Years = appState.sim.partners.some(p => p.durationMonths >= 36);
       const achScore100 = appState.sim.globalMaxSexScore >= 100;
@@ -2258,7 +2323,7 @@
       const unlocked = [ach100Kills, ach5Years, achScore120, hasOlder20, hasYounger20, achGrandSlam].filter(Boolean).length;
       document.getElementById("achieveUnlockedCount").innerText = unlocked;
 
-      // クラウンバッジ一覧の生成
+      // クラウンバッジ一覧
       let badgesHtml = "";
       if (ach100Kills) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-950 text-rose-300 border border-rose-600 font-bold">⚔️ 100人斬り達成</span>';
       else if (ach50Kills) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-950/60 text-rose-300 border border-rose-800 font-bold">⚔️ 50人斬り達成</span>';
@@ -2384,11 +2449,52 @@
       document.getElementById("allPartnersList").innerHTML = allHtml;
       document.getElementById("toggleAllPartnersBtn").innerText = `すべての交際履歴（全${totalPartners}人）を確認する ▼`;
 
-      document.getElementById("epilogueText").innerHTML = `
-        <p>10年という歳月が過ぎ、首都圏の街並みも電車の車窓も少しずつ色を変えた。</p>
-        <p>誰にも言えない秘密の逢瀬、ホテルのシーツの匂い、駅の改札で交わした切ない最後のハイタッチ。それらはすべて、誰にも知られることなく、あなたの胸の奥深くにだけ静かに刻まれている。</p>
-        <p class="text-purple-300 font-medium">家庭の日常に戻ったあなたの横顔には、あの10年間を生き抜いた者だけが持つ、大人の孤独と温もりが宿っていた。</p>
-      `;
+      // 称号に応じた10年エピローグ文章の完全分岐（偉業達成者は「まだまだ続けるぞ！」の気概）
+      let epilogueHtml = "";
+      if (achGrandSlam || (ach100Kills && ach5Years) || (ach100Kills && achScore120)) {
+        epilogueHtml = `
+          <p>10年という歳月は、あなたにとってゴールではなく単なる通過点に過ぎなかった。</p>
+          <p>100人を超える逢瀬、理性を焼き尽くす120pt超えの歓喜、そして何年もの間途切れなかった特別な絆。そのすべてを両立し、家庭の平穏すら手玉に取り続けたあなたの情熱は、枯れるどころか円熟の輝きを増している。</p>
+          <p class="text-amber-300 font-bold">「さて、次はどんな相手と新しい秘密を始めようか」――何食わぬ顔で日常を歩みながら、あなたの指先は密かに次の出逢いを探している。あなたの裏歴史は、ここからが本番だ。</p>
+        `;
+      } else if (ach100Kills || ach50Kills) {
+        epilogueHtml = `
+          <p>首都圏の夜を駆け巡り、数え切れないほどの異性と肌を重ねてきた10年間。</p>
+          <p>改札での別れ際、指輪をはめ直す仕草、スマートに逢瀬を楽しむ手腕はもはや芸術の域に達している。どれほど人数を重ねても、新しい誰かと出会う瞬間の胸の高鳴りは決して色褪せない。</p>
+          <p class="text-pink-300 font-bold">家庭を守り抜きながら欲望も妥協しない。10年の修羅場を生き抜いたあなたの足取りは、むしろ最初の一歩を踏み出した時よりも軽やかだ。「まだまだ私の現役は終わらない」と微笑みながら。</p>
+        `;
+      } else if (ach5Years || ach3Years) {
+        epilogueHtml = `
+          <p>めまぐるしく移り変わる東京の街並みの中で、奇跡のように紡ぎ続けた年月。</p>
+          <p>家庭の事情や加齢の波を共に乗り越え、法的な誓約を超えて魂と身体で結ばれた相手がいた。10年が経った今でも、二人きりでホテルへ向かう道すがらは、出逢った当初のような甘い緊張感に包まれている。</p>
+          <p class="text-purple-300 font-bold">「来年も、その先も、ずっと一緒にいようね」――誰にも知られることのない二人の純愛クロニクルは、10年の節目を超えてこれからも静かに刻まれ続けていく。</p>
+        `;
+      } else if (achScore120 || achScore100) {
+        epilogueHtml = `
+          <p>理性を完全に焼き尽くすほどの極限の逢瀬。ホテルのシーツを掴んだまま息が止まりそうになったあの夜の記憶。</p>
+          <p>日常の平穏では決して味わえない、生きている実感を骨の髄まで叩き込まれた10年間だった。一度極限の絶頂を知ってしまった身体は、もはや退屈なだけの日常には戻れない。</p>
+          <p class="text-rose-300 font-bold">ふとした瞬間に蘇る甘い熱気と渇き。あなたの胸の奥底で燻り続ける背徳の炎は、これからも決して消えることはないだろう。</p>
+        `;
+      } else if (hasOlder20 || hasYounger20 || achDiff10) {
+        epilogueHtml = `
+          <p>世代という境界線すら軽々と飛び越え、異なる時代を生きる相手と熱情を交わした10年間。</p>
+          <p>大人の圧倒的な包容力に甘えた夜もあれば、若さゆえの真っ直ぐな熱気に溺れた昼下がりもあった。年齢などただの記号に過ぎないと知るあなたの瞳には、抗いがたい大人の色気が宿っている。</p>
+          <p class="text-cyan-300 font-bold">「次はどんな世代の魅力に触れてみようか」――年齢を重ねるごとに増していく自信を胸に、あなたは夜の街へ静かに視線を投げかけている。</p>
+        `;
+      } else if (appState.sim.isRetired) {
+        epilogueHtml = `
+          <p>泥沼の修羅場に呑まれる前に自らアプリを消し、平穏な家庭の日常へと生還した10年目。</p>
+          <p>あのスリル、秘密の合言葉、誰にも言えない甘い時間は、心の奥深くにある鍵付きの金庫へと大切に仕舞い込まれた。家族と囲む夕食の温もりを噛み締めながら、ふと窓の外の夜空を見上げる。</p>
+          <p class="text-slate-400 font-bold">あの熱狂の日々を生き抜いた誇りと、ほんの少しの切ない孤独を抱きしめて、静かに大人の余生を歩み始める。</p>
+        `;
+      } else {
+        epilogueHtml = `
+          <p>家庭と仕事の狭間、電車の乗り換えのわずかな隙間に息を潜めて愛を求めた10年間。</p>
+          <p>甘美な逢瀬も、胸を締め付ける別れも、すべてを飲み込んであなたの人生の糧となった。誰にも知られない裏の歴史を胸に抱えたまま、今日も何食わぬ顔で日常を歩き続ける。</p>
+          <p class="text-purple-300 font-bold">家庭の日常に戻ったあなたの横顔には、あの10年間を生き抜いた者だけが持つ、大人の孤独と温もりが宿っていた。</p>
+        `;
+      }
+      document.getElementById("epilogueText").innerHTML = epilogueHtml;
     }
 
     function updateAchievementCard(elId, isAchieved, activeClass) {

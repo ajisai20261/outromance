@@ -161,6 +161,9 @@
   </style>
 </head>
 <body class="min-h-screen relative flex flex-col justify-between selection:bg-purple-500 selection:text-white">
+  <!-- BGM要素（同階層の theme.mp3 を再生） -->
+  <audio id="bgmAudio" src="theme.mp3" loop preload="auto"></audio>
+
   <div class="bg-ambient"></div>
   <div id="flashOverlay" class="fixed inset-0 pointer-events-none z-50 transition-colors"></div>
 
@@ -220,13 +223,16 @@
         </h2>
         <div class="text-xs text-slate-300 space-y-2.5 text-left leading-relaxed border-y border-slate-800 py-3.5">
           <p>
+            ・<strong class="text-pink-300 font-bold">本作は婚外恋愛（不倫）を扱ったシミュレーションゲームです。</strong>
+          </p>
+          <p>
             ・本作は<strong class="text-purple-300">すべてフィクション</strong>であり、実在の人物・団体・事件等とは一切関係ありません。
           </p>
           <p>
             ・マッチングアプリや出会い系サービスのように、<strong class="text-rose-300">実際に出会いを提供するゲームではありません</strong>。
           </p>
           <p>
-            ・成人向けの直接的な性的描写はありませんが、テーマの性質（既婚者の恋愛）上、<strong class="text-amber-300 font-bold">18歳未満の方のプレイはご遠慮ください</strong>。
+            ・成人向けの直接的な性的描写はありませんが、テーマの性質上、<strong class="text-amber-300 font-bold">18歳未満の方のプレイはご遠慮ください</strong>。
           </p>
         </div>
         <button onclick="acceptDisclaimer()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
@@ -1217,6 +1223,16 @@
       isSoundOn = !isSoundOn;
       document.getElementById("soundIcon").innerText = isSoundOn ? "🔊" : "🔇";
       document.getElementById("soundText").innerText = isSoundOn ? "音響: ON" : "音響: OFF";
+      
+      const bgm = document.getElementById("bgmAudio");
+      if (bgm) {
+        if (isSoundOn) {
+          bgm.volume = 0.35;
+          bgm.play().catch(e => {});
+        } else {
+          bgm.pause();
+        }
+      }
       if (isSoundOn) playTone(587.33, 0.12);
     }
 
@@ -1260,10 +1276,20 @@
       if ("vibrate" in navigator) try { navigator.vibrate(pat); } catch(e) {}
     }
 
-    /* ディスクレーマー承認 */
+    /* ディスクレーマー承認 ＆ BGM開始 */
     function acceptDisclaimer() {
       initAudio();
-      if (isSoundOn) playTone(523.25, 0.12);
+      isSoundOn = true;
+      document.getElementById("soundIcon").innerText = "🔊";
+      document.getElementById("soundText").innerText = "音響: ON";
+      
+      const bgm = document.getElementById("bgmAudio");
+      if (bgm) {
+        bgm.volume = 0.35;
+        bgm.play().catch(e => {});
+      }
+
+      playTone(523.25, 0.12);
       triggerVibrate(20);
       document.getElementById("stepDisclaimer").classList.add("hidden");
       document.getElementById("step0").classList.remove("hidden");
@@ -1359,7 +1385,6 @@
       triggerVibrate(15);
       if (isSoundOn) playTone(659.25, 0.1);
 
-      // UIアクティブ切り替え
       const pBtns = {
         pure: document.getElementById("presetBtnPure"),
         balanced: document.getElementById("presetBtnBalanced"),
@@ -1374,12 +1399,10 @@
         }
       });
 
-      // プリセットによる基本設定
       const isMale = (appState.user.gender === "male");
       const concSelect = document.getElementById("userMaxConcurrent");
       const agePrefSelect = document.getElementById("targetAgePref");
 
-      // 一旦ポイントを全回収（予算Lv.0、基礎能力を再抽選直後の値へリセット）
       appState.tempPoints = appState.stats.income + 1;
       appState.stats.budget = 0;
       appState.stats.looks = appState.baseLooks || 4;
@@ -1389,7 +1412,6 @@
       if (presetType === "pure") {
         concSelect.value = "1";
         agePrefSelect.value = "same";
-        // 純愛型：体力と外見を優先して長期安定化
         while (appState.tempPoints > 0) {
           if (appState.stats.stamina < 9) { appState.stats.stamina++; appState.tempPoints--; }
           else if (appState.stats.looks < 9) { appState.stats.looks++; appState.tempPoints--; }
@@ -1399,7 +1421,6 @@
       } else if (presetType === "carnage") {
         concSelect.value = "4";
         agePrefSelect.value = isMale ? "younger" : "same";
-        // 100人斬り型：男性なら活動費極振り、女性なら外見極振り
         if (isMale) {
           while (appState.tempPoints > 0 && appState.stats.budget < 10) {
             appState.stats.budget = Math.min(10, appState.stats.budget + 2);
@@ -1422,7 +1443,6 @@
           }
         }
       } else {
-        // 分散余裕型（バランス）
         concSelect.value = "2";
         agePrefSelect.value = "same";
         if (isMale && appState.tempPoints >= 2) {
@@ -1460,7 +1480,6 @@
         }
       }
 
-      // プリセットリセット用の基底値を保持
       appState.baseLooks = appState.stats.looks;
       appState.baseLibido = appState.stats.libido;
       appState.baseStamina = appState.stats.stamina;
@@ -1470,7 +1489,6 @@
       appState.stats.spouseAffection = 5;
       appState.stats.spouseAlert = 3;
 
-      // デフォルトで「分散余裕型」を適用
       applyStylePreset('balanced');
       if (isSoundOn) playTone(523.25, 0.12);
     }
@@ -1523,11 +1541,9 @@
       triggerVibrate(12);
     }
 
-    /* 未割り振りポイントの自動均等配分ロジック */
     function autoAllocateRemainingPoints() {
       if (appState.tempPoints <= 0) return;
       const isMale = (appState.user.gender === "male");
-      // 男性は活動費・外見重視、女性は外見・性欲重視で循環配分
       const order = isMale ? ["budget", "looks", "stamina", "libido"] : ["looks", "libido", "stamina", "budget"];
       let loopCount = 0;
       while (appState.tempPoints > 0 && loopCount < 30) {
@@ -1548,7 +1564,7 @@
             }
           }
         }
-        if (!allocatedThisRound) break; // すべてカンスト時は離脱
+        if (!allocatedThisRound) break;
         loopCount++;
       }
     }
@@ -1594,7 +1610,6 @@
     }
 
     function startSimulation() {
-      // 未配分ポイントを自動均等配分
       if (appState.tempPoints > 0) {
         autoAllocateRemainingPoints();
         renderStep1B();
@@ -2202,7 +2217,6 @@
       const currentAge = getRealAge(mIdx);
       appState.sim.currentAge = currentAge;
 
-      // 途中サマリー集計
       document.getElementById("twoYearSummaryTotal").innerText = `${appState.sim.partners.length}人`;
       const sortedByDur = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
       document.getElementById("twoYearSummaryLongest").innerText = sortedByDur[0] ? `${sortedByDur[0].durationMonths}ヶ月` : "0ヶ月";
@@ -2214,7 +2228,6 @@
       document.getElementById("twoYearSummaryYoungest").innerText = youngest ? `${youngest.startAge}歳` : "―";
       document.getElementById("twoYearSummaryOldest").innerText = oldest ? `${oldest.startAge}歳` : "―";
 
-      // 加齢減退
       const r = Math.random();
       let dropTotal = 2;
       if (r < 0.05) dropTotal = 0;
@@ -2259,7 +2272,6 @@
       document.getElementById("dropDetailStamina").innerText = `${prevStamina} → ${appState.stats.stamina}`;
       document.getElementById("dropDetailLibido").innerText = `${prevLibido} → ${appState.stats.libido}`;
 
-      // 年収変動
       let bonus = 0, penalty = 0;
       if (appState.sim.globalMaxSexScore >= 95) bonus++;
       if (appState.sim.crisisCountIn2Years >= 2) penalty++;
@@ -2288,7 +2300,6 @@
       appState.stats.income = Math.max(2, Math.min(8, appState.stats.income + incomeDelta));
       document.getElementById("incomeChangeReport").innerText = `Lv.${prevIncome} → Lv.${appState.stats.income}`;
 
-      // 予算リセット ＆ 再配分ポイント
       appState.stats.budget = 0;
       const reallocPoints = Math.max(2, appState.stats.income + 1 + bonus - penalty);
 
@@ -2403,7 +2414,6 @@
     }
 
     function resumeNextTwoYears() {
-      // 節目モーダルでの未割り振りポイントも自動均等配分
       if (appState.twoYearTemp.points > 0) {
         autoAllocateTwoYearPoints();
       }
@@ -2928,7 +2938,6 @@
     }
 
     function initApp() {
-      // 初期起動時はディスクレーマー確認画面を表示
       document.getElementById("stepDisclaimer").classList.remove("hidden");
     }
 

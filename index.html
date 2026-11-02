@@ -293,13 +293,18 @@
           </div>
           <div class="space-y-1">
             <label class="text-xs font-semibold text-slate-300">居住エリア</label>
-            <select id="userPref" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+            <select id="userPref" onchange="onPrefChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
               <option value="tokyo" selected>東京</option>
               <option value="kanagawa">神奈川</option>
               <option value="saitama">埼玉</option>
               <option value="chiba">千葉</option>
             </select>
           </div>
+        </div>
+
+        <!-- 居住エリアのマイルド特性解説バッジ -->
+        <div id="prefDescBox" class="p-2 rounded-lg bg-slate-950/80 border border-purple-900/40 text-[11px] text-purple-200">
+          <span class="font-bold text-purple-300">【都心の魔境】</span> 出逢いのチャンスは最大だが人の目も多い（出逢い+4% / 身バレ+2%）
         </div>
 
         <div class="space-y-1">
@@ -1187,6 +1192,48 @@
       chiba: ["本八幡", "船橋", "柏", "幕張", "浦安", "松戸", "市川"]
     };
 
+    /* 居住エリアのマイルド特性（攻略に重く影響しない隠し味） */
+    const PREF_PROPERTIES = {
+      tokyo: {
+        title: "【都心の魔境】",
+        desc: "出逢いのチャンスは最大だが人の目も多い（出逢い+4% / 身バレ+2%）",
+        meetBonus: 0.04,
+        crisisBonus: 0.02,
+        breakBonus: 0.0,
+        scoreBonus: 0
+      },
+      kanagawa: {
+        title: "【港街と洗練】",
+        desc: "ロケーション抜群で密会が盛り上がりやすい（密会スコア+3pt）",
+        meetBonus: 0.0,
+        crisisBonus: 0.0,
+        breakBonus: 0.0,
+        scoreBonus: 3
+      },
+      saitama: {
+        title: "【鉄壁の隠密】",
+        desc: "生活圏を外して平穏をキープしやすい（身バレ危機率-2%）",
+        meetBonus: 0.0,
+        crisisBonus: -0.02,
+        breakBonus: 0.0,
+        scoreBonus: 0
+      },
+      chiba: {
+        title: "【堅実な安定】",
+        desc: "落ち着いた大人の逢瀬で関係が長続きしやすい（破局率-1.5%）",
+        meetBonus: 0.0,
+        crisisBonus: 0.0,
+        breakBonus: -0.015,
+        scoreBonus: 0
+      }
+    };
+
+    function onPrefChange() {
+      const p = document.getElementById("userPref").value;
+      const prop = PREF_PROPERTIES[p] || PREF_PROPERTIES.tokyo;
+      document.getElementById("prefDescBox").innerHTML = `<span class="font-bold text-purple-300">${prop.title}</span> ${prop.desc}`;
+    }
+
     const MONTH_EMOJIS = ["", "🎍", "🍫", "🎎", "🌸", "🌿", "☔", "🎋", "🌻", "🌕", "🎃", "🍂", "🎄"];
     const PARTNER_COLORS = ["#ec4899", "#8b5cf6", "#06b6d4", "#f59e0b"];
 
@@ -1848,9 +1895,14 @@
       let activePartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
       let isCrisisHappened = false;
 
+      // エリア特性の取得
+      const prefProp = PREF_PROPERTIES[appState.user.pref] || PREF_PROPERTIES.tokyo;
+
       const activeCount = activePartners.length;
-      let riskRate = (appState.stats.spouseAlert * 0.02) + (activeCount * 0.02);
+      let riskRate = (appState.stats.spouseAlert * 0.02) + (activeCount * 0.02) + (prefProp.crisisBonus || 0);
       if (appState.stats.stamina <= 3) riskRate += 0.04;
+      riskRate = Math.max(0.01, Math.min(0.40, riskRate));
+
       if (Math.random() < riskRate && activeCount > 0) {
         isCrisisHappened = true;
         appState.sim.crisisCountIn2Years++;
@@ -1864,7 +1916,7 @@
         p.datesCount++;
         p.age = p.startAge + Math.floor(p.durationMonths / 12);
 
-        const score = calculateSexScore(p, calMonth, isCrisisHappened);
+        const score = calculateSexScore(p, calMonth, isCrisisHappened, prefProp.scoreBonus || 0);
         p.lastSexScore = score;
         if (score > p.maxSexScore) p.maxSexScore = score;
         if (score > appState.sim.globalMaxSexScore) {
@@ -1894,6 +1946,10 @@
         if (p.age <= currentRealAge - 10) breakRate *= 1.35;
         breakRate *= concurrentPenalty;
 
+        // 千葉などの破局率微調整
+        breakRate += (prefProp.breakBonus || 0);
+        breakRate = Math.max(0.008, breakRate);
+
         if (p.durationMonths >= 2) {
           const roll = Math.random();
           if (roll < breakRate && roll > highestBreakRoll) {
@@ -1916,7 +1972,7 @@
         }
       }
 
-      // 新規マッチング判定（月最大2名獲得・ダブルゲット対応）
+      // 新規マッチング判定（月最大2名獲得・エリア補正対応）
       const maxAllowed = appState.stats.maxPartners || 2;
       let emptySlots = maxAllowed - appState.sim.activePartnerIds.length;
       let matchedPartners = [];
@@ -1933,6 +1989,9 @@
 
         if (appState.stats.targetAgePref === "younger") meetBase *= 0.65;
         if (appState.stats.targetAgePref === "older") meetBase *= 1.25;
+
+        // 東京などの出逢い微調整
+        meetBase += (prefProp.meetBonus || 0);
         meetBase = Math.max(0.12, Math.min(0.85, meetBase));
 
         // 1人目判定
@@ -1948,7 +2007,7 @@
 
           // 2人目判定（空き枠が2以上ある場合のみ追加抽選）
           if (emptySlots >= 2) {
-            let doubleRate = 0.10; // 基礎成功率10%
+            let doubleRate = 0.10;
             if (isUserMale) {
               if (appState.stats.budget >= 8) doubleRate += 0.20;
               else if (appState.stats.budget >= 6) doubleRate += 0.10;
@@ -1976,14 +2035,12 @@
       // マッチングトーストの時間差表示制御
       if (!isSilent && matchedPartners.length > 0) {
         let baseDelay = breakCandidate ? 2800 : 0;
-        // 1人目表示
         setTimeout(() => {
           showNewPartnerToast(matchedPartners[0], false);
           playRareChime();
           triggerVibrate([40, 50, 40]);
         }, baseDelay);
 
-        // 2人目表示（ダブルマッチ時）
         if (matchedPartners.length > 1) {
           setTimeout(() => {
             showNewPartnerToast(matchedPartners[1], true);
@@ -2025,7 +2082,7 @@
       document.getElementById("simActiveCount").innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
     }
 
-    function calculateSexScore(partner, month, isCrisis) {
+    function calculateSexScore(partner, month, isCrisis, prefBonus = 0) {
       let base = 50;
       if (partner.chemistry === "S") base = 85;
       else if (partner.chemistry === "A") base = 72;
@@ -2041,7 +2098,7 @@
         eventBonus = 10 + Math.floor(Math.random() * 8);
       }
       const thrillBonus = isCrisis ? 15 : 0;
-      return Math.max(10, Math.round(base + libidoBonus + masteryBonus + eventBonus + thrillBonus));
+      return Math.max(10, Math.round(base + libidoBonus + masteryBonus + eventBonus + thrillBonus + prefBonus));
     }
 
     function createSynthesizedPartner(startMonth, playerAge) {
@@ -2072,7 +2129,6 @@
         else partnerAge = Math.max(18, Math.min(85, playerAge + Math.floor(Math.random() * 11) - 5));
       }
 
-      // 年代別の流行名前を自動割り当て（カタカナ表記）
       const name = pickGenerationalName(targetGender, partnerAge);
 
       let avatarNum, category = "normal";
@@ -2295,32 +2351,114 @@
       appState.sim.monthlyHistory[mIdx] = { month: mIdx, calMonth, partners: monthLogRecord };
     }
 
+    /* エリア別日常密会 ＆ たまの遠隔地逃避行（約15%）対応ログ生成 */
     function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
       let pool = [];
+      const userPref = appState.user.pref || "tokyo";
+      const isRemoteDate = (Math.random() < 0.15); // 約15%で遠隔地・小旅行
+
       if (partner.durationMonths <= 2) {
-        pool = [
-          "初アポ。お互いに指輪を外した日焼け跡を見つめながら乾杯。",
-          "昼の短時間ランチ。「怪しい人じゃなくて良かった」と笑い合う。",
-          "初ホテル。お互いの家庭の詮索はしない暗黙のルールで抱き合った。",
-          "駅前カフェで待ち合わせ。メッセージ通りの上品な笑顔に安堵。"
+        if (userPref === "kanagawa") {
+          pool = [
+            "初アポ。みなとみらいの海風を感じながらバーで乾杯。",
+            "武蔵小杉のカフェで短時間ランチ。お互いに指輪を外した跡を見つめ合う。",
+            "初ホテル。元町の静かな隠れ家で、家庭の話は避けて抱き合った。",
+            "横浜駅の人混みを避け、タクシーで静かなホテルへ直行した。"
+          ];
+        } else if (userPref === "saitama") {
+          pool = [
+            "初アポ。大宮駅東口の落ち着いた個室で安堵の笑顔。",
+            "浦和の閑静な和食ランチ。「知り合いに見つかりにくいね」と笑い合う。",
+            "初ホテル。湘南新宿ラインで新宿まで足を伸ばし、密会へ。",
+            "川越の郊外カフェで合流し、そのまま人目のない車内へ。"
+          ];
+        } else if (userPref === "chiba") {
+          pool = [
+            "初アポ。西船橋の個室ダイニングで秘密の乾杯。",
+            "幕張ベイエリアのテラス席で待ち合わせ。穏やかな笑顔に惹かれる。",
+            "初ホテル。東西線で都内方面へ移動し、人目を忍んでデイユースへ。",
+            "船橋駅の喧騒を離れ、郊外のホテルへ滑り込んだ。"
+          ];
+        } else {
+          pool = [
+            "初アポ。神楽坂の路地裏個室でひっそりと乾杯。",
+            "恵比寿の目立たないカフェで短時間ランチ。「怪しい人じゃなくて安心した」と笑い合う。",
+            "初ホテル。新宿御苑前の静かなデイユースで、暗黙の了解のもと抱き合った。",
+            "六本木の個室バーから、タクシーで隠れ家ホテルへ直行。"
+          ];
+        }
+      } else if (isRemoteDate) {
+        // たまの遠隔地逃避行デート（約15%）
+        const remotePool = [
+          "有休を重ねて急遽、ロマンスカーで箱根温泉へ日帰り逃避行。",
+          "熱海のオーシャンビューホテル。波音を聞きながら誰にも言えない午後を過ごした。",
+          "レンタカーで湘南・三浦半島へ海沿いドライブ。夕暮れの車内で手を重ねた。",
+          "人目を避けて舞浜・お台場のリゾートホテルへ。現実を忘れて深く肌を重ねた。",
+          "新幹線で軽井沢へ。避暑地の冷たい空気の中、コートに隠れて指を絡め合った。"
         ];
+        pool = remotePool;
       } else {
+        // エリア別・季節の日常逢瀬ログ
         switch (month) {
-          case 1: pool = ["年始の家族時間を終え、ホテルで飢えたように抱き合った。", "「今年もよろしくね」と、新春の冷たい空気の中で手を繋いだ。"]; break;
-          case 2: pool = ["人目を盗んで小さなチョコを手渡され、甘い密会へ。", "「本命にはあげられないから」とホテルで照れながらチョコを渡された。"]; break;
-          case 3: pool = ["年度末の繁忙期、仕事帰りに駆け込みでバーとホテルへ。", "春風の冷たい夜、お互いの仕事の愚痴をホテルで癒やし合う。"]; break;
-          case 4: pool = ["人通りの少ない目黒川沿いで、息を潜めて夜桜散歩。", "桜舞い散る夜、コートを脱ぎ捨てて互いの温もりを確かめ合った。"]; break;
-          case 5: pool = ["連休明けの平日昼下がり、久しぶりの逢瀬に飢えたように抱き合う。", "初夏の風が心地よいテラス席で、人目を気にしつつランチデート。"]; break;
-          case 6: pool = ["ゲリラ豪雨を口実に、急遽シティホテルのデイユースへ。", "梅雨の湿気の中、汗ばむ肌を重ねて秘密の午後を過ごした。"]; break;
-          case 7: pool = ["薄着の季節。「肌が綺麗だね」とホテルで囁かれた。", "夏の夜風に吹かれながら、湾岸エリアのホテルで夜通し過ごした。"]; break;
-          case 8: pool = ["お盆の帰省期間。全パートナーと連絡自粛の沈黙週間。", "酷暑の午後、キンキンに冷えたホテルの部屋で肌を寄せ合った。"]; break;
-          case 9: pool = ["少し涼しくなった夜、湾岸エリアを当てもなくドライブ。", "初秋の気配に少し寂しさを感じながら、ホテルで深く愛し合う。"]; break;
-          case 10: pool = ["平日に有休を合わせ、隠れ家個室の和食ランチへ。", "紅葉の気配を感じながら、郊外のホテルでゆっくり羽を伸ばした。"]; break;
-          case 11: pool = ["寒くなった手を、コートのポケットの中でそっと握られた。", "冷えた身体を温め合うように、ホテルで長い抱擁を交わす。"]; break;
-          case 12: pool = ["家庭があるからこそ、23日の昼間に平日フライング乾杯。", "忘年会の口実で、終電を気にせずホテルで今年最後の密会。"]; break;
-          default: pool = ["個室ディナーのあと、いつものホテルで濃密な2時間。"];
+          case 1:
+            pool = (userPref === "kanagawa")
+              ? ["年始の家族時間を終え、横浜の夜景ホテルで飢えたように抱き合った。", "「今年もよろしくね」と、山下公園の冷たい風の中そっと手を繋いだ。"]
+              : (userPref === "saitama")
+              ? ["年始の帰省を終え、大宮の個室で熱烈に抱き合った。", "新春の冷たい空気の中、池袋の隠れ家ホテルへ逃げ込んだ。"]
+              : (userPref === "chiba")
+              ? ["正月ムードの日常を抜け出し、西船橋のホテルで濃密な午後を過ごした。", "湾岸の風を感じながら、今年最初の逢瀬を確かめ合った。"]
+              : ["年始の家族時間を終え、都内ホテルで飢えたように抱き合った。", "「今年もよろしくね」と、神宮前の静かな通りでそっと手を繋いだ。"];
+            break;
+          case 2:
+            pool = ["人目を盗んで小さなチョコを手渡され、甘い密会へ。", "「本命にはあげられないから」とホテルで照れながらチョコを渡された。"];
+            break;
+          case 3:
+            pool = (userPref === "kanagawa")
+              ? ["年度末の繁忙期、みなとみらいで仕事帰りに駆け込みデイユース。", "春風の冷たい夜、関内のバーとホテルで癒やし合う。"]
+              : (userPref === "saitama")
+              ? ["年度末の疲れを癒やすため、大宮の隠れ家ホテルで長い抱擁を交わす。", "仕事帰りの湘南新宿ライン、途中下車してホテルへ直行。"]
+              : ["年度末の繁忙期、仕事帰りに駆け込みでホテルへ。", "春風の冷たい夜、お互いの仕事の愚痴をホテルで癒やし合う。"];
+            break;
+          case 4:
+            pool = (userPref === "kanagawa")
+              ? ["人通りの少ない元町の裏通りで、息を潜めて夜桜散歩。", "桜舞い散る夜、ホテルの部屋で互いの温もりを確かめ合った。"]
+              : (userPref === "saitama")
+              ? ["大宮公園の喧騒を避け、静かな個室ホテルへ直行。", "夜桜を見上げるふりをして、そっと指先を絡め合った。"]
+              : ["人通りの少ない目黒川沿いで、息を潜めて夜桜散歩。", "桜舞い散る夜、コートを脱ぎ捨てて互いの温もりを確かめ合った。"];
+            break;
+          case 5:
+            pool = ["連休明けの平日昼下がり、久しぶりの逢瀬に飢えたように抱き合う。", "初夏の心地よい陽気の中、人目を気にしつつランチとホテル。"];
+            break;
+          case 6:
+            pool = ["ゲリラ豪雨を口実に、急遽シティホテルのデイユースへ。", "梅雨の湿気の中、汗ばむ肌を重ねて秘密の午後を過ごした。"];
+            break;
+          case 7:
+            pool = (userPref === "kanagawa")
+              ? ["薄着の季節。「肌が綺麗だね」とみなとみらいのホテルで囁かれた。", "夏の夜風に吹かれながら、湘南沿いのホテルで熱く過ごした。"]
+              : ["薄着の季節。「肌が綺麗だね」とホテルで囁かれた。", "夏の夜風に吹かれながら、シティホテルの高層階で夜通し過ごした。"];
+            break;
+          case 8:
+            pool = ["お盆の帰省期間。全パートナーと連絡自粛の沈黙週間。", "酷暑の午後、キンキンに冷えたホテルの部屋で肌を寄せ合った。"];
+            break;
+          case 9:
+            pool = (userPref === "chiba")
+              ? ["少し涼しくなった夜、幕張ベイエリアを当てもなくドライブ。", "初秋の気配に少し寂しさを感じながら、ホテルで深く愛し合う。"]
+              : ["少し涼しくなった夜、湾岸エリアを当てもなくドライブ。", "初秋の気配に少し寂しさを感じながら、ホテルで深く愛し合う。"];
+            break;
+          case 10:
+            pool = ["平日に有休を合わせ、隠れ家個室の和食ランチへ。", "紅葉の気配を感じながら、郊外のホテルでゆっくり羽を伸ばした。"];
+            break;
+          case 11:
+            pool = ["寒くなった手を、コートのポケットの中でそっと握られた。", "冷えた身体を温め合うように、ホテルで長い抱擁を交わす。"];
+            break;
+          case 12:
+            pool = ["家庭があるからこそ、23日の昼間に平日フライング乾杯。", "忘年会の口実で、終電を気にせずホテルで今年最後の密会。"];
+            break;
+          default:
+            pool = ["個室ディナーのあと、いつものホテルで濃密な2時間。"];
         }
       }
+
       const choices = pool.filter(t => !usedTexts.has(t));
       return choices.length > 0 ? choices[Math.floor(Math.random() * choices.length)] : pool[0];
     }
@@ -3093,6 +3231,7 @@
 
     function initApp() {
       document.getElementById("stepDisclaimer").classList.remove("hidden");
+      onPrefChange();
     }
 
     if (document.readyState === "loading") {

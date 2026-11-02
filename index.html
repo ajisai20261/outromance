@@ -573,7 +573,7 @@
         </div>
         <div class="flex justify-between text-[9px] text-slate-500 px-1">
           <span>※マスをタップすると当時の逢瀬ログを確認できます</span>
-          <span>1月〜12月（月絵文字）</span>
+          <span>1月〜12月（🎂＝誕生月）</span>
         </div>
       </div>
 
@@ -871,6 +871,10 @@
         <button id="pausePlayBtn" onclick="togglePauseSimulation()" class="w-10 h-10 rounded-xl bg-purple-700/80 hover:bg-purple-600 border border-purple-500 text-white flex items-center justify-center font-bold text-sm transition active:scale-95">
           ⏸️
         </button>
+        <!-- 進行速度トグルボタン（3.0s ⇄ 1.5s） -->
+        <button id="speedToggleBtn" onclick="toggleSpeed()" class="px-2.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-purple-300 hover:bg-slate-700 transition active:scale-95">
+          ⏩ 1.0x
+        </button>
         <button onclick="skipToEndOfTwoYears()" class="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs text-slate-300 hover:bg-slate-700 transition">
           2年後へスキップ ⏩
         </button>
@@ -878,7 +882,7 @@
 
       <div class="text-right">
         <div id="stickyMonthText" class="text-xs font-bold text-white">40歳（1年目 1月）</div>
-        <div id="stickySpeedText" class="text-[9px] text-purple-300">1.4秒/月 進行中</div>
+        <div id="stickySpeedText" class="text-[9px] text-purple-300">3.0秒/月 進行中</div>
       </div>
     </div>
   </div>
@@ -1014,7 +1018,7 @@
             <span class="text-cyan-400">⚡ 体力・生活管理</span>
             <span id="twoYearValStamina" class="font-bold text-white">4 / 10</span>
           </div>
-          <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
             <div id="twoYearBarStamina" class="stat-bar-fill h-full bg-cyan-400 w-[40%]"></div>
           </div>
           <div class="flex justify-end gap-2">
@@ -1028,7 +1032,7 @@
             <span class="text-rose-400">🔥 性欲・意欲</span>
             <span id="twoYearValLibido" class="font-bold text-white">5 / 10</span>
           </div>
-          <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
             <div id="twoYearBarLibido" class="stat-bar-fill h-full bg-rose-500 w-[50%]"></div>
           </div>
           <div class="flex justify-end gap-2">
@@ -1331,6 +1335,7 @@
     let isSoundOn = false;
     let audioCtx = null;
     let simTimer = null;
+    let simSpeedMs = 3000; // デフォルト3.0秒
 
     let appState = {
       user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 40, birthMonth: 4 },
@@ -1374,6 +1379,24 @@
         }
       }
       if (isSoundOn) playTone(587.33, 0.12);
+    }
+
+    /* 速度切り替えトグル（3.0秒 ⇄ 1.5秒） */
+    function toggleSpeed() {
+      if (simSpeedMs === 3000) {
+        simSpeedMs = 1500;
+        document.getElementById("speedToggleBtn").innerText = "⏩ 2.0x";
+        document.getElementById("stickySpeedText").innerText = "1.5秒/月 (早送り)";
+      } else {
+        simSpeedMs = 3000;
+        document.getElementById("speedToggleBtn").innerText = "⏩ 1.0x";
+        document.getElementById("stickySpeedText").innerText = "3.0秒/月 進行中";
+      }
+      triggerVibrate(15);
+      if (!appState.sim.isPaused && !appState.sim.isSkipping) {
+        clearTimeout(simTimer);
+        simTimer = setTimeout(simulationTick, simSpeedMs);
+      }
     }
 
     function playTone(freq, duration, type="sine") {
@@ -1813,6 +1836,7 @@
       const cycleIndex = Math.floor(appState.sim.currentMonth / 24);
       const startYearNum = cycleIndex * 2 + 1;
       const endYearNum = startYearNum + 1;
+      const userBirthMonth = appState.user.birthMonth || 4;
 
       document.getElementById("matrixPhaseTitle").innerText = `第${cycleIndex + 1}期：${startYearNum}〜${endYearNum}年目（${cycleIndex * 24 + 1}〜${(cycleIndex + 1) * 24}ヶ月）`;
       document.getElementById("matrixRow1Label").innerText = `${startYearNum}年目`;
@@ -1834,7 +1858,9 @@
 
         const centerCircle = document.createElement("div");
         centerCircle.className = "w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-[9px] select-none";
-        centerCircle.innerText = MONTH_EMOJIS[calMonth] || "🌸";
+        // 誕生月マスは「🎂」絵文字に差し替え
+        const monthEmoji = (calMonth === userBirthMonth) ? "🎂" : (MONTH_EMOJIS[calMonth] || "🌸");
+        centerCircle.innerText = monthEmoji;
         dot.appendChild(centerCircle);
 
         if (i < 12) r1.appendChild(dot);
@@ -1844,7 +1870,7 @@
 
     function startSimLoop() {
       clearTimeout(simTimer);
-      simTimer = setTimeout(simulationTick, 1400);
+      simTimer = setTimeout(simulationTick, simSpeedMs);
     }
 
     function pauseSimulationInternal() {
@@ -2298,7 +2324,14 @@
 
     function renderRealtimeMonthlyLog(mIdx, calMonth) {
       const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
-      document.getElementById("seasonBadge").innerText = `${calMonth}月`;
+      const userBirthMonth = appState.user.birthMonth || 4;
+      
+      // 誕生月の場合は🎂をバッジに表示
+      if (calMonth === userBirthMonth) {
+        document.getElementById("seasonBadge").innerText = `🎂 ${calMonth}月（誕生月）`;
+      } else {
+        document.getElementById("seasonBadge").innerText = `${MONTH_EMOJIS[calMonth] || "🌸"} ${calMonth}月`;
+      }
       document.getElementById("monthTitleLog").innerText = seasons[calMonth];
 
       const listContainer = document.getElementById("currentMonthPartnersLog");
@@ -2367,6 +2400,7 @@
     function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
       let pool = [];
       const userPref = appState.user.pref || "tokyo";
+      const userBirthMonth = appState.user.birthMonth || 4;
       const isRemoteDate = (Math.random() < 0.15); // 約15%で遠隔地・小旅行
 
       if (partner.durationMonths <= 2) {
@@ -2400,6 +2434,13 @@
             "恵比寿の目立たないバーから、タクシーで隠れ家ホテルへ直行。"
           ];
         }
+      } else if (month === userBirthMonth) {
+        // 誕生月専用の特別密会ログ
+        pool = [
+          "「お誕生日おめでとう」とホテルで小さな包みを渡され、熱く深く抱き合った。",
+          "誕生日の夜。家族への言い訳を作り、わずか1時間の熱い逢瀬にすべてを捧げた。",
+          "誰にも言えない特別なバースデー。ホテルのワインを開け、二人きりで祝杯を交わす。"
+        ];
       } else if (isRemoteDate) {
         // たまの遠隔地逃避行デート（約15%）
         const remotePool = [
@@ -2545,7 +2586,9 @@
       const age = getRealAge(mIdx);
       const yearNum = Math.floor(mIdx / 12) + 1;
       const m = (mIdx % 12) + 1;
-      document.getElementById("detailMonthHeader").innerText = `${age}歳（${yearNum}年目 ${m}月）の記憶`;
+      const userBirthMonth = appState.user.birthMonth || 4;
+      const birthTag = (m === userBirthMonth) ? "🎂 誕生月の記憶" : "の記憶";
+      document.getElementById("detailMonthHeader").innerText = `${age}歳（${yearNum}年目 ${m}月）${birthTag}`;
 
       if (!history || history.partners.length === 0) {
         document.getElementById("detailMonthContent").innerHTML = `<div>この月はパートナーはおらず、家庭と仕事に専念していました。</div>`;
@@ -2889,7 +2932,7 @@
         if (diff >= 20) hasOlder20 = true;
         if (diff <= -20) hasYounger20 = true;
         if (diff >= 10) hasOlder10 = true;
-        if (diff <= -10) hasYounger10 = true;
+        if (diff <= -10) hasYounger20 = true;
       });
 
       const ach100Kills = totalPartners >= 100;

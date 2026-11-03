@@ -45,11 +45,11 @@
                   radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.08) 0%, transparent 55%);
     }
 
-    /* キービジュアル演出用スタイル */
+    /* キービジュアル演出用スタイル（指定の画像名を設定） */
     .kv-background {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, #1e1b4b 0%, #09090b 50%, #3b0764 100%);
+      background-image: url('title_kv.jpg');
       background-size: cover;
       background-position: center;
       opacity: 1;
@@ -261,9 +261,8 @@
       </div>
     </section>
 
-    <!-- ==================== STEP 0: シネマティック・プロローグ（キービジュアル＆タップ早送り対応） ==================== -->
+    <!-- ==================== STEP 0: シネマティック・プロローグ ==================== -->
     <section id="step0" onclick="advancePrologue(event)" class="hidden min-h-[80vh] flex flex-col items-center justify-start pt-6 sm:pt-8 relative overflow-hidden text-center py-6 cursor-pointer select-none">
-      <!-- キービジュアル背景レイヤー -->
       <div id="keyVisualBg" class="kv-background"></div>
 
       <div id="prologueWrapper" class="w-full flex flex-col items-center justify-center transition-opacity duration-300 relative z-10">
@@ -325,7 +324,6 @@
           </div>
         </div>
 
-        <!-- 居住エリアのマイルド特性解説バッジ -->
         <div id="prefDescBox" class="p-2.5 rounded-lg bg-slate-950/80 border border-purple-900/40 text-[11px] text-purple-200 leading-relaxed">
           <span class="font-bold text-purple-300">【都心の魔境】</span> 出逢いのチャンスは最大だが人の目も多い（出逢い+4% / 身バレ+2%）
         </div>
@@ -379,7 +377,6 @@
         </button>
       </div>
 
-      <!-- 婚外プレイスタイル・クイックプリセット選択 -->
       <div class="space-y-1.5">
         <div class="text-[11px] font-bold text-purple-300">
           <span>🎯 婚外スタイル選択（タップで推奨設定を自動セット）</span>
@@ -414,7 +411,6 @@
         </div>
       </div>
 
-      <!-- 活動費（予算 Lv.0〜10） -->
       <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-3.5 space-y-2">
         <div class="flex justify-between items-center">
           <div>
@@ -434,14 +430,12 @@
         </div>
       </div>
 
-      <!-- 基礎パラメータ（外見・性欲・体力） -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-3">
         <div class="flex justify-between items-center text-xs font-semibold text-slate-400">
           <span>自己投資ステータス</span>
           <span class="text-[10px] text-purple-300">基礎能力合計: <strong id="lblStatsTotal" class="text-white font-bold">14</strong> pt</span>
         </div>
 
-        <!-- 外見 -->
         <div class="space-y-1">
           <div class="flex justify-between text-xs">
             <span class="text-amber-300 font-medium">✨ 外見・身だしなみ（出会い・継続。女性は影響大）</span>
@@ -456,7 +450,6 @@
           </div>
         </div>
 
-        <!-- 性欲 -->
         <div class="space-y-1">
           <div class="flex justify-between text-xs">
             <span class="text-rose-400 font-medium">🔥 性欲・モチベーション（密会スコアに直結）</span>
@@ -471,7 +464,6 @@
           </div>
         </div>
 
-        <!-- 体力（トラブル抑制の要） -->
         <div class="space-y-1">
           <div class="flex justify-between text-xs">
             <span class="text-cyan-400 font-medium">⚡ 体力（トラブル抑止）</span>
@@ -487,7 +479,6 @@
         </div>
       </div>
 
-      <!-- 本業年収水準 ＆ 家庭環境 -->
       <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 grid grid-cols-2 gap-3 text-xs">
         <div>
           <span class="text-slate-400">本業年収水準:</span>
@@ -507,7 +498,6 @@
         </div>
       </div>
 
-      <!-- 希望並行人数 ＆ ターゲット年代 -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-3">
         <div class="space-y-1">
           <div class="flex justify-between items-center">
@@ -556,7 +546,6 @@
         </div>
       </div>
 
-      <!-- リアルタイム能力値表示バー（コンパクト化） -->
       <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-1.5 flex items-center justify-between text-center text-[11px]">
         <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white">4</span></div>
         <div class="text-slate-600">|</div>
@@ -567,7 +556,6 @@
         <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="liveStatBudget" class="font-bold text-white">Lv.0</span></div>
       </div>
 
-      <!-- 2年サイクル（24マス）マトリクス表示 -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-2 shadow-xl">
         <div class="flex justify-between items-center text-[11px] px-1">
           <span id="matrixPhaseTitle" class="font-bold text-purple-300">第1期：1〜2年目（1〜24ヶ月）</span>
@@ -590,7 +578,6 @@
         </div>
       </div>
 
-      <!-- 新規マッチング時トースト通知 -->
       <div id="newPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-purple-950 via-pink-950 to-slate-900 border-2 border-pink-500 rounded-xl p-2.5 sm:p-3 shadow-2xl">
         <div class="flex items-center gap-2.5 sm:gap-3">
           <div class="avatar-frame-lg">
@@ -620,22 +607,19 @@
         </p>
       </div>
 
-      <!-- 関係解消・破局時トースト通知 -->
       <div id="breakupPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-slate-950 via-purple-950/60 to-slate-900 border-2 border-purple-400/80 rounded-xl p-2.5 sm:p-3 shadow-2xl">
-        <div class="flex items-center gap-2.5 sm:gap-3">
-          <div class="avatar-frame-lg grayscale contrast-125">
-            <img src="" alt="" id="toastBreakupImg">
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-1">
-              <div class="space-y-0.5 min-w-0">
-                <div class="text-[9.5px] sm:text-[10px] font-bold text-purple-300 flex items-center gap-1 truncate">
-                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block flex-shrink-0"></span>
-                  <span id="toastBreakupTag" class="truncate">🍂 PARTNER BREAKUP</span>
-                </div>
-                <div class="text-xs sm:text-sm font-black text-slate-200 truncate" id="toastBreakupName">カナコ (37歳)</div>
-                <div class="text-[9.5px] text-slate-400" id="toastBreakupPeriod">4ヶ月で関係解消</div>
+        <div class="avatar-frame-lg grayscale contrast-125">
+          <img src="" alt="" id="toastBreakupImg">
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-1">
+            <div class="space-y-0.5 min-w-0">
+              <div class="text-[9.5px] sm:text-[10px] font-bold text-purple-300 flex items-center gap-1 truncate">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block flex-shrink-0"></span>
+                <span id="toastBreakupTag" class="truncate">🍂 PARTNER BREAKUP</span>
               </div>
+              <div class="text-xs sm:text-sm font-black text-slate-200 truncate" id="toastBreakupName">カナコ (37歳)</div>
+              <div class="text-[9.5px] text-slate-400" id="toastBreakupPeriod">4ヶ月で関係解消</div>
             </div>
           </div>
         </div>
@@ -644,7 +628,6 @@
         </p>
       </div>
 
-      <!-- 相手配偶者からの訴訟トースト通知 -->
       <div id="lawsuitToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-amber-950 via-rose-950 to-slate-950 border-2 border-amber-500 rounded-xl p-2.5 sm:p-3 shadow-2xl">
         <div class="flex items-center gap-2.5 sm:gap-3">
           <div class="text-2xl sm:text-3xl flex-shrink-0 animate-bounce">⚖️</div>
@@ -656,7 +639,6 @@
         </div>
       </div>
 
-      <!-- 月別並行パートナー＆逢瀬スコアログカード -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 sm:p-3.5 space-y-2.5">
         <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-1.5">
           <div class="font-bold text-slate-200 flex items-center gap-1.5">
@@ -671,7 +653,6 @@
         </div>
       </div>
 
-      <!-- 家庭・身バレ気配ログ -->
       <div class="bg-slate-950 border border-slate-850 rounded-xl p-3 text-xs space-y-1">
         <div class="flex items-center justify-between text-slate-400 font-semibold">
           <div class="flex items-center gap-1">
@@ -685,7 +666,6 @@
         </p>
       </div>
 
-      <!-- ドットクリック時のインライン振り返りポップアップ -->
       <div id="clickMonthDetail" class="hidden bg-purple-950/70 border border-purple-700/80 rounded-xl p-3 text-xs space-y-1">
         <div class="flex justify-between font-bold text-purple-200">
           <span id="detailMonthHeader">43歳 8月の記憶</span>
@@ -697,7 +677,6 @@
 
     <!-- ==================== STEP 3: 10年総括・最終リザルト ==================== -->
     <section id="step3" class="hidden space-y-5 py-3 pb-12">
-      <!-- プレイヤー軌跡ヘッダー -->
       <div class="text-center space-y-1 border-b border-purple-900/40 pb-3">
         <div class="text-xs text-slate-400 font-medium">
           <span id="resPlayerNameHeader" class="text-white font-bold text-sm">ユウスケ</span> さんの10年間
@@ -714,12 +693,10 @@
         <h2 id="resTitleBadge" class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 drop-shadow-[0_0_12px_rgba(244,63,94,0.4)]">
           『奇跡の純白伴侶』
         </h2>
-        <!-- 複数達成時の実績クラウンバッジ一覧 -->
         <div id="resAchieveBadgeList" class="flex flex-wrap items-center justify-center gap-1.5 pt-1"></div>
         <p id="resEndingDesc" class="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed pt-1"></p>
       </div>
 
-      <!-- やり込みアチーブメント -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
         <div class="text-[11px] font-bold text-amber-300 flex items-center justify-between">
           <span>🏆 10年アチーブメント（やり込み実績）</span>
@@ -759,7 +736,6 @@
         </div>
       </div>
 
-      <!-- 2大パートナーハイライト -->
       <div class="space-y-3">
         <div class="bg-gradient-to-b from-purple-950/40 to-slate-900/90 border border-purple-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
           <div class="flex items-center gap-3">
@@ -808,7 +784,6 @@
         </div>
       </div>
 
-      <!-- 10年総括スタッツ -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 grid grid-cols-2 gap-3 text-center">
         <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
           <div class="text-[10px] text-slate-400">累計交際人数</div>
@@ -830,7 +805,6 @@
         </div>
       </div>
 
-      <!-- 10年後の最終能力値（スリム化） -->
       <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-2 flex items-center justify-between text-center text-[11px]">
         <div><span class="text-amber-300 font-medium">✨外見</span> <span id="resStatLooks" class="font-bold text-white">Lv.4</span></div>
         <div class="text-slate-600">|</div>
@@ -841,7 +815,6 @@
         <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="resStatBudget" class="font-bold text-white">Lv.0</span></div>
       </div>
 
-      <!-- 全交際履歴アコーディオン -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div id="allHistoryWrapper" class="hidden space-y-2">
           <div class="text-[11px] font-semibold text-slate-400">すべての交際履歴</div>
@@ -853,13 +826,11 @@
         </button>
       </div>
 
-      <!-- 10年総括エピローグ -->
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2 font-serif-jp text-xs leading-relaxed text-slate-300">
         <div class="text-[10px] font-sans font-bold text-purple-400 uppercase tracking-widest">10-Year Epilogue</div>
         <div id="epilogueText" class="space-y-2"></div>
       </div>
 
-      <!-- アクションボタン -->
       <div class="space-y-2.5 pt-2">
         <button onclick="generateSquareCard()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
           <span>📷 成績表カードを画像保存（1080×1080）</span>
@@ -898,7 +869,7 @@
     </div>
   </div>
 
-  <!-- 2年ごとの節目モーダル（PC最適化＆コンパクト化） -->
+  <!-- 2年ごとの節目モーダル（タイポ修正済み） -->
   <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md md:max-w-2xl w-full p-4 sm:p-6 space-y-3.5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
       <div class="text-center space-y-1">
@@ -906,12 +877,10 @@
         <h3 class="text-base sm:text-lg font-bold text-white" id="twoYearTitle">2年目の節目：42歳の現在</h3>
       </div>
 
-      <!-- PC用2カラム構造ラッパー -->
       <div class="md:grid md:grid-cols-2 md:gap-4 space-y-3.5 md:space-y-0">
         
-        <!-- 左カラム：サマリー＆パートナー動向 -->
+        <!-- 左カラム -->
         <div class="space-y-3.5">
-          <!-- 10年史の途中サマリーカード群 -->
           <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
             <div class="text-[11px] font-bold text-amber-300">📊 これまでの到達サマリー</div>
             <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
@@ -940,13 +909,11 @@
             </div>
           </div>
 
-          <!-- 現在交際中のパートナー動向 -->
           <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-1.5">
             <div class="text-xs font-bold text-purple-300">💖 現在継続中のパートナー</div>
             <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs max-h-36 overflow-y-auto"></div>
           </div>
 
-          <!-- 加齢変化レポート（コンパクト化） -->
           <div id="twoYearAgeDropDetail" class="bg-rose-950/40 border border-rose-800/60 rounded-xl p-3 space-y-1 text-xs">
             <div class="flex justify-between items-center">
               <span class="font-bold text-rose-300">📉 加齢による変化</span>
@@ -958,9 +925,8 @@
           </div>
         </div>
 
-        <!-- 右カラム：年収推移・再配分・ケア・投資設定 -->
+        <!-- 右カラム -->
         <div class="space-y-3.5">
-          <!-- 本業年収Lv推移 -->
           <div class="bg-slate-950/80 border border-emerald-900/60 rounded-xl p-3 flex justify-between items-center text-xs">
             <div>
               <span class="text-slate-400 block text-[10px]">本業年収水準の推移</span>
@@ -971,7 +937,6 @@
             </div>
           </div>
 
-          <!-- 再配分ポイント -->
           <div class="bg-purple-950/40 border border-purple-800/50 rounded-xl p-3 flex justify-between items-center">
             <div>
               <div class="text-xs font-bold text-purple-200">再配分可能ポイント</div>
@@ -982,7 +947,6 @@
             </div>
           </div>
 
-          <!-- 家庭ケア -->
           <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-3 flex justify-between items-center text-xs">
             <div>
               <div class="font-bold text-emerald-300">🏡 家庭ケア</div>
@@ -993,7 +957,6 @@
             </button>
           </div>
 
-          <!-- 活動費予算 -->
           <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-3 space-y-1">
             <div class="flex justify-between items-center text-xs">
               <span class="font-bold text-white">💳 婚外活動費（2年ごとにリセット）</span>
@@ -1008,7 +971,6 @@
             </div>
           </div>
 
-          <!-- アンチエイジング再投資 -->
           <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
             <div class="font-semibold text-slate-400">アンチエイジング再投資</div>
             <div class="grid grid-cols-3 gap-2 text-center">
@@ -1042,7 +1004,6 @@
 
       </div>
 
-      <!-- 下部共通設定・ボタン -->
       <div class="space-y-3 pt-2 border-t border-slate-800">
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
@@ -1096,9 +1057,6 @@
   <canvas id="exportCanvas" width="1080" height="1080" class="hidden"></canvas>
 
   <script>
-    /* ============================================================
-       年代別名前プール（すべてカタカナ表記・実勢ランキング上位準拠）
-       ============================================================ */
     const GENERATIONAL_NAMES = {
       female: {
         youth: [
@@ -1330,7 +1288,7 @@
       }
     };
 
-    let isSoundOn = false; // 最初からオフ設定
+    let isSoundOn = false;
     let audioCtx = null;
     let simTimer = null;
     let simSpeedMs = 3000;
@@ -1438,7 +1396,6 @@
 
     function acceptDisclaimer() {
       initAudio();
-      // 免責事項同意後もBGMはオフのまま（ユーザーが手動でオンにする仕様）
       triggerVibrate(20);
       document.getElementById("stepDisclaimer").classList.add("hidden");
       document.getElementById("step0").classList.remove("hidden");
@@ -1456,7 +1413,6 @@
         const el = document.getElementById(id);
         if (el) el.classList.remove("visible");
       });
-      // キービジュアル演出：最初は鮮明に、少し遅れて暗転（dimmed）
       const kvBg = document.getElementById("keyVisualBg");
       if (kvBg) {
         kvBg.classList.remove("dimmed");
@@ -1821,8 +1777,8 @@
     }
 
     let tapStartX = 0, tapStartY = 0;
-    let isTapInitialized = false;      // 多重登録ガード
-    let lastTapAdvanceTime = 0;       // 連打防止タイムスタンプ
+    let isTapInitialized = false;
+    let lastTapAdvanceTime = 0;
 
     function initScreenTapHandler() {
       if (isTapInitialized) return;
@@ -1961,7 +1917,6 @@
 
       const stamina = appState.stats.stamina || 4;
 
-      // 警戒度上昇率を約1/3に引き下げ
       let alertUpChance = (stamina >= 7) ? 0.05 : (stamina <= 3 ? 0.18 : 0.10);
 
       if (activePartners.length >= 3 && Math.random() < alertUpChance) {
@@ -1988,7 +1943,6 @@
         appState.sim.crisisCountIn2Years++;
       }
 
-      // 離婚ゲームオーバー判定（危機時33%、平常時6%）
       const divorceChance = isCrisisHappened ? 0.33 : 0.06;
       if (appState.stats.spouseAlert >= 5 && Math.random() < divorceChance) {
         triggerDivorceGameOver(mIdx, isSilent);
@@ -2018,7 +1972,6 @@
         }
       });
 
-      // 相手配偶者からの訴訟判定（発生率約1/3に引き下げ）
       let lawsuitPartner = null;
       for (const p of activePartners) {
         let lawsuitRate = 0.0033;
@@ -2040,7 +1993,6 @@
         appState.sim.breakupCountIn2Years++;
         appState.sim.lawsuitCount++;
 
-        // 年収低下ペナルティを -1 に半減
         appState.stats.income = Math.max(2, appState.stats.income - 1);
         updateLiveStats();
 
@@ -2354,7 +2306,7 @@
 
       const badgeEl = document.getElementById("toastPartnerBadge");
       let badges = `<span class="px-1.5 py-0.2 text-[9px] bg-indigo-950 text-indigo-300 rounded border border-indigo-700/60 font-bold">🏷️${p.tag}</span>`;
-      if (p.category === "senior") badges += ' <span class="px-1.5 py-0.2 text-[9px] bg-purple-900 text-purple-200 rounded border border-purple-500/30 font-bold">シニア</span>';
+      if (p.category === "senior") badges += ' <span class="px-1.5 py-0.2 text-[9px] bg-purple-900 text-purple-200 rounded border border-purple-500/40 font-bold">シニア</span>';
       else if (p.category === "youth") badges += ' <span class="px-1.5 py-0.2 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 font-bold">若手</span>';
       badgeEl.innerHTML = badges;
 
@@ -2683,7 +2635,7 @@
     function pauseForTwoYearMilestone() {
       pauseSimulationInternal();
       document.getElementById("flashOverlay").classList.remove("red-flash-active");
-      closeClickDetail(); // 進行画面のポップアップが残らないように確実に閉じる
+      closeClickDetail();
 
       const mIdx = appState.sim.currentMonth;
       appState.sim.lastMilestoneMonth = mIdx;
@@ -2783,15 +2735,16 @@
       appState.twoYearTemp.libido = appState.stats.libido;
       appState.twoYearTemp.spouseAlert = appState.stats.spouseAlert;
       appState.twoYearTemp.min_looks = appState.stats.looks;
-      appstate.twoYearTemp.min_stamina = appState.stats.stamina;
+      // 修正: 小文字タイポ（appstate -> appState）を解消
+      appState.twoYearTemp.min_stamina = appState.stats.stamina;
       appState.twoYearTemp.min_libido = appState.stats.libido;
 
       appState.sim.crisisCountIn2Years = 0;
       appState.sim.breakupCountIn2Years = 0;
 
-      const yearIndex = (mIdx / 24) * 2; // 2年、4年、6年、8年、10年
+      const yearIndex = (mIdx / 24) * 2;
       document.getElementById("twoYearHeaderTag").innerText = `${mIdx}ヶ月目の節目`;
-      document.getElementById("twoYearTitle").innerText = `${yearIndex + 2}年目の節目：${currentAge}歳の現在`;
+      document.getElementById("twoYearTitle").innerText = `${yearIndex}年目の節目：${currentAge}歳の現在`;
       document.getElementById("twoYearMaxPartners").value = String(appState.stats.maxPartners || 2);
       document.getElementById("twoYearTargetAgePref").value = appState.stats.targetAgePref || "same";
 
@@ -3105,7 +3058,6 @@
       const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
       const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null };
       
-      // 今でも継続中（120ヶ月目、または自主引退月まで終わっていない）かどうか
       const isLongestActive = (longestP.endMonth === null || longestP.endMonth >= 120);
       longestP.lastLine = generateLastLineText(longestP, isTargetPartnerMale, isLongestActive);
 
@@ -3182,9 +3134,6 @@
       }
     }
 
-    /* ============================================================
-       1080×1080 Canvas 成績表カード生成
-       ============================================================ */
     async function generateSquareCard() {
       if (document.fonts) try { await document.fonts.ready; } catch(e) {}
       const cvs = document.getElementById("exportCanvas");
@@ -3292,7 +3241,6 @@
 
       ctx.imageSmoothingEnabled = false;
 
-      // 左：最長交際
       ctx.fillStyle = "rgba(24, 18, 43, 0.85)";
       ctx.fillRect(72, 670, 440, 240);
       ctx.strokeStyle = "rgba(168, 85, 247, 0.45)";
@@ -3314,7 +3262,6 @@
       ctx.font = "italic 15px 'Noto Sans JP', sans-serif";
       wrapCanvasText(ctx, longestP.lastLine || "「……」", 92, 786, 400, 23);
 
-      // 右：最高スコア
       ctx.fillStyle = "rgba(30, 18, 25, 0.85)";
       ctx.fillRect(532, 670, 476, 240);
       ctx.strokeStyle = "rgba(244, 63, 94, 0.45)";

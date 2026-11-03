@@ -46,9 +46,10 @@ body {
   z-index: -1;
 }
 
+/* 暗転時の透明度・明度を緩和（暗すぎないバランスへ調整） */
 .kv-background.dimmed {
-  opacity: 0.3;
-  filter: brightness(0.6) contrast(1.1);
+  opacity: 0.6;
+  filter: brightness(0.8) contrast(1.05);
 }
 
 /* アバター立体フレーム */

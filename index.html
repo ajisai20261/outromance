@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;600;900&display=swap" rel="stylesheet">
   
- <!-- スクリプト群（依存関係順に読み込み） -->
+  <!-- スクリプト群（依存関係順に読み込み） -->
   <script src="avatars.js"></script>
   <script src="data.js"></script>
   <script src="sim.js"></script>
@@ -158,7 +158,7 @@
         </div>
 
         <div id="prefDescBox" class="p-2.5 rounded-lg bg-slate-950/80 border border-purple-900/40 text-[11px] text-purple-200 leading-relaxed">
-          <span class="font-bold text-purple-300">【都心の魔境】</span> 出逢いのチャンスは最大だが人の目も多い（出逢い+4% / 身バレ+2%）
+          <span class="font-bold text-purple-300">【都心の魔境】</span> 出逢いのチャンスは最大だが人の目も多い
         </div>
 
         <div class="space-y-1">
@@ -206,26 +206,27 @@
           <h2 class="text-base sm:text-lg font-bold text-white">能力値と活動リソース配分</h2>
         </div>
         <button onclick="rerollStats()" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-purple-300 hover:bg-slate-700 flex items-center gap-1 transition">
-          <span>基礎再抽選 🔄</span>
+          <span>初期値再抽選 🔄</span>
         </button>
       </div>
 
+      <!-- 婚外スタイル（初期状態は未選択） -->
       <div class="space-y-1.5">
         <div class="text-[11px] font-bold text-purple-300">
           <span>🎯 婚外スタイル選択（タップで推奨設定を自動セット）</span>
         </div>
         <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
-          <button type="button" onclick="applyStylePreset('pure')" id="presetBtnPure" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500">
+          <button type="button" onclick="applyStylePreset('pure')" id="presetBtnPure" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-90 scale-100">
             <div class="text-sm sm:text-base mb-0.5">💍</div>
             <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">純愛継続型</div>
             <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">1人と深く長く。<br>5年の絆狙い</div>
           </button>
-          <button type="button" onclick="applyStylePreset('balanced')" id="presetBtnBalanced" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-purple-950/60 border-purple-500 ring-1 ring-purple-500/50">
+          <button type="button" onclick="applyStylePreset('balanced')" id="presetBtnBalanced" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-90 scale-100">
             <div class="text-sm sm:text-base mb-0.5">🍷</div>
             <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">分散余裕型</div>
-            <div class="text-[8.5px] sm:text-[9px] text-slate-300 leading-tight mt-1">2人並行の王道。<br>平穏と逢瀬両立</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">2人並行の王道。<br>平穏と逢瀬両立</div>
           </button>
-          <button type="button" onclick="applyStylePreset('carnage')" id="presetBtnCarnage" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-pink-500">
+          <button type="button" onclick="applyStylePreset('carnage')" id="presetBtnCarnage" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-pink-500 opacity-90 scale-100">
             <div class="text-sm sm:text-base mb-0.5">⚔️</div>
             <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">100人斬り型</div>
             <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">4人・超高速回転。<br>夜の覇者狙い</div>
@@ -250,7 +251,7 @@
             <div class="text-xs font-bold text-white flex items-center gap-1.5">
               <span>💳 婚外活動費（出会い・継続の必須費用）</span>
             </div>
-            <div class="text-[10px] text-purple-300" id="lblBudgetDesc">男性は出会い・継続に絶大な効果（女性は効果低め）</div>
+            <div class="text-[10px] text-purple-300" id="lblBudgetDesc">男性は出会い・継続に絶大な効果（活動費必須）</div>
           </div>
           <span id="valBudget" class="text-base font-black text-pink-300">Lv.0</span>
         </div>
@@ -312,18 +313,11 @@
         </div>
       </div>
 
+      <!-- ステータス確認（本業年収 ＆ 警戒度のみの2分割） -->
       <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 grid grid-cols-2 gap-3 text-xs">
         <div>
           <span class="text-slate-400">本業年収水準:</span>
           <span id="lblIncome" class="font-bold text-emerald-400 ml-1">Lv.4</span>
-        </div>
-        <div>
-          <span class="text-slate-400">子ども負担度:</span>
-          <span id="lblChildBurden" class="font-bold text-slate-300 ml-1">Lv.5</span>
-        </div>
-        <div>
-          <span class="text-slate-400">配偶者好感度:</span>
-          <span id="lblSpouseAffection" class="font-bold text-slate-300 ml-1">Lv.5</span>
         </div>
         <div>
           <span class="text-slate-400">配偶者の監視警戒:</span>
@@ -331,28 +325,26 @@
         </div>
       </div>
 
-      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-3">
-        <div class="space-y-1">
-          <div class="flex justify-between items-center">
-            <label class="text-xs font-semibold text-slate-200">希望並行人数（同時交際の上限）</label>
-            <span class="text-[10px] text-pink-400 font-bold" id="lblConcurrentDesc">分散満喫</span>
-          </div>
-          <select id="userMaxConcurrent" onchange="updateConcurrentDesc()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-            <option value="1">1人（一途・破局率激減・5年継続狙い）</option>
-            <option value="2" selected>2人（分散満喫・リスクと充足のバランス）</option>
-            <option value="3">3人（多重密会・破局率1.8倍）</option>
-            <option value="4">4人（限界突破・超高速回転・100人斬り狙い）</option>
+      <!-- 交際数 ＆ 狙う年代の1列横並びUI -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-1.5">
+          <label class="text-xs font-semibold text-slate-200">希望交際人数</label>
+          <select id="userMaxConcurrent" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="1">1人</option>
+            <option value="2" selected>2人</option>
+            <option value="3">3人</option>
+            <option value="4">4人</option>
           </select>
         </div>
-      </div>
 
-      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-1.5">
-        <label class="text-xs font-semibold text-slate-300">希望ターゲット年代</label>
-        <select id="targetAgePref" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-          <option value="younger">年下狙い（18歳以上・下限へ近づくほど激レア）</option>
-          <option value="same" selected>同年代（±3〜5歳差・安定した長期交際）</option>
-          <option value="older">年上狙い（出会い・継続しやすいが60歳以上は相性難）</option>
-        </select>
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-1.5">
+          <label class="text-xs font-semibold text-slate-200">ターゲット年代</label>
+          <select id="targetAgePref" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="younger">年下狙い</option>
+            <option value="same" selected>同年代</option>
+            <option value="older">年上狙い</option>
+          </select>
+        </div>
       </div>
 
       <button onclick="startSimulation()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.3)] transition active:scale-95 flex items-center justify-center gap-2">

@@ -45,6 +45,22 @@
                   radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.08) 0%, transparent 55%);
     }
 
+    /* キービジュアル演出用スタイル */
+    .kv-background {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #1e1b4b 0%, #09090b 50%, #3b0764 100%);
+      background-size: cover;
+      background-position: center;
+      opacity: 1;
+      transition: opacity 1.5s ease-in-out, filter 1.5s ease-in-out;
+      z-index: -1;
+    }
+    .kv-background.dimmed {
+      opacity: 0.3;
+      filter: brightness(0.6) contrast(1.1);
+    }
+
     /* 48x48 高品位アバター立体フレーム */
     .avatar-frame {
       width: 44px;
@@ -245,33 +261,36 @@
       </div>
     </section>
 
-    <!-- ==================== STEP 0: シネマティック・プロローグ（タップ早送り対応） ==================== -->
+    <!-- ==================== STEP 0: シネマティック・プロローグ（キービジュアル＆タップ早送り対応） ==================== -->
     <section id="step0" onclick="advancePrologue(event)" class="hidden min-h-[80vh] flex flex-col items-center justify-start pt-6 sm:pt-8 relative overflow-hidden text-center py-6 cursor-pointer select-none">
-      <div id="prologueWrapper" class="w-full flex flex-col items-center justify-center transition-opacity duration-300">
+      <!-- キービジュアル背景レイヤー -->
+      <div id="keyVisualBg" class="kv-background"></div>
+
+      <div id="prologueWrapper" class="w-full flex flex-col items-center justify-center transition-opacity duration-300 relative z-10">
         <div class="space-y-4 font-serif-jp text-slate-200 text-sm sm:text-[15px] tracking-[0.16em] leading-[2.2em] max-w-md px-3 mx-auto">
-          <p id="pText1" class="fade-seq text-slate-200 font-normal">
+          <p id="pText1" class="fade-seq text-slate-200 font-normal drop-shadow-md">
             2020年代<br>世界最大の人口を誇る、東京首都圏。
           </p>
-          <p id="pText2" class="fade-seq text-slate-300 font-light">
+          <p id="pText2" class="fade-seq text-slate-300 font-light drop-shadow-md">
             点在する繁華街と、それらを結ぶ鉄道網。<br>そして屈指の治安に守られた水面下で――
           </p>
-          <p id="pText3" class="fade-seq font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">
+          <p id="pText3" class="fade-seq font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200 drop-shadow-md">
             既婚者同士の恋愛<br>“婚外”が静かに広がっていた。
           </p>
-          <div id="pTitleCard" class="fade-seq pt-3 pb-2 my-2 border-y border-purple-500/20">
-            <div class="text-[10px] sm:text-[11px] font-cinzel font-bold tracking-[0.3em] text-purple-400 uppercase mb-1.5">OUTROMANCE : SECRET CHRONICLE</div>
-            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_0_20px_rgba(157,78,221,0.65)]">
+          <div id="pTitleCard" class="fade-seq pt-3 pb-2 my-2 border-y border-purple-500/30 bg-black/40 backdrop-blur-sm rounded-xl px-2">
+            <div class="text-[10px] sm:text-[11px] font-cinzel font-bold tracking-[0.3em] text-purple-300 uppercase mb-1.5">OUTROMANCE : SECRET CHRONICLE</div>
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_0_20px_rgba(157,78,221,0.8)]">
               婚外10年シミュレーター
             </h1>
             <div class="text-xs sm:text-sm font-bold text-pink-300 tracking-[0.2em] mt-1.5">〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.85)] font-black text-sm sm:text-base mx-0.5">裏</span>歴史〜</div>
           </div>
-          <p id="pText4" class="fade-seq text-white font-normal drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+          <p id="pText4" class="fade-seq text-white font-normal drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
             あなたも婚外の道に足を踏み入れる。
           </p>
         </div>
 
         <div id="pActionBtn" class="fade-seq mt-6 w-full max-w-xs">
-          <button onclick="goToStep1A(event)" class="w-full py-3.5 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
+          <button onclick="goToStep1A(event)" class="w-full py-3.5 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.5)] transition transform active:scale-95 flex items-center justify-center gap-2">
             <span>スタート ▶</span>
           </button>
         </div>
@@ -315,7 +334,7 @@
           <label class="text-xs font-semibold text-slate-300">あなたのお名前（ニックネーム可）</label>
           <input type="text" id="userName" value="ユウスケ" maxlength="12" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
           <p class="text-[10px] text-amber-300/80 leading-relaxed pt-0.5">
-            ※本作は一切個人情報を取得しておりませんが、成績表カードの画像保存やSNSシェア機能があるため本名での入力はお控えください。
+            ※本作は一切個人情報を取得しておりませんがSNSシェア機能があるため本名での入力はお控えください。
           </p>
         </div>
 
@@ -455,7 +474,7 @@
         <!-- 体力（トラブル抑制の要） -->
         <div class="space-y-1">
           <div class="flex justify-between text-xs">
-            <span class="text-cyan-400 font-medium">⚡ 体力・アリバイ管理（身バレ・家庭警戒・訴訟の抑止）</span>
+            <span class="text-cyan-400 font-medium">⚡ 体力（トラブル抑止）</span>
             <span id="valStamina" class="font-bold text-white">4 / 10</span>
           </div>
           <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
@@ -524,7 +543,6 @@
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
         <div>
           <span id="simCurrentAge" class="text-sm sm:text-base font-bold text-white">40歳（1年目 1月）</span>
-          <span id="simProgressMonth" class="text-slate-400 ml-1">（1 / 120ヶ月）</span>
         </div>
         <div class="flex items-center gap-3">
           <div class="text-right">
@@ -538,24 +556,15 @@
         </div>
       </div>
 
-      <!-- リアルタイム能力値表示バー -->
-      <div class="bg-slate-900/70 border border-slate-800/80 rounded-xl px-3 py-2 grid grid-cols-4 gap-2 text-center text-[10px]">
-        <div class="bg-slate-950/60 p-1 rounded border border-slate-800">
-          <span class="text-amber-300 block">✨外見</span>
-          <span id="liveStatLooks" class="font-bold text-white text-xs">4/10</span>
-        </div>
-        <div class="bg-slate-950/60 p-1 rounded border border-slate-800">
-          <span class="text-cyan-400 block">⚡体力</span>
-          <span id="liveStatStamina" class="font-bold text-white text-xs">4/10</span>
-        </div>
-        <div class="bg-slate-950/60 p-1 rounded border border-slate-800">
-          <span class="text-rose-400 block">🔥性欲</span>
-          <span id="liveStatLibido" class="font-bold text-white text-xs">4/10</span>
-        </div>
-        <div class="bg-slate-950/60 p-1 rounded border border-slate-800">
-          <span class="text-pink-300 block">💳活動費</span>
-          <span id="liveStatBudget" class="font-bold text-white text-xs">Lv.0</span>
-        </div>
+      <!-- リアルタイム能力値表示バー（コンパクト化） -->
+      <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-1.5 flex items-center justify-between text-center text-[11px]">
+        <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white">4</span></div>
+        <div class="text-slate-600">|</div>
+        <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="liveStatStamina" class="font-bold text-white">4</span></div>
+        <div class="text-slate-600">|</div>
+        <div><span class="text-rose-400 font-medium">🔥性欲</span> <span id="liveStatLibido" class="font-bold text-white">4</span></div>
+        <div class="text-slate-600">|</div>
+        <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="liveStatBudget" class="font-bold text-white">Lv.0</span></div>
       </div>
 
       <!-- 2年サイクル（24マス）マトリクス表示 -->
@@ -821,37 +830,22 @@
         </div>
       </div>
 
-      <!-- 10年後の最終能力値 -->
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 text-xs space-y-2">
-        <div class="text-[11px] font-bold text-slate-300 flex items-center justify-between">
-          <span>📊 10年経過後の最終ステータス</span>
-          <span class="text-[10px] text-slate-500 font-normal">加齢減衰と再投資の結末</span>
-        </div>
-        <div class="grid grid-cols-4 gap-2 text-center text-[10px]">
-          <div class="bg-slate-950/60 p-1.5 rounded-lg border border-slate-800">
-            <span class="text-amber-300 block font-medium">✨外見</span>
-            <span id="resStatLooks" class="font-black text-white text-sm">Lv.4</span>
-          </div>
-          <div class="bg-slate-950/60 p-1.5 rounded-lg border border-slate-800">
-            <span class="text-cyan-400 block font-medium">⚡体力</span>
-            <span id="resStatStamina" class="font-black text-white text-sm">Lv.4</span>
-          </div>
-          <div class="bg-slate-950/60 p-1.5 rounded-lg border border-slate-800">
-            <span class="text-rose-400 block font-medium">🔥性欲</span>
-            <span id="resStatLibido" class="font-black text-white text-sm">Lv.5</span>
-          </div>
-          <div class="bg-slate-950/60 p-1.5 rounded-lg border border-slate-800">
-            <span class="text-pink-300 block font-medium">💳活動費</span>
-            <span id="resStatBudget" class="font-black text-white text-sm">Lv.0</span>
-          </div>
-        </div>
+      <!-- 10年後の最終能力値（スリム化） -->
+      <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-2 flex items-center justify-between text-center text-[11px]">
+        <div><span class="text-amber-300 font-medium">✨外見</span> <span id="resStatLooks" class="font-bold text-white">Lv.4</span></div>
+        <div class="text-slate-600">|</div>
+        <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="resStatStamina" class="font-bold text-white">Lv.4</span></div>
+        <div class="text-slate-600">|</div>
+        <div><span class="text-rose-400 font-medium">🔥性欲</span> <span id="resStatLibido" class="font-bold text-white">Lv.5</span></div>
+        <div class="text-slate-600">|</div>
+        <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="resStatBudget" class="font-bold text-white">Lv.0</span></div>
       </div>
 
       <!-- 全交際履歴アコーディオン -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div id="allHistoryWrapper" class="hidden space-y-2">
           <div class="text-[11px] font-semibold text-slate-400">すべての交際履歴</div>
-          <div id="allPartnersList" class="space-y-1.5 text-xs max-h-60 overflow-y-auto"></div>
+          <div id="allPartnersList" class="space-y-2 text-xs max-h-60 overflow-y-auto"></div>
         </div>
 
         <button id="toggleAllPartnersBtn" onclick="toggleAllPartners()" class="w-full py-2 text-xs text-purple-400 hover:text-purple-300 border border-purple-900/60 rounded-xl bg-purple-950/30 transition">
@@ -904,212 +898,185 @@
     </div>
   </div>
 
-  <!-- 2年ごとの節目モーダル -->
+  <!-- 2年ごとの節目モーダル（PC最適化＆コンパクト化） -->
   <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl my-auto max-h-[88vh] overflow-y-auto">
+    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md md:max-w-2xl w-full p-4 sm:p-6 space-y-3.5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
       <div class="text-center space-y-1">
         <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold" id="twoYearHeaderTag">24-Month Milestone</span>
-        <h3 class="text-base sm:text-lg font-bold text-white" id="twoYearTitle">42歳を迎えて（2年経過）</h3>
+        <h3 class="text-base sm:text-lg font-bold text-white" id="twoYearTitle">2年目の節目：42歳の現在</h3>
       </div>
 
-      <!-- 10年史の途中サマリーカード群 -->
-      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-2.5 sm:p-3 space-y-2">
-        <div class="text-[11px] font-bold text-amber-300 flex items-center justify-between">
-          <span>📊 これまでの到達サマリー</span>
-          <span class="text-[9px] text-slate-500">進捗</span>
+      <!-- PC用2カラム構造ラッパー -->
+      <div class="md:grid md:grid-cols-2 md:gap-4 space-y-3.5 md:space-y-0">
+        
+        <!-- 左カラム：サマリー＆パートナー動向 -->
+        <div class="space-y-3.5">
+          <!-- 10年史の途中サマリーカード群 -->
+          <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
+            <div class="text-[11px] font-bold text-amber-300">📊 これまでの到達サマリー</div>
+            <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+                <span class="text-[9px] text-slate-400 block">累計交際</span>
+                <span id="twoYearSummaryTotal" class="font-bold text-pink-400">0人</span>
+              </div>
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+                <span class="text-[9px] text-slate-400 block">最長期間</span>
+                <span id="twoYearSummaryLongest" class="font-bold text-purple-300">0ヶ月</span>
+              </div>
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+                <span class="text-[9px] text-slate-400 block">最高密会度</span>
+                <span id="twoYearSummaryScore" class="font-bold text-amber-300">0 pt</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800 flex justify-between items-center">
+                <span class="text-slate-400 text-[10px]">最年少:</span>
+                <span id="twoYearSummaryYoungest" class="font-bold text-emerald-300 truncate ml-1">―</span>
+              </div>
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800 flex justify-between items-center">
+                <span class="text-slate-400 text-[10px]">最年長:</span>
+                <span id="twoYearSummaryOldest" class="font-bold text-cyan-300 truncate ml-1">―</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 現在交際中のパートナー動向 -->
+          <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-1.5">
+            <div class="text-xs font-bold text-purple-300">💖 現在継続中のパートナー</div>
+            <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs max-h-36 overflow-y-auto"></div>
+          </div>
+
+          <!-- 加齢変化レポート（コンパクト化） -->
+          <div id="twoYearAgeDropDetail" class="bg-rose-950/40 border border-rose-800/60 rounded-xl p-3 space-y-1 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-rose-300">📉 加齢による変化</span>
+              <span id="twoYearTotalDropText" class="text-[10px] px-2 py-0.5 rounded bg-rose-900 text-rose-200 font-bold">-2 pt</span>
+            </div>
+            <div class="text-[11px] text-slate-200 pt-1">
+              ✨外見: <span id="dropDetailLooks" class="font-bold">5 → 4</span> ｜ ⚡体力: <span id="dropDetailStamina" class="font-bold">10 → 10</span> ｜ 🔥性欲: <span id="dropDetailLibido" class="font-bold">4 → 3</span>
+            </div>
+          </div>
         </div>
-        <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
-          <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-400 block">累計交際</span>
-            <span id="twoYearSummaryTotal" class="font-bold text-pink-400">0人</span>
+
+        <!-- 右カラム：年収推移・再配分・ケア・投資設定 -->
+        <div class="space-y-3.5">
+          <!-- 本業年収Lv推移 -->
+          <div class="bg-slate-950/80 border border-emerald-900/60 rounded-xl p-3 flex justify-between items-center text-xs">
+            <div>
+              <span class="text-slate-400 block text-[10px]">本業年収水準の推移</span>
+              <span id="incomeChangeReport" class="font-bold text-emerald-400 text-sm">Lv.4 → Lv.5</span>
+            </div>
+            <div class="text-right text-[10px] text-slate-400">
+              年収UPに伴う原資付与
+            </div>
           </div>
-          <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-400 block">最長期間</span>
-            <span id="twoYearSummaryLongest" class="font-bold text-purple-300">0ヶ月</span>
+
+          <!-- 再配分ポイント -->
+          <div class="bg-purple-950/40 border border-purple-800/50 rounded-xl p-3 flex justify-between items-center">
+            <div>
+              <div class="text-xs font-bold text-purple-200">再配分可能ポイント</div>
+            </div>
+            <div class="text-right">
+              <span id="twoYearRemainPoints" class="text-xl font-black text-purple-300">5</span>
+              <span class="text-xs text-slate-400"> pt</span>
+            </div>
           </div>
-          <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-400 block">最高密会度</span>
-            <span id="twoYearSummaryScore" class="font-bold text-amber-300">0 pt</span>
+
+          <!-- 家庭ケア -->
+          <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-3 flex justify-between items-center text-xs">
+            <div>
+              <div class="font-bold text-emerald-300">🏡 家庭ケア</div>
+              <div class="text-[10px] text-slate-400">配偶者警戒: <span id="modalAlertVal" class="font-bold text-amber-400">Lv.3</span> (-2Lv)</div>
+            </div>
+            <button type="button" onclick="buyFamilyCare()" id="btnFamilyCare" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95">
+              ケア実行 (-1pt)
+            </button>
+          </div>
+
+          <!-- 活動費予算 -->
+          <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-3 space-y-1">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-white">💳 婚外活動費（2年ごとにリセット）</span>
+              <span id="twoYearValBudget" class="font-black text-pink-300">Lv.0</span>
+            </div>
+            <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-purple-900/50">
+              <div id="twoYearBarBudget" class="stat-bar-fill h-full bg-gradient-to-r from-purple-500 to-pink-500 w-[0%]"></div>
+            </div>
+            <div class="flex justify-end gap-2 pt-0.5">
+              <button onclick="adjustTwoYearStat('budget', -1)" class="px-2.5 py-0.5 text-xs bg-slate-800 rounded border border-slate-700 text-white font-bold">−</button>
+              <button onclick="adjustTwoYearStat('budget', 1)" class="px-2.5 py-0.5 text-xs bg-purple-700 rounded border border-purple-600 text-white font-bold">＋</button>
+            </div>
+          </div>
+
+          <!-- アンチエイジング再投資 -->
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
+            <div class="font-semibold text-slate-400">アンチエイジング再投資</div>
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+                <span class="text-amber-300 block text-[10px]">✨外見</span>
+                <span id="twoYearValLooks" class="font-bold text-white">4</span>
+                <div class="flex justify-center gap-1 mt-1">
+                  <button onclick="adjustTwoYearStat('looks', -1)" class="px-1.5 text-[10px] bg-slate-800 rounded">⁻</button>
+                  <button onclick="adjustTwoYearStat('looks', 1)" class="px-1.5 text-[10px] bg-slate-700 rounded text-amber-300">⁺</button>
+                </div>
+              </div>
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+                <span class="text-cyan-400 block text-[10px]">⚡体力</span>
+                <span id="twoYearValStamina" class="font-bold text-white">4</span>
+                <div class="flex justify-center gap-1 mt-1">
+                  <button onclick="adjustTwoYearStat('stamina', -1)" class="px-1.5 text-[10px] bg-slate-800 rounded">⁻</button>
+                  <button onclick="adjustTwoYearStat('stamina', 1)" class="px-1.5 text-[10px] bg-slate-700 rounded text-cyan-300">⁺</button>
+                </div>
+              </div>
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+                <span class="text-rose-400 block text-[10px]">🔥性欲</span>
+                <span id="twoYearValLibido" class="font-bold text-white">5</span>
+                <div class="flex justify-center gap-1 mt-1">
+                  <button onclick="adjustTwoYearStat('libido', -1)" class="px-1.5 text-[10px] bg-slate-800 rounded">⁻</button>
+                  <button onclick="adjustTwoYearStat('libido', 1)" class="px-1.5 text-[10px] bg-slate-700 rounded text-rose-300">⁺</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-          <div class="bg-slate-900 p-1.5 rounded border border-slate-800 flex justify-between items-center">
-            <span class="text-slate-400 text-[10px]">最年少:</span>
-            <span id="twoYearSummaryYoungest" class="font-bold text-emerald-300 truncate ml-1">―</span>
-          </div>
-          <div class="bg-slate-900 p-1.5 rounded border border-slate-800 flex justify-between items-center">
-            <span class="text-slate-400 text-[10px]">最年長:</span>
-            <span id="twoYearSummaryOldest" class="font-bold text-cyan-300 truncate ml-1">―</span>
-          </div>
-        </div>
+
       </div>
 
-      <!-- 現在交際中のパートナー動向 -->
-      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-2.5 sm:p-3 space-y-1.5">
-        <div class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-          <span>💖 現在継続中のパートナー</span>
-        </div>
-        <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs"></div>
-      </div>
-
-      <!-- 本業年収Lv推移 -->
-      <div class="bg-slate-950/80 border border-emerald-900/60 rounded-xl p-2.5 sm:p-3 flex justify-between items-center text-xs">
-        <div>
-          <span class="text-slate-400 block text-[10px]">本業年収水準の推移</span>
-          <span id="incomeChangeReport" class="font-bold text-emerald-400 text-sm">Lv.4 → Lv.5</span>
-        </div>
-        <div class="text-right text-[10px] text-slate-400">
-          次回割り振り原資へ直結
-        </div>
-      </div>
-
-      <!-- 加齢減退レポート -->
-      <div id="twoYearAgeDropDetail" class="bg-rose-950/40 border border-rose-800/60 rounded-xl p-2.5 sm:p-3 space-y-1.5">
-        <div class="flex justify-between items-center text-xs">
-          <span class="font-bold text-rose-300 flex items-center gap-1">📉 加齢による肉体変化</span>
-          <span id="twoYearTotalDropText" class="text-[10px] px-2 py-0.5 rounded bg-rose-900 text-rose-200 font-bold">-2 pt</span>
-        </div>
-        <div class="grid grid-cols-3 gap-1.5 text-center text-[11px]">
-          <div class="bg-slate-950/70 p-1.5 rounded border border-rose-900/40">
-            <div class="text-[10px] text-amber-300">✨ 外見</div>
-            <div id="dropDetailLooks" class="font-bold text-white">5 → 4</div>
+      <!-- 下部共通設定・ボタン -->
+      <div class="space-y-3 pt-2 border-t border-slate-800">
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
+            <span class="text-slate-300">同時交際上限</span>
+            <select id="twoYearMaxPartners" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+              <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option><option value="4">4人</option>
+            </select>
           </div>
-          <div class="bg-slate-950/70 p-1.5 rounded border border-rose-900/40">
-            <div class="text-[10px] text-cyan-300">⚡ 体力</div>
-            <div id="dropDetailStamina" class="font-bold text-white">5 → 4</div>
-          </div>
-          <div class="bg-slate-950/70 p-1.5 rounded border border-rose-900/40">
-            <div class="text-[10px] text-rose-300">🔥 性欲</div>
-            <div id="dropDetailLibido" class="font-bold text-white">6 → 6</div>
+          <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
+            <span class="text-slate-300">ターゲット年代</span>
+            <select id="twoYearTargetAgePref" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+              <option value="younger">年下狙い</option><option value="same">同年代</option><option value="older">年上狙い</option>
+            </select>
           </div>
         </div>
-      </div>
 
-      <!-- 再配分ポイント（+1底上げ） -->
-      <div class="bg-purple-950/40 border border-purple-800/50 rounded-xl p-2.5 sm:p-3 flex justify-between items-center">
-        <div>
-          <div class="text-xs font-bold text-purple-200">再配分可能ポイント</div>
-          <div class="text-[10px] text-slate-400">年収Lv + 1pt ＋ 成果ボーナス − 揉め事ペナルティ</div>
-        </div>
-        <div class="text-right">
-          <span id="twoYearRemainPoints" class="text-xl sm:text-2xl font-black text-purple-300">5</span>
-          <span class="text-xs text-slate-400"> pt</span>
-        </div>
-      </div>
-
-      <!-- 家庭ケア（家族旅行で監視警戒度を下げる） -->
-      <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-2.5 sm:p-3 flex justify-between items-center text-xs">
-        <div>
-          <div class="font-bold text-emerald-300 flex items-center gap-1">
-            <span>🏡 家庭ケア（家族旅行・機嫌取り）</span>
-          </div>
-          <div class="text-[10px] text-slate-400">配偶者警戒: <span id="modalAlertVal" class="font-bold text-amber-400">Lv.3</span> (1pt消費で -2Lv)</div>
-        </div>
-        <button type="button" onclick="buyFamilyCare()" id="btnFamilyCare" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95">
-          ケア実行 (-1pt)
+        <button onclick="resumeNextTwoYears()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+          <span>この設定で次の2年間を進める ›</span>
         </button>
-      </div>
 
-      <!-- 活動費予算 -->
-      <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-2.5 sm:p-3 space-y-1.5">
-        <div class="flex justify-between items-center text-xs">
-          <span class="font-bold text-white">💳 婚外活動費（予算 Lv.0リセット済）</span>
-          <span id="twoYearValBudget" class="font-black text-pink-300">Lv.0</span>
-        </div>
-        <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-purple-900/50">
-          <div id="twoYearBarBudget" class="stat-bar-fill h-full bg-gradient-to-r from-purple-500 to-pink-500 w-[0%]"></div>
-        </div>
-        <div class="flex justify-end gap-2 pt-0.5">
-          <button onclick="adjustTwoYearStat('budget', -1)" class="px-2.5 py-0.5 text-xs bg-slate-800 rounded border border-slate-700 text-white font-bold">−</button>
-          <button onclick="adjustTwoYearStat('budget', 1)" class="px-2.5 py-0.5 text-xs bg-purple-700 rounded border border-purple-600 text-white font-bold">＋</button>
-        </div>
-      </div>
-
-      <!-- アンチエイジング再投資 -->
-      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-2">
-        <div class="text-[11px] font-semibold text-slate-400">アンチエイジング再投資</div>
-        <div class="space-y-1">
-          <div class="flex justify-between text-xs">
-            <span class="text-amber-300">✨ 外見（出会い・継続。女性は影響大）</span>
-            <span id="twoYearValLooks" class="font-bold text-white">4 / 10</span>
-          </div>
-          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
-            <div id="twoYearBarLooks" class="stat-bar-fill h-full bg-amber-400 w-[40%]"></div>
-          </div>
-          <div class="flex justify-end gap-2">
-            <button onclick="adjustTwoYearStat('looks', -1)" class="px-2 text-xs bg-slate-800 rounded border border-slate-700">−</button>
-            <button onclick="adjustTwoYearStat('looks', 1)" class="px-2 text-xs bg-slate-700 rounded border border-slate-600 text-amber-300">＋</button>
-          </div>
-        </div>
-
-        <div class="space-y-1">
-          <div class="flex justify-between text-xs">
-            <span class="text-cyan-400">⚡ 体力・アリバイ管理（トラブル・警戒抑止）</span>
-            <span id="twoYearValStamina" class="font-bold text-white">4 / 10</span>
-          </div>
-          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
-            <div id="twoYearBarStamina" class="stat-bar-fill h-full bg-cyan-400 w-[40%]"></div>
-          </div>
-          <div class="flex justify-end gap-2">
-            <button onclick="adjustTwoYearStat('stamina', -1)" class="px-2 text-xs bg-slate-800 rounded border border-slate-700">−</button>
-            <button onclick="adjustTwoYearStat('stamina', 1)" class="px-2 text-xs bg-slate-700 rounded border border-slate-600 text-cyan-300">＋</button>
-          </div>
-        </div>
-
-        <div class="space-y-1">
-          <div class="flex justify-between text-xs">
-            <span class="text-rose-400">🔥 性欲・意欲</span>
-            <span id="twoYearValLibido" class="font-bold text-white">5 / 10</span>
-          </div>
-          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
-            <div id="twoYearBarLibido" class="stat-bar-fill h-full bg-rose-500 w-[50%]"></div>
-          </div>
-          <div class="flex justify-end gap-2">
-            <button onclick="adjustTwoYearStat('libido', -1)" class="px-2 text-xs bg-slate-800 rounded border border-slate-700">−</button>
-            <button onclick="adjustTwoYearStat('libido', 1)" class="px-2 text-xs bg-slate-700 rounded border border-slate-600 text-rose-300">＋</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-2">
-        <div class="flex justify-between items-center text-xs">
-          <span class="font-semibold text-slate-300">同時交際上限の変更</span>
-          <select id="twoYearMaxPartners" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-            <option value="1">1人（一途・純愛）</option>
-            <option value="2">2人（分散満喫）</option>
-            <option value="3">3人（積極交際）</option>
-            <option value="4">4人（限界突破）</option>
-          </select>
-        </div>
-        <div class="flex justify-between items-center text-xs border-t border-slate-900 pt-2">
-          <span class="font-semibold text-slate-300">今後のターゲット年代</span>
-          <select id="twoYearTargetAgePref" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-            <option value="younger">年下狙い（18歳以上）</option>
-            <option value="same">同年代（±3〜5歳）</option>
-            <option value="older">年上狙い（60歳以上相性難）</option>
-          </select>
-        </div>
-      </div>
-
-      <button onclick="resumeNextTwoYears()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
-        <span>この設定で次の2年間を進める ›</span>
-      </button>
-
-      <div class="pt-2 border-t border-slate-800 space-y-2">
         <details class="text-xs text-slate-300 group">
           <summary class="cursor-pointer font-bold text-purple-300 hover:text-purple-200 flex justify-between py-1">
             <span>直近24ヶ月の月別クロニクル振り返り</span>
             <span class="group-open:rotate-180 transition-transform">▼</span>
           </summary>
           <div class="pt-2">
-            <div id="twoYearChronicleScroll" class="max-h-36 overflow-y-auto space-y-1 p-2 bg-slate-950 rounded-lg border border-slate-800 text-[10px] leading-relaxed"></div>
+            <div id="twoYearChronicleScroll" class="max-h-32 overflow-y-auto space-y-1 p-2 bg-slate-950 rounded-lg border border-slate-800 text-[10px] leading-relaxed"></div>
           </div>
         </details>
-      </div>
 
-      <button onclick="retireFromTwoYear()" class="w-full py-2 rounded-lg text-xs text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-900 bg-slate-950/40 transition">
-        ここで婚外活動を終える（自主引退）
-      </button>
+        <button onclick="retireFromTwoYear()" class="w-full py-2 rounded-lg text-xs text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-900 bg-slate-950/40 transition">
+          ここで婚外活動を終える（自主引退）
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1207,7 +1174,6 @@
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
-    /* 裏事情タグ一覧（短縮表示で画面崩れ防止） */
     const PARTNER_TAGS_POOL = ["平日昼", "年下独身", "夜間遠征", "秘密厳守", "冷えきり", "割り切り"];
 
     function pickPartnerTag(age, job) {
@@ -1217,7 +1183,6 @@
       return PARTNER_TAGS_POOL[Math.floor(Math.random() * PARTNER_TAGS_POOL.length)];
     }
 
-    /* 職業プール（短縮形に統一・会社経営と会社役員は両方残存） */
     const FEMALE_JOBS_POOL = [
       "一般事務", "公務員", "専業主婦", "パート", "SE", "営業職",
       "医療事務", "看護師", "カフェ店員", "アパレル", "高校教諭", "経理",
@@ -1229,7 +1194,6 @@
       "経理", "ディレクター", "外資金融", "会社経営", "会社役員", "弁護士", "不動産企画", "出版編集者"
     ];
 
-    /* 各都県の最寄り駅プール（短縮・新都心除外・埼玉千葉増量） */
     const AREAS_NO_STATION = {
       tokyo: [
         "中目黒", "恵比寿", "銀座", "神楽坂", "白金台", "二子玉川", "三軒茶屋", "代官山",
@@ -1250,7 +1214,6 @@
       ]
     };
 
-    /* 居住エリアのマイルド特性 */
     const PREF_PROPERTIES = {
       tokyo: {
         title: "【都心の魔境】",
@@ -1295,7 +1258,6 @@
     const MONTH_EMOJIS = ["", "🎍", "🍫", "🎎", "🌸", "🌿", "☔", "🎋", "🌻", "🌕", "🎃", "🍂", "🎄"];
     const PARTNER_COLORS = ["#ec4899", "#8b5cf6", "#06b6d4", "#f59e0b"];
 
-    /* 破局時セリフ集 */
     const BREAKUP_QUOTES_FEMALE_PARTNER = [
       "「ごめんね、夫に怪しまれちゃって……これ以上は続けられないの。」",
       "「母親・妻としての日常に戻らなきゃいけないの。今まで本当にありがとう。」",
@@ -1309,16 +1271,12 @@
       "「仕事と家族の役目に戻るよ。君と出会えて本当に幸せだった。ありがとう。」"
     ];
 
-    /* 手動フェードアウト時セリフ集 */
     const MANUAL_BREAKUP_QUOTES = [
       "「ごめん、これ以上は続けられない」とだけ告げて、静かに連絡先を消去した。",
       "潮時を感じ、互いの家庭を守るためそっとフェードアウトした。",
       "関係が深くなりすぎる前に、自分から静かに別れを告げた。"
     ];
 
-    /* ============================================================
-       軽量内蔵フォールバックエンジン ＆ AvatarCacheManager
-       ============================================================ */
     const PixelAvatarEngine = {
       generate(idStr) {
         const cvs = document.createElement("canvas");
@@ -1372,7 +1330,7 @@
       }
     };
 
-    let isSoundOn = false;
+    let isSoundOn = false; // 最初からオフ設定
     let audioCtx = null;
     let simTimer = null;
     let simSpeedMs = 3000;
@@ -1480,17 +1438,7 @@
 
     function acceptDisclaimer() {
       initAudio();
-      isSoundOn = true;
-      document.getElementById("soundIcon").innerText = "🔊";
-      document.getElementById("soundText").innerText = "音響: ON";
-      
-      const bgm = document.getElementById("bgmAudio");
-      if (bgm) {
-        bgm.volume = 0.35;
-        bgm.play().catch(e => {});
-      }
-
-      playTone(523.25, 0.12);
+      // 免責事項同意後もBGMはオフのまま（ユーザーが手動でオンにする仕様）
       triggerVibrate(20);
       document.getElementById("stepDisclaimer").classList.add("hidden");
       document.getElementById("step0").classList.remove("hidden");
@@ -1508,6 +1456,12 @@
         const el = document.getElementById(id);
         if (el) el.classList.remove("visible");
       });
+      // キービジュアル演出：最初は鮮明に、少し遅れて暗転（dimmed）
+      const kvBg = document.getElementById("keyVisualBg");
+      if (kvBg) {
+        kvBg.classList.remove("dimmed");
+        setTimeout(() => kvBg.classList.add("dimmed"), 800);
+      }
       advancePrologue();
     }
 
@@ -1818,9 +1772,9 @@
        シミュレーション進行ロジック
        ============================================================ */
     function updateLiveStats() {
-      document.getElementById("liveStatLooks").innerText = `${appState.stats.looks}/10`;
-      document.getElementById("liveStatStamina").innerText = `${appState.stats.stamina}/10`;
-      document.getElementById("liveStatLibido").innerText = `${appState.stats.libido}/10`;
+      document.getElementById("liveStatLooks").innerText = `${appState.stats.looks}`;
+      document.getElementById("liveStatStamina").innerText = `${appState.stats.stamina}`;
+      document.getElementById("liveStatLibido").innerText = `${appState.stats.libido}`;
       document.getElementById("liveStatBudget").innerText = `Lv.${appState.stats.budget}`;
       document.getElementById("headerAssetVal").innerText = `Lv.${appState.stats.income}`;
       document.getElementById("statSummaryText").innerText = `本業年収水準: Lv.${appState.stats.income}`;
@@ -1891,7 +1845,6 @@
     function triggerScreenTapAdvance() {
       if (appState.sim.isPaused || appState.sim.isSkipping) return;
 
-      // 250ms以内の多重呼び出し（重複イベント・誤連打）をガード
       const now = performance.now();
       if (now - lastTapAdvanceTime < 250) return;
       lastTapAdvanceTime = now;
@@ -2001,7 +1954,6 @@
       appState.sim.currentAge = currentRealAge;
 
       document.getElementById("simCurrentAge").innerText = `${currentRealAge}歳（${yearNum}年目 ${calMonth}月）`;
-      document.getElementById("simProgressMonth").innerText = `(${mIdx + 1} / 120ヶ月)`;
       document.getElementById("stickyMonthText").innerText = `${currentRealAge}歳（${yearNum}年目 ${calMonth}月）`;
 
       let activePartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
@@ -2009,7 +1961,7 @@
 
       const stamina = appState.stats.stamina || 4;
 
-      // 【緩和】警戒度上昇率を約1/3に引き下げ
+      // 警戒度上昇率を約1/3に引き下げ
       let alertUpChance = (stamina >= 7) ? 0.05 : (stamina <= 3 ? 0.18 : 0.10);
 
       if (activePartners.length >= 3 && Math.random() < alertUpChance) {
@@ -2019,7 +1971,6 @@
         appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
       }
 
-      // 体力Lv.6以上なら警戒が自然解除されやすい
       let alertDownChance = (stamina >= 7) ? 0.40 : (activePartners.length === 0 ? 0.30 : 0.08);
       if (Math.random() < alertDownChance) {
         appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 1);
@@ -2037,7 +1988,7 @@
         appState.sim.crisisCountIn2Years++;
       }
 
-      // 🚨 【緩和】離婚ゲームオーバー判定（危機時でも33%、平常時は6%に引き下げ）
+      // 離婚ゲームオーバー判定（危機時33%、平常時6%）
       const divorceChance = isCrisisHappened ? 0.33 : 0.06;
       if (appState.stats.spouseAlert >= 5 && Math.random() < divorceChance) {
         triggerDivorceGameOver(mIdx, isSilent);
@@ -2067,11 +2018,11 @@
         }
       });
 
-      // ⚖️ 【緩和】相手配偶者からの訴訟判定（発生率を約1/3に引き下げ）
+      // 相手配偶者からの訴訟判定（発生率約1/3に引き下げ）
       let lawsuitPartner = null;
       for (const p of activePartners) {
-        let lawsuitRate = 0.0033; // 通常: 1.0% -> 0.33% に引き下げ
-        if (p.tag === "冷えきり") lawsuitRate = 0.008; // 冷えきり: 2.5% -> 0.8% に引き下げ
+        let lawsuitRate = 0.0033;
+        if (p.tag === "冷えきり") lawsuitRate = 0.008;
         if (p.tag === "秘密厳守") lawsuitRate = 0.0;
 
         if (stamina >= 7) lawsuitRate *= 0.5;
@@ -2089,7 +2040,7 @@
         appState.sim.breakupCountIn2Years++;
         appState.sim.lawsuitCount++;
 
-        // 【緩和】年収低下ペナルティを -2 から -1 に半減
+        // 年収低下ペナルティを -1 に半減
         appState.stats.income = Math.max(2, appState.stats.income - 1);
         updateLiveStats();
 
@@ -2153,7 +2104,6 @@
         }
       }
 
-      // 新規マッチング判定（月最大2名獲得対応）
       const maxAllowed = appState.stats.maxPartners || 2;
       let emptySlots = maxAllowed - appState.sim.activePartnerIds.length;
       let matchedPartners = [];
@@ -2404,7 +2354,7 @@
 
       const badgeEl = document.getElementById("toastPartnerBadge");
       let badges = `<span class="px-1.5 py-0.2 text-[9px] bg-indigo-950 text-indigo-300 rounded border border-indigo-700/60 font-bold">🏷️${p.tag}</span>`;
-      if (p.category === "senior") badges += ' <span class="px-1.5 py-0.2 text-[9px] bg-purple-900 text-purple-200 rounded border border-purple-500/40 font-bold">シニア</span>';
+      if (p.category === "senior") badges += ' <span class="px-1.5 py-0.2 text-[9px] bg-purple-900 text-purple-200 rounded border border-purple-500/30 font-bold">シニア</span>';
       else if (p.category === "youth") badges += ' <span class="px-1.5 py-0.2 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 font-bold">若手</span>';
       badgeEl.innerHTML = badges;
 
@@ -2557,15 +2507,15 @@
           scoreBadge = `<span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[9.5px] sm:text-[10px] flex-shrink-0">${score}pt</span>`;
         }
 
-        let catBadge = `<span class="px-1 py-0.2 text-[8px] bg-indigo-950 text-indigo-300 rounded border border-indigo-700/60 font-bold flex-shrink-0">🏷️${p.tag}</span>`;
-        if (p.category === "senior") catBadge += ' <span class="px-1 py-0.2 text-[8px] bg-purple-900 text-purple-200 rounded border border-purple-500/30 flex-shrink-0">シニア</span>';
-        if (p.category === "youth") catBadge += ' <span class="px-1 py-0.2 text-[8px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 flex-shrink-0">若手</span>';
+        let catBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-indigo-950 text-indigo-300 rounded border border-indigo-700/60 font-bold">🏷️${p.tag}</span>`;
+        if (p.category === "senior") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-purple-900 text-purple-200 rounded border border-purple-500/30 font-bold">シニア</span>';
+        if (p.category === "youth") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 font-bold">若手</span>';
 
         monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score, tag: p.tag });
         const avatarSrc = AvatarCacheManager.get(p.avatarId);
 
         html += `
-          <div class="p-2 sm:p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2 sm:gap-2.5 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs">
             <div class="avatar-frame mt-0.5"><img src="${avatarSrc}" alt="${p.name}"></div>
             <div class="flex-1 min-w-0 space-y-1">
               <div class="flex items-center justify-between gap-1">
@@ -2576,8 +2526,8 @@
                 </div>
                 <div class="flex items-center gap-1 flex-shrink-0 ml-1">
                   ${scoreBadge}
-                  <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を手放す（フェードアウト）" class="px-1.5 py-0.5 rounded text-[9.5px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5 flex-shrink-0">
-                    <span>👋</span><span>手放す</span>
+                  <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-1.5 py-0.5 rounded text-[9.5px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5 flex-shrink-0">
+                    <span>👋</span><span>別れる</span>
                   </button>
                 </div>
               </div>
@@ -2606,21 +2556,21 @@
             "あざみ野の静かな住宅街の隠れ家和食。指輪を外した日焼け跡を見つめ合う。",
             "初ホテル。二子玉川から田園都市線で少し移動し、誰にも言えない午後へ。",
             "みなとみらいの海風を感じるバーで合流。「怪しい人じゃなくて安心した」と笑い合う。",
-            "武蔵小杉のカフェで短時間ランチ。お互いの家庭の詮索はしないルールで抱き合った。"
+            "武蔵小杉のカフェで短時間ランチ。お互いの家庭の詮索はしないルールで抱き合った."
           ];
         } else if (userPref === "saitama") {
           pool = [
             "初アポ。大宮駅東口の落ち着いた個室で安堵の笑顔。",
             "浦和の閑静な和食ランチ。「知り合いに見つかりにくいね」と笑い合う。",
             "初ホテル。湘南新宿ラインで新宿まで足を伸ばし、歌舞伎町を避けてホテルへ。",
-            "戸田の静かなホテルデイユース。平日の静けさの中で抱き合った。"
+            "戸田の静かなホテルデイユース。平日の静けさの中で抱き合った."
           ];
         } else if (userPref === "chiba") {
           pool = [
             "初アポ。西船橋の個室ダイニングで秘密の乾杯。",
             "幕張ベイエリアのテラス席で待ち合わせ。穏やかな笑顔に惹かれる。",
             "初ホテル。東西線で都内方面へ移動し、人目を忍んでデイユースへ。",
-            "新浦安の静かなホテルラウンジから、そのまま人目のない客室へ。"
+            "新浦安の静かなホテルラウンジから、そのまま人目のない客室へ."
           ];
         } else {
           pool = [
@@ -2637,132 +2587,50 @@
           "誰にも言えない特別なバースデー。ホテルのワインを開け、二人きりで祝杯を交わす。"
         ];
       } else if (isRemoteDate) {
-        const remotePool = [
+        pool = [
           "有休を重ねて急遽、ロマンスカーで箱根温泉へ日帰り逃避行。",
           "熱海のオーシャンビューホテル。波音を聞きながら誰にも言えない午後を過ごした。",
           "レンタカーで湘南・三浦半島へ海沿いドライブ。夕暮れの車内で手を重ねた。",
           "人目を避けて舞浜・お台場のリゾートホテルへ。現実を忘れて深く肌を重ねた。",
           "新幹線で軽井沢へ。避暑地の冷たい空気の中、コートに隠れて指を絡め合った。"
         ];
-        pool = remotePool;
       } else {
         switch (month) {
           case 1:
-            pool = (userPref === "kanagawa")
-              ? [
-                  "年始の家族時間を終え、たまプラから車を走らせてホテルへ直行。",
-                  "「今年もよろしくね」と、みなとみらいの冷たい風の中そっと手を繋いだ。"
-                ]
-              : (userPref === "saitama")
-              ? [
-                  "年始の帰省を終え、大宮の個室で熱烈に抱き合った。",
-                  "新春の冷たい空気の中、池袋の隠れ家ホテルへ逃げ込んだ。"
-                ]
-              : (userPref === "chiba")
-              ? [
-                  "正月ムードの日常を抜け出し、西船橋のホテルで濃密な午後を過ごした。",
-                  "湾岸の潮風を感じながら、今年最初の逢瀬を確かめ合った。"
-                ]
-              : [
-                  "年始の家族時間を終え、三軒茶屋の隠れ家で飢えたように抱き合った。",
-                  "「今年もよろしくね」と、二子玉川の河川敷沿いでそっと指を絡めた。"
-                ];
+            pool = ["年始の家族時間を終え、隠れ家で飢えたように抱き合った。", "「今年もよろしくね」とそっと指を絡めた。"];
             break;
           case 2:
-            pool = [
-              "人目を盗んで小さなチョコを手渡され、甘い密会へ。",
-              "「本命にはあげられないから」とホテルで照れながらチョコを渡された。"
-            ];
+            pool = ["人目を盗んで小さなチョコを手渡され、甘い密会へ。", "「本命にはあげられないから」とホテルでチョコを渡された。"];
             break;
           case 3:
-            pool = (userPref === "kanagawa")
-              ? [
-                  "年度末の繁忙期、あざみ野の静かな個室ホテルで仕事帰りに癒やし合う。",
-                  "田園都市線の急行を見送り、各停の静かな駅で待ち合わせてホテルへ。"
-                ]
-              : (userPref === "saitama")
-              ? [
-                  "年度末の疲れを癒やすため、大宮の隠れ家ホテルで長い抱擁を交わす。",
-                  "仕事帰りの湘南新宿ライン、途中下車してホテルへ直行。"
-                ]
-              : [
-                  "年度末の繁忙期、仕事帰りに駆け込みでホテルへ。",
-                  "春風の冷たい夜、お互いの仕事の愚痴をホテルで癒やし合う。"
-                ];
+            pool = ["年度末の繁忙期、仕事帰りに駆け込みでホテルへ。", "春風の冷たい夜、お互いの仕事の愚痴をホテルで癒やし合う。"];
             break;
           case 4:
-            pool = (userPref === "kanagawa")
-              ? [
-                  "田園都市線沿いの閑静な街並みを抜け、二人きりの部屋で春の逢瀬。",
-                  "桜舞い散る夜、コートを脱ぎ捨てて互いの温もりを確かめ合った。"
-                ]
-              : (userPref === "saitama")
-              ? [
-                  "大宮公園の喧騒を避け、静かな個室ホテルへ直行。",
-                  "夜桜を見上げるふりをして、そっと指先を絡め合った。"
-                ]
-              : [
-                  "人通りの少ない目黒川沿いで、息を潜めて夜桜散歩。",
-                  "二子玉川の静かな通りを抜け、隠れ家ホテルで春の午後を過ごした。"
-                ];
+            pool = ["人通りの少ない通りで、息を潜めて夜桜散歩。", "隠れ家ホテルで春の午後を過ごした。"];
             break;
           case 5:
-            pool = [
-              "連休明けの平日昼下がり、久しぶりの逢瀬に飢えたように抱き合う。",
-              "初夏の心地よい陽気の中、人目を気にしつつランチとホテル。"
-            ];
+            pool = ["連休明けの平日昼下がり、久しぶりの逢瀬に飢えたように抱き合う。"];
             break;
           case 6:
-            pool = [
-              "ゲリラ豪雨を口実に、急遽シティホテルのデイユースへ。",
-              "梅雨の湿気の中、汗ばむ肌を重ねて秘密の午後を過ごした。"
-            ];
+            pool = ["ゲリラ豪雨を口実に、急遽シティホテルのデイユースへ。"];
             break;
           case 7:
-            pool = (userPref === "kanagawa")
-              ? [
-                  "薄着の季節。「肌が綺麗だね」とホテルで囁かれた。",
-                  "たまプラから湘南方面へ足を伸ばし、海沿いのホテルで熱く過ごした。"
-                ]
-              : [
-                  "薄着の季節。「肌が綺麗だね」とホテルで囁かれた。",
-                  "夏の夜風に吹かれながら、シティホテルの高層階で夜通し過ごした。"
-                ];
+            pool = ["薄着の季節。「肌が綺麗だね」とホテルで囁かれた。"];
             break;
           case 8:
-            pool = [
-              "お盆の帰省期間。全パートナーと連絡自粛の沈黙週間。",
-              "酷暑の午後、キンキンに冷えたホテルの部屋で肌を寄せ合った。"
-            ];
+            pool = ["お盆の帰省期間。全パートナーと連絡自粛の沈黙週間。"];
             break;
           case 9:
-            pool = (userPref === "chiba")
-              ? [
-                  "少し涼しくなった夜、幕張ベイエリアを当てもなくドライブ。",
-                  "初秋の気配に少し寂しさを感じながら、ホテルで深く愛し合う。"
-                ]
-              : [
-                  "少し涼しくなった夜、当てもなく夜風に吹かれドライブ。",
-                  "初秋の気配に少し寂しさを感じながら、ホテルで深く愛し合う。"
-                ];
+            pool = ["少し涼しくなった夜、当てもなく夜風に吹かれドライブ。"];
             break;
           case 10:
-            pool = [
-              "平日に有休を合わせ、隠れ家個室の和食ランチへ。",
-              "紅葉の気配を感じながら、郊外のホテルでゆっくり羽を伸ばした。"
-            ];
+            pool = ["平日に有休を合わせ、隠れ家個室の和食ランチへ。"];
             break;
           case 11:
-            pool = [
-              "寒くなった手を、コートのポケットの中でそっと握られた。",
-              "冷えた身体を温め合うように、ホテルで長い抱擁を交わす。"
-            ];
+            pool = ["寒くなった手を、コートのポケットの中でそっと握られた。"];
             break;
           case 12:
-            pool = [
-              "家庭があるからこそ、23日の昼間に平日フライング乾杯。",
-              "忘年会の口実で、終電を気にせずホテルで今年最後の密会。"
-            ];
+            pool = ["忘年会の口実で、終電を気にせずホテルで今年最後の密会。"];
             break;
           default:
             pool = ["個室ディナーのあと、いつものホテルで濃密な2時間。"];
@@ -2815,6 +2683,7 @@
     function pauseForTwoYearMilestone() {
       pauseSimulationInternal();
       document.getElementById("flashOverlay").classList.remove("red-flash-active");
+      closeClickDetail(); // 進行画面のポップアップが残らないように確実に閉じる
 
       const mIdx = appState.sim.currentMonth;
       appState.sim.lastMilestoneMonth = mIdx;
@@ -2914,14 +2783,15 @@
       appState.twoYearTemp.libido = appState.stats.libido;
       appState.twoYearTemp.spouseAlert = appState.stats.spouseAlert;
       appState.twoYearTemp.min_looks = appState.stats.looks;
-      appState.twoYearTemp.min_stamina = appState.stats.stamina;
+      appstate.twoYearTemp.min_stamina = appState.stats.stamina;
       appState.twoYearTemp.min_libido = appState.stats.libido;
 
       appState.sim.crisisCountIn2Years = 0;
       appState.sim.breakupCountIn2Years = 0;
 
+      const yearIndex = (mIdx / 24) * 2; // 2年、4年、6年、8年、10年
       document.getElementById("twoYearHeaderTag").innerText = `${mIdx}ヶ月目の節目`;
-      document.getElementById("twoYearTitle").innerText = `${currentAge}歳を迎えて（${mIdx/12}年経過）`;
+      document.getElementById("twoYearTitle").innerText = `${yearIndex + 2}年目の節目：${currentAge}歳の現在`;
       document.getElementById("twoYearMaxPartners").value = String(appState.stats.maxPartners || 2);
       document.getElementById("twoYearTargetAgePref").value = appState.stats.targetAgePref || "same";
 
@@ -2935,15 +2805,11 @@
       document.getElementById("twoYearRemainPoints").innerText = appState.twoYearTemp.points;
       document.getElementById("twoYearValBudget").innerText = "Lv." + appState.twoYearTemp.budget;
       document.getElementById("twoYearBarBudget").style.width = (appState.twoYearTemp.budget * 10) + "%";
-      document.getElementById("twoYearValLooks").innerText = appState.twoYearTemp.looks + " / 10";
-      document.getElementById("twoYearBarLooks").style.width = (appState.twoYearTemp.looks * 10) + "%";
-      document.getElementById("twoYearValStamina").innerText = appState.twoYearTemp.stamina + " / 10";
-      document.getElementById("twoYearBarStamina").style.width = (appState.twoYearTemp.stamina * 10) + "%";
-      document.getElementById("twoYearValLibido").innerText = appState.twoYearTemp.libido + " / 10";
-      document.getElementById("twoYearBarLibido").style.width = (appState.twoYearTemp.libido * 10) + "%";
+      document.getElementById("twoYearValLooks").innerText = appState.twoYearTemp.looks;
+      document.getElementById("twoYearValStamina").innerText = appState.twoYearTemp.stamina;
+      document.getElementById("twoYearValLibido").innerText = appState.twoYearTemp.libido;
       document.getElementById("modalAlertVal").innerText = "Lv." + appState.twoYearTemp.spouseAlert;
 
-      // 家庭ケアボタンの動的状態制御
       const btnCare = document.getElementById("btnFamilyCare");
       if (btnCare) {
         if (appState.twoYearTemp.spouseAlert <= 1) {
@@ -3094,7 +2960,12 @@
       calculateAndRenderResult();
     }
 
-    function generateLastLineText(partner, isPartnerMale) {
+    function generateLastLineText(partner, isPartnerMale, isStillActive) {
+      if (isStillActive) {
+        return isPartnerMale
+          ? "「10年経った今でも、あなたといる時間が一番落ち着くよ。これからもずっとよろしくね。」"
+          : "「10年経った今でも、あなたと過ごす温もりは少しも色褪せないよ。これからもずっと一緒にいようね。」";
+      }
       if (partner.durationMonths >= 60) {
         return isPartnerMale
           ? "「5年もの長い間、俺だけを想い続けてくれてありがとう。お前は俺の裏の人生最高の誇りだよ。」"
@@ -3190,7 +3061,6 @@
 
       if (hasOlder20) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-500 font-bold">🍷 +20歳年上愛</span>';
       if (hasYounger20) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-pink-950 text-pink-300 border border-pink-500 font-bold">🍓 -20歳年下愛</span>';
-      if (!hasOlder20 && !hasYounger20 && achDiff10) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-slate-300 border border-slate-700 font-bold">🧭 ±10歳差愛</span>';
 
       document.getElementById("resAchieveBadgeList").innerHTML = badgesHtml;
 
@@ -3233,18 +3103,21 @@
       document.getElementById("resEndingDesc").innerText = desc;
 
       const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-      const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼" };
-      longestP.lastLine = generateLastLineText(longestP, isTargetPartnerMale);
+      const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null };
+      
+      // 今でも継続中（120ヶ月目、または自主引退月まで終わっていない）かどうか
+      const isLongestActive = (longestP.endMonth === null || longestP.endMonth >= 120);
+      longestP.lastLine = generateLastLineText(longestP, isTargetPartnerMale, isLongestActive);
 
       document.getElementById("longestPartnerImg").src = AvatarCacheManager.get(longestP.avatarId);
-      document.getElementById("longestPartnerNameAge").innerText = `${longestP.name} (${longestP.endAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"}) 🏷️${longestP.tag}`;
-      document.getElementById("longestPartnerPeriod").innerText = `交際${longestP.durationMonths}ヶ月（約${(longestP.durationMonths/12).toFixed(1)}年）`;
+      document.getElementById("longestPartnerNameAge").innerHTML = `${longestP.name} (${longestP.endAge || longestP.startAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${longestP.tag} ｜ 相性 ${longestP.chemistry}</span>`;
+      document.getElementById("longestPartnerPeriod").innerText = `交際${longestP.durationMonths}ヶ月（約${(longestP.durationMonths/12).toFixed(1)}年）${isLongestActive ? " 【現在も継続中】" : ""}`;
       document.getElementById("longestPartnerChem").innerText = `相性 ${longestP.chemistry}`;
       document.getElementById("longestPartnerLineText").innerText = longestP.lastLine;
 
       const highestScoreP = appState.sim.highestScorePartner || longestP;
       document.getElementById("highestScorePartnerImg").src = AvatarCacheManager.get(highestScoreP.avatarId);
-      document.getElementById("highestScorePartnerNameAge").innerText = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"}) 🏷️${highestScoreP.tag}`;
+      document.getElementById("highestScorePartnerNameAge").innerHTML = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${highestScoreP.tag} ｜ 相性 ${highestScoreP.chemistry}</span>`;
       document.getElementById("highestScoreDetail").innerText = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt`;
       document.getElementById("highestScoreChem").innerText = `相性 ${highestScoreP.chemistry}`;
 
@@ -3257,18 +3130,17 @@
       appState.sim.partners.forEach((p, idx) => {
         const avatarSrc = AvatarCacheManager.get(p.avatarId);
         allHtml += `
-          <div class="p-2 rounded bg-slate-950/50 border border-slate-850 flex justify-between items-center text-xs">
+          <div class="p-2.5 rounded bg-slate-950/50 border border-slate-850 flex justify-between items-center text-xs">
             <div class="flex items-center gap-2">
               <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
               <div>
-                <span class="font-bold text-white">${idx + 1}. ${p.name} (${p.startAge}歳)</span>
-                <span class="text-indigo-300 text-[9px] ml-1">🏷️${p.tag}</span>
-                <span class="text-slate-400 ml-1 text-[10px]">${p.job} / ${p.area}</span>
+                <div class="font-bold text-white">${idx + 1}. ${p.name} (${p.startAge}歳) <span class="text-indigo-300 text-[10px]">🏷️${p.tag}</span></div>
+                <div class="text-slate-400 text-[10px]">${p.job} / ${p.area}</div>
               </div>
             </div>
             <div class="text-right">
-              <span class="text-amber-300 font-bold text-[11px]">最高: ${p.maxSexScore}pt</span>
-              <span class="text-slate-400 text-[10px] ml-1">(${p.durationMonths}ヶ月)</span>
+              <span class="px-1.5 py-0.5 rounded bg-pink-950 text-pink-300 border border-pink-700 text-[10px] font-bold">相性 ${p.chemistry}</span>
+              <div class="text-amber-300 font-bold text-[11px] mt-0.5">最高: ${p.maxSexScore}pt (${p.durationMonths}ヶ月)</div>
             </div>
           </div>
         `;
@@ -3280,44 +3152,12 @@
       if (isDivorced) {
         epilogueHtml = `
           <p class="text-rose-400 font-bold">背徳の果てに訪れたのは、日常そのものの完全崩壊だった。</p>
-          <p>家庭の警戒を甘く見積もり続けた結果、決定的な証拠を握られ離婚届を突きつけられた。荷物をまとめ、かつて家族と過ごした家を出て行くとき、振り返っても誰も見送ってはくれなかった。</p>
-          <p class="text-slate-400">「あの時、引き返していれば……」――失ったものの大きさに打ちのめされながら、誰にも相談できない孤独な後悔とともに、裏歴史の幕は強制的に降ろされた。</p>
-        `;
-      } else if (achGrandSlam || (ach100Kills && ach5Years) || (ach100Kills && achScore120)) {
-        epilogueHtml = `
-          <p>10年という歳月は、あなたにとってゴールではなく単なる通過点に過ぎなかった。</p>
-          <p>100人を超える逢瀬、理性を焼き尽くす120pt超えの歓喜、そして何年もの間途切れなかった特別な絆。そのすべてを両立し、家庭の平穏すら手玉に取り続けたあなたの情熱は、枯れるどころか円熟の輝きを増している。</p>
-          <p class="text-amber-300 font-bold">「さて、次はどんな相手と新しい秘密を始めようか」――何食わぬ顔で日常を歩みながら、あなたの指先は密かに次の出逢いを探している。あなたの裏歴史は、ここからが本番だ。</p>
-        `;
-      } else if (ach100Kills || ach50Kills) {
-        epilogueHtml = `
-          <p>首都圏の夜を駆け巡り、数え切れないほどの異性と肌を重ねてきた10年間。</p>
-          <p>改札での別れ際、指輪をはめ直す仕草、スマートに逢瀬を楽しむ手腕はもはや芸術の域に達している。どれほど人数を重ねても、新しい誰かと出会う瞬間の胸の高鳴りは決して色褪せない。</p>
-          <p class="text-pink-300 font-bold">家庭を守り抜きながら欲望も妥協しない。10年の修羅場を生き抜いたあなたの足取りは、むしろ最初の一歩を踏み出した時よりも軽やかだ。「まだまだ私の現役は終わらない」と微笑みながら。</p>
-        `;
-      } else if (ach5Years || ach3Years) {
-        epilogueHtml = `
-          <p>めまぐるしく移り変わる東京の街並みの中で、奇跡のように紡ぎ続けた年月。</p>
-          <p>家庭の事情や加齢の波を共に乗り越え、法的な誓約を超えて魂と身体で結ばれた相手がいた。10年が経った今でも、二人きりでホテルへ向かう道すがらは、出逢った当初のような甘い緊張感に包まれている。</p>
-          <p class="text-purple-300 font-bold">「来年も、その先も、ずっと一緒にいようね」――誰にも知られることのない二人の純愛クロニクルは、10年の節目を超えてこれからも静かに刻まれ続けていく。</p>
-        `;
-      } else if (achScore120 || achScore100) {
-        epilogueHtml = `
-          <p>理性を完全に焼き尽くすほどの極限の逢瀬。ホテルのシーツを掴んだまま息が止まりそうになったあの夜の記憶。</p>
-          <p>日常の平穏では決して味わえない、生きている実感を骨の髄まで叩き込まれた10年間だった。一度極限の絶頂を知ってしまった身体は、もはや退屈なだけの日常には戻れない。</p>
-          <p class="text-rose-300 font-bold">ふとした瞬間に蘇る甘い熱気と渇き。あなたの胸の奥底で燻り続ける背徳の炎は、これからも決して消えることはないだろう。</p>
-        `;
-      } else if (appState.sim.isRetired) {
-        epilogueHtml = `
-          <p>泥沼の修羅場に呑まれる前に自らアプリを消し、平穏な家庭の日常へと生還した10年目。</p>
-          <p>あのスリル、秘密の合言葉、誰にも言えない甘い時間は、心の奥深くにある鍵付きの金庫へと大切に仕舞い込まれた。家族と囲む夕食の温もりを噛み締めながら、ふと窓の外の夜空を見上げる。</p>
-          <p class="text-slate-400 font-bold">あの熱狂の日々を生き抜いた誇りと、ほんの少しの切ない孤独を抱きしめて、静かに大人の余生を歩み始める。</p>
+          <p>家庭の警戒を甘く見積もり続けた結果、決定的な証拠を握られ離婚届を突きつけられた。</p>
         `;
       } else {
         epilogueHtml = `
           <p>家庭と仕事の狭間、電車の乗り換えのわずかな隙間に息を潜めて愛を求めた10年間。</p>
           <p>甘美な逢瀬も、胸を締め付ける別れも、すべてを飲み込んであなたの人生の糧となった。誰にも知られない裏の歴史を胸に抱えたまま、今日も何食わぬ顔で日常を歩き続ける。</p>
-          <p class="text-purple-300 font-bold">家庭の日常に戻ったあなたの横顔には、あの10年間を生き抜いた者だけが持つ、大人の孤独と温もりが宿っていた。</p>
         `;
       }
       document.getElementById("epilogueText").innerHTML = epilogueHtml;
@@ -3447,7 +3287,7 @@
       });
 
       const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-      const longestP = sortedByDuration[0] || { name: "なし", durationMonths: 0, area: "東京", avatarId: "F01", tag: "平日昼" };
+      const longestP = sortedByDuration[0] || { name: "なし", durationMonths: 0, area: "東京", avatarId: "F01", tag: "平日昼", endMonth: null };
       const highestScoreP = appState.sim.highestScorePartner || longestP;
 
       ctx.imageSmoothingEnabled = false;
@@ -3533,8 +3373,12 @@
     function shareOnX() {
       const title = document.getElementById("resTitleBadge").innerText;
       const count = document.getElementById("resTotalCount").innerText;
+      const longestM = document.getElementById("twoYearSummaryLongest").innerText || "0ヶ月";
       const score = appState.sim.globalMaxSexScore || 0;
-      const text = encodeURIComponent(`【婚外10年シミュレーター 〜既婚者たちの裏歴史〜】\n私の10年後の称号は ${title} でした。\n\n・累計交際人数: ${count}\n・最高密会スコア: ${score}pt\n・首都圏711万人のリアルな十年史\n\n#婚外10年シミュレーター #婚外シミュレーター #既婚者たちの裏歴史 #AjisaiGameStudio #既婚者マチアプ`);
+      const youngest = document.getElementById("twoYearSummaryYoungest").innerText || "―";
+      const oldest = document.getElementById("twoYearSummaryOldest").innerText || "―";
+
+      const text = encodeURIComponent(`【婚外10年シミュレーター 〜既婚者たちの裏歴史〜】\n私の称号は ${title} でした。\n\n累計交際 ${count}\n最長期間 ${longestM}\n最高密会度 ${score} pt\n最年少/最年長:${youngest}/${oldest}\n\n#婚外恋愛 #不倫 #婚外10年シミュレーター`);
       window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
     }
 

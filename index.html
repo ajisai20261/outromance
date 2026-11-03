@@ -30,6 +30,10 @@
     .font-serif-jp { font-family: 'Noto Serif JP', serif; }
     .font-cinzel { font-family: 'Cinzel', serif; }
 
+    /* Tailwind読み込み遅延対策・透明要素のタップ遮断ガード */
+    .hidden { display: none !important; }
+    .fade-seq:not(.visible) { pointer-events: none; }
+
     /* 背景アンビエントネオン */
     .bg-ambient {
       position: fixed;
@@ -638,7 +642,7 @@
           <div class="flex-1 min-w-0">
             <div class="text-[11px] sm:text-xs font-black text-amber-300">相手の配偶者から内容証明郵便！</div>
             <div class="text-xs sm:text-sm font-bold text-white truncate" id="toastLawsuitPartnerName">サオリ (33歳) の夫に発覚</div>
-            <div class="text-[9px] sm:text-[10px] text-rose-300 pt-0.5 leading-tight">示談金支払いにより本業年収Lvが低下（-2 Lv）</div>
+            <div class="text-[9px] sm:text-[10px] text-rose-300 pt-0.5 leading-tight">示談金支払いにより本業年収Lvが低下（-1 Lv）</div>
           </div>
         </div>
       </div>
@@ -1795,11 +1799,19 @@
     function buyFamilyCare() {
       if (appState.twoYearTemp.points <= 0) return;
       if (appState.twoYearTemp.spouseAlert <= 1) return;
+
       appState.twoYearTemp.points -= 1;
       appState.twoYearTemp.spouseAlert = Math.max(1, appState.twoYearTemp.spouseAlert - 2);
+
       triggerVibrate(20);
       playRareChime();
       renderTwoYearModal();
+
+      const btn = document.getElementById("btnFamilyCare");
+      if (btn) {
+        btn.classList.add("ring-2", "ring-white");
+        setTimeout(() => btn.classList.remove("ring-2", "ring-white"), 300);
+      }
     }
 
     /* ============================================================
@@ -1855,7 +1867,13 @@
     }
 
     let tapStartX = 0, tapStartY = 0;
+    let isTapInitialized = false;      // 多重登録ガード
+    let lastTapAdvanceTime = 0;       // 連打防止タイムスタンプ
+
     function initScreenTapHandler() {
+      if (isTapInitialized) return;
+      isTapInitialized = true;
+
       document.addEventListener("pointerdown", e => {
         tapStartX = e.clientX;
         tapStartY = e.clientY;
@@ -1872,6 +1890,12 @@
 
     function triggerScreenTapAdvance() {
       if (appState.sim.isPaused || appState.sim.isSkipping) return;
+
+      // 250ms以内の多重呼び出し（重複イベント・誤連打）をガード
+      const now = performance.now();
+      if (now - lastTapAdvanceTime < 250) return;
+      lastTapAdvanceTime = now;
+
       clearTimeout(simTimer);
       simulationTick();
     }
@@ -1985,29 +2009,26 @@
 
       const stamina = appState.stats.stamina || 4;
 
-      // 【体力による警戒度コントロール】
-      // 体力Lv.7以上：細やかなアリバイ工作・家族サービスで警戒上昇が激減（15%）し、自然低下も起きやすい
-      // 体力Lv.3以下：疲労で寝落ち、言動矛盾、スマホ放置等で警戒上昇が跳ね上がる（45%）
-      let alertUpChance = (stamina >= 7) ? 0.15 : (stamina <= 3 ? 0.45 : 0.28);
+      // 【緩和】警戒度上昇率を約1/3に引き下げ
+      let alertUpChance = (stamina >= 7) ? 0.05 : (stamina <= 3 ? 0.18 : 0.10);
 
       if (activePartners.length >= 3 && Math.random() < alertUpChance) {
         appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
       }
-      if (stamina <= 3 && activePartners.length >= 2 && Math.random() < 0.35) {
+      if (stamina <= 3 && activePartners.length >= 2 && Math.random() < 0.12) {
         appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
       }
 
-      // 体力Lv.6以上なら、交際人数が少なくても細やかな気配りで警戒が自然と解けやすい
-      let alertDownChance = (stamina >= 7) ? 0.40 : (activePartners.length === 0 ? 0.30 : 0.05);
+      // 体力Lv.6以上なら警戒が自然解除されやすい
+      let alertDownChance = (stamina >= 7) ? 0.40 : (activePartners.length === 0 ? 0.30 : 0.08);
       if (Math.random() < alertDownChance) {
         appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 1);
       }
 
       const prefProp = PREF_PROPERTIES[appState.user.pref] || PREF_PROPERTIES.tokyo;
 
-      // 【体力による身バレ危機率（riskRate）の大幅カット】
       const activeCount = activePartners.length;
-      let staminaProtection = (stamina - 4) * 0.018; // 体力1ptごとに約1.8%のトラブル防止ボーナス
+      let staminaProtection = (stamina - 4) * 0.018;
       let riskRate = (appState.stats.spouseAlert * 0.03) + (activeCount * 0.02) + (prefProp.crisisBonus || 0) - staminaProtection;
       riskRate = Math.max(0.005, Math.min(0.45, riskRate));
 
@@ -2016,8 +2037,9 @@
         appState.sim.crisisCountIn2Years++;
       }
 
-      // 🚨 離婚ゲームオーバー判定（警戒Lv.5時に身バレ危機または高確率で家庭崩壊）
-      if (appState.stats.spouseAlert >= 5 && (isCrisisHappened || Math.random() < 0.18)) {
+      // 🚨 【緩和】離婚ゲームオーバー判定（危機時でも33%、平常時は6%に引き下げ）
+      const divorceChance = isCrisisHappened ? 0.33 : 0.06;
+      if (appState.stats.spouseAlert >= 5 && Math.random() < divorceChance) {
         triggerDivorceGameOver(mIdx, isSilent);
         return;
       }
@@ -2045,14 +2067,13 @@
         }
       });
 
-      // ⚖️ 相手配偶者からの訴訟判定（体力Lv.7以上で相手の異変察知・訴訟リスク半減）
+      // ⚖️ 【緩和】相手配偶者からの訴訟判定（発生率を約1/3に引き下げ）
       let lawsuitPartner = null;
       for (const p of activePartners) {
-        let lawsuitRate = 0.01;
-        if (p.tag === "冷えきり") lawsuitRate = 0.025;
+        let lawsuitRate = 0.0033; // 通常: 1.0% -> 0.33% に引き下げ
+        if (p.tag === "冷えきり") lawsuitRate = 0.008; // 冷えきり: 2.5% -> 0.8% に引き下げ
         if (p.tag === "秘密厳守") lawsuitRate = 0.0;
 
-        // 体力による相手の警戒察知・リスク半減
         if (stamina >= 7) lawsuitRate *= 0.5;
 
         if (Math.random() < lawsuitRate) {
@@ -2067,7 +2088,9 @@
         lawsuitPartner.endAge = lawsuitPartner.age;
         appState.sim.breakupCountIn2Years++;
         appState.sim.lawsuitCount++;
-        appState.stats.income = Math.max(2, appState.stats.income - 2);
+
+        // 【緩和】年収低下ペナルティを -2 から -1 に半減
+        appState.stats.income = Math.max(2, appState.stats.income - 1);
         updateLiveStats();
 
         if (!isSilent) {
@@ -2251,7 +2274,6 @@
       appState.sim.breakupCountIn2Years++;
 
       let isTroubled = false;
-      // 体力Lv.7以上なら、年下独身との別れ話でもスマートに丸め込んで警戒上昇を完全回避
       if (p.tag === "年下独身" && appState.stats.stamina < 7 && Math.random() < 0.50) {
         appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
         isTroubled = true;
@@ -2920,6 +2942,24 @@
       document.getElementById("twoYearValLibido").innerText = appState.twoYearTemp.libido + " / 10";
       document.getElementById("twoYearBarLibido").style.width = (appState.twoYearTemp.libido * 10) + "%";
       document.getElementById("modalAlertVal").innerText = "Lv." + appState.twoYearTemp.spouseAlert;
+
+      // 家庭ケアボタンの動的状態制御
+      const btnCare = document.getElementById("btnFamilyCare");
+      if (btnCare) {
+        if (appState.twoYearTemp.spouseAlert <= 1) {
+          btnCare.disabled = true;
+          btnCare.innerText = "警戒度 最小 (不要)";
+          btnCare.className = "px-2.5 py-1 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs cursor-not-allowed";
+        } else if (appState.twoYearTemp.points <= 0) {
+          btnCare.disabled = true;
+          btnCare.innerText = "ポイント不足";
+          btnCare.className = "px-2.5 py-1 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs cursor-not-allowed";
+        } else {
+          btnCare.disabled = false;
+          btnCare.innerText = "ケア実行 (-1pt)";
+          btnCare.className = "px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95";
+        }
+      }
     }
 
     function adjustTwoYearStat(type, delta) {

@@ -1,0 +1,172 @@
+:root {
+  --bg-dark: #08090d;
+  --card-bg: rgba(18, 20, 29, 0.88);
+  --accent-purple: #9d4edd;
+  --accent-cyan: #06b6d4;
+  --accent-rose: #f43f5e;
+  --accent-gold: #f59e0b;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: #f1f5f9;
+  font-family: 'Noto Sans JP', sans-serif;
+  overflow-x: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.font-serif-jp { font-family: 'Noto Serif JP', serif; }
+.font-cinzel { font-family: 'Cinzel', serif; }
+
+/* Tailwind読み込み遅延対策・透明要素のタップ遮断ガード */
+.hidden { display: none !important; }
+.fade-seq:not(.visible) { pointer-events: none; }
+
+/* 背景アンビエントネオン */
+.bg-ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle at 15% 15%, rgba(157, 78, 221, 0.16) 0%, transparent 45%),
+              radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.14) 0%, transparent 45%),
+              radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.08) 0%, transparent 55%);
+}
+
+/* キービジュアル演出用スタイル */
+.kv-background {
+  position: absolute;
+  inset: 0;
+  background-image: url('title_kv.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 1;
+  transition: opacity 1.5s ease-in-out, filter 1.5s ease-in-out;
+  z-index: -1;
+}
+
+.kv-background.dimmed {
+  opacity: 0.3;
+  filter: brightness(0.6) contrast(1.1);
+}
+
+/* アバター立体フレーム */
+.avatar-frame {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: radial-gradient(circle at 50% 30%, #252d40 0%, #0c0e14 100%);
+  border: 1px solid rgba(200, 168, 107, 0.45);
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.15), 0 2px 6px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.avatar-frame img, .avatar-frame canvas {
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.avatar-frame-sm {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: #0f121a;
+  border: 1px solid rgba(200, 168, 107, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.avatar-frame-sm img, .avatar-frame-sm canvas {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.avatar-frame-lg {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 30%, #2a344a 0%, #0a0c12 100%);
+  border: 2px solid rgba(200, 168, 107, 0.55);
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.2), 0 4px 14px rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.avatar-frame-lg img, .avatar-frame-lg canvas {
+  width: 56px;
+  height: 56px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* 画面赤フラッシュ（身バレ危機アラート） */
+@keyframes redFlash {
+  0% { background-color: rgba(239, 68, 68, 0.65); }
+  100% { background-color: transparent; }
+}
+.red-flash-active {
+  animation: redFlash 0.65s ease-out;
+}
+
+.stat-bar-fill {
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* パルス光輪 */
+@keyframes pulseRing {
+  0% { transform: scale(0.95); opacity: 0.9; }
+  50% { transform: scale(1.35); opacity: 0.2; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+.ring-pulse-rare {
+  position: relative;
+}
+.ring-pulse-rare::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 2px solid #f59e0b;
+  animation: pulseRing 1.2s infinite ease-out;
+  pointer-events: none;
+}
+
+/* 限界突破ゴールド光彩 */
+@keyframes goldGlitter {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8)); }
+  50% { filter: drop-shadow(0 0 14px rgba(244, 63, 94, 0.9)); }
+}
+.limit-break-badge {
+  animation: goldGlitter 1.5s infinite alternate;
+}
+
+.fade-seq {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fade-seq.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sticky-bottom-bar {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(13, 15, 23, 0.92);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}

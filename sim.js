@@ -2,7 +2,8 @@
    sim.js - OUTROMANCE コアシミュレーション・計算ロジック
    ============================================================ */
 
-let appState = {
+// グローバル重複防止セーフティ
+window.appState = window.appState || {
   user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 40, birthMonth: 4 },
   stats: { looks: 4, libido: 4, stamina: 4, budget: 0, income: 4, childBurden: 5, spouseAffection: 5, spouseAlert: 3, targetAgePref: "same", maxPartners: 2 },
   tempPoints: 5,
@@ -16,6 +17,7 @@ let appState = {
   },
   twoYearTemp: { points: 5, looks: 4, libido: 4, stamina: 4, budget: 0, spouseAlert: 3 }
 };
+var appState = window.appState;
 
 function getRealAge(mIdx) {
   const b = appState.user.birthMonth || 4;
@@ -57,8 +59,8 @@ function adjustStat(type, delta) {
       appState.tempPoints += 1;
     }
   }
-  renderStep1B();
-  triggerVibrate(12);
+  if (typeof renderStep1B === "function") renderStep1B();
+  if (typeof triggerVibrate === "function") triggerVibrate(12);
 }
 
 function autoAllocateRemainingPoints() {
@@ -124,9 +126,9 @@ function buyFamilyCare() {
   appState.twoYearTemp.points -= 1;
   appState.twoYearTemp.spouseAlert = Math.max(1, appState.twoYearTemp.spouseAlert - 2);
 
-  triggerVibrate(20);
-  playRareChime();
-  renderTwoYearModal();
+  if (typeof triggerVibrate === "function") triggerVibrate(20);
+  if (typeof playRareChime === "function") playRareChime();
+  if (typeof renderTwoYearModal === "function") renderTwoYearModal();
 
   const btn = document.getElementById("btnFamilyCare");
   if (btn) {
@@ -159,8 +161,8 @@ function adjustTwoYearStat(type, delta) {
       appState.twoYearTemp.points += 1;
     }
   }
-  renderTwoYearModal();
-  triggerVibrate(12);
+  if (typeof renderTwoYearModal === "function") renderTwoYearModal();
+  if (typeof triggerVibrate === "function") triggerVibrate(12);
 }
 
 function calculateSexScore(partner, month, isCrisis, prefBonus = 0) {
@@ -225,7 +227,7 @@ function createSynthesizedPartner(startMonth, playerAge) {
   }
 
   const avatarId = prefix + String(avatarNum).padStart(2, '0');
-  const meta = AvatarCacheManager.getMeta(avatarId);
+  const meta = (typeof AvatarCacheManager !== "undefined") ? AvatarCacheManager.getMeta(avatarId) : { quote: "" };
 
   const rChem = Math.random();
   let chemistry = "B";
@@ -246,7 +248,7 @@ function createSynthesizedPartner(startMonth, playerAge) {
   const availableColor = PARTNER_COLORS.find(c => !usedColors.includes(c)) || PARTNER_COLORS[appState.sim.totalPartnerCounter % PARTNER_COLORS.length];
 
   return {
-    id: "p_" + Date.now() + "_" + Math.floor(Math.random()*1000),
+    id: "p_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
     name, job, area, avatarId, category, tag,
     quote: meta.quote,
     startAge: partnerAge,
@@ -267,12 +269,8 @@ function createSynthesizedPartner(startMonth, playerAge) {
 function simulateOneMonth(isSilent = false) {
   const mIdx = appState.sim.currentMonth;
   const calMonth = (mIdx % 12) + 1;
-  const yearNum = Math.floor(mIdx / 12) + 1;
   const currentRealAge = getRealAge(mIdx);
   appState.sim.currentAge = currentRealAge;
-
-  document.getElementById("simCurrentAge").innerText = `${currentRealAge}歳（${yearNum}年目 ${calMonth}月）`;
-  document.getElementById("stickyMonthText").innerText = `${currentRealAge}歳（${yearNum}年目 ${calMonth}月）`;
 
   let activePartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
   let isCrisisHappened = false;
@@ -306,7 +304,9 @@ function simulateOneMonth(isSilent = false) {
 
   const divorceChance = isCrisisHappened ? 0.33 : 0.06;
   if (appState.stats.spouseAlert >= 5 && Math.random() < divorceChance) {
-    triggerDivorceGameOver(mIdx, isSilent);
+    if (typeof triggerDivorceGameOver === "function") {
+      triggerDivorceGameOver(mIdx, isSilent);
+    }
     return;
   }
 
@@ -355,12 +355,12 @@ function simulateOneMonth(isSilent = false) {
     appState.sim.lawsuitCount++;
 
     appState.stats.income = Math.max(2, appState.stats.income - 1);
-    updateLiveStats();
+    if (typeof updateLiveStats === "function") updateLiveStats();
 
     if (!isSilent) {
-      showLawsuitToast(lawsuitPartner);
-      playAlarm();
-      triggerVibrate([100, 80, 100]);
+      if (typeof showLawsuitToast === "function") showLawsuitToast(lawsuitPartner);
+      if (typeof playAlarm === "function") playAlarm();
+      if (typeof triggerVibrate === "function") triggerVibrate([100, 80, 100]);
     }
     activePartners = activePartners.filter(p => p.id !== lawsuitPartner.id);
   }
@@ -411,9 +411,9 @@ function simulateOneMonth(isSilent = false) {
     appState.sim.breakupCountIn2Years++;
 
     if (!isSilent) {
-      showBreakupPartnerToast(breakCandidate, isUserMale, false);
-      playBreakupChime();
-      triggerVibrate([60, 40]);
+      if (typeof showBreakupPartnerToast === "function") showBreakupPartnerToast(breakCandidate, isUserMale, false);
+      if (typeof playBreakupChime === "function") playBreakupChime();
+      if (typeof triggerVibrate === "function") triggerVibrate([60, 40]);
     }
   }
 
@@ -478,26 +478,28 @@ function simulateOneMonth(isSilent = false) {
   if (!isSilent && matchedPartners.length > 0) {
     let baseDelay = (breakCandidate || lawsuitPartner) ? 2800 : 0;
     setTimeout(() => {
-      showNewPartnerToast(matchedPartners[0], false);
-      playRareChime();
-      triggerVibrate([40, 50, 40]);
+      if (typeof showNewPartnerToast === "function") showNewPartnerToast(matchedPartners[0], false);
+      if (typeof playRareChime === "function") playRareChime();
+      if (typeof triggerVibrate === "function") triggerVibrate([40, 50, 40]);
     }, baseDelay);
 
     if (matchedPartners.length > 1) {
       setTimeout(() => {
-        showNewPartnerToast(matchedPartners[1], true);
-        playLimitBreakChime();
-        triggerVibrate([50, 60, 50, 60]);
+        if (typeof showNewPartnerToast === "function") showNewPartnerToast(matchedPartners[1], true);
+        if (typeof playLimitBreakChime === "function") playLimitBreakChime();
+        if (typeof triggerVibrate === "function") triggerVibrate([50, 60, 50, 60]);
       }, baseDelay + 2800);
     }
   }
 
-  renderAlertAndFlash(isCrisisHappened, isSilent);
-  updateMatrixDot(mIdx);
-  renderRealtimeMonthlyLog(mIdx, calMonth);
+  if (typeof renderAlertAndFlash === "function") renderAlertAndFlash(isCrisisHappened, isSilent);
+  if (typeof updateMatrixDot === "function") updateMatrixDot(mIdx);
+  if (typeof renderRealtimeMonthlyLog === "function") renderRealtimeMonthlyLog(mIdx, calMonth);
 
-  document.getElementById("simActiveCount").innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
-  document.getElementById("simTotalPartners").innerText = `${appState.sim.totalPartnerCounter}人`;
+  const actCountEl = document.getElementById("simActiveCount");
+  if (actCountEl) actCountEl.innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
+  const totPartEl = document.getElementById("simTotalPartners");
+  if (totPartEl) totPartEl.innerText = `${appState.sim.totalPartnerCounter}人`;
 }
 
 function manualBreakup(partnerId, event) {
@@ -517,14 +519,17 @@ function manualBreakup(partnerId, event) {
     isTroubled = true;
   }
 
-  showBreakupPartnerToast(p, appState.user.gender === "male", true, isTroubled);
-  playBreakupChime();
-  triggerVibrate([50, 40]);
+  if (typeof showBreakupPartnerToast === "function") {
+    showBreakupPartnerToast(p, appState.user.gender === "male", true, isTroubled);
+  }
+  if (typeof playBreakupChime === "function") playBreakupChime();
+  if (typeof triggerVibrate === "function") triggerVibrate([50, 40]);
 
   const calMonth = (mIdx % 12) + 1;
-  updateMatrixDot(mIdx);
-  renderRealtimeMonthlyLog(mIdx, calMonth);
+  if (typeof updateMatrixDot === "function") updateMatrixDot(mIdx);
+  if (typeof renderRealtimeMonthlyLog === "function") renderRealtimeMonthlyLog(mIdx, calMonth);
 
   const maxAllowed = appState.stats.maxPartners || 2;
-  document.getElementById("simActiveCount").innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
+  const actCountEl = document.getElementById("simActiveCount");
+  if (actCountEl) actCountEl.innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
 }

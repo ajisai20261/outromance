@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>OUTROMANCE: 婚外10年シミュレーター 〜既婚者たちの裏歴史〜 | Ajisai Game Studio</title>
+  <title>アウトロマンス: 婚外10年シミュレーター 〜既婚者たちの裏歴史〜 | Ajisai Game Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- 外部CSS -->
@@ -59,7 +59,7 @@
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <!-- 互換性維持のための非表示バッジ -->
+      <!-- 互換用非表示バッジ -->
       <span id="headerAssetBadge" class="hidden"><span id="headerAssetVal"></span></span>
       <button id="soundToggleBtn" onclick="toggleSound()" class="px-2.5 py-1 rounded-full text-[11px] bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 flex items-center gap-1.5 transition">
         <span id="soundIcon">🔇</span>
@@ -97,30 +97,38 @@
       <div id="keyVisualBg" class="kv-background"></div>
 
       <div id="prologueWrapper" class="w-full flex flex-col items-center justify-center transition-opacity duration-300 relative z-10">
-        <div class="space-y-4 font-serif-jp text-slate-200 text-sm sm:text-[15px] tracking-[0.16em] leading-[2.2em] max-w-md px-3 mx-auto">
-          <p id="pText1" class="fade-seq text-slate-200 font-normal drop-shadow-md">
+        <div class="space-y-4 font-serif-jp text-white text-sm sm:text-[15px] tracking-[0.16em] leading-[2.2em] max-w-md px-3 mx-auto">
+          <!-- 文字の周囲に白い光彩（ホワイトグロー）と黒シャドウを二重掛けして視認性を大幅強化 -->
+          <p id="pText1" class="fade-seq font-semibold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]">
             2020年代<br>世界最大の人口を誇る、東京首都圏。
           </p>
-          <p id="pText2" class="fade-seq text-slate-300 font-light drop-shadow-md">
+          <p id="pText2" class="fade-seq font-semibold text-slate-100 drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]">
             点在する繁華街と、それらを結ぶ鉄道網。<br>そして屈指の治安に守られた水面下で――
           </p>
-          <p id="pText3" class="fade-seq font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200 drop-shadow-md">
+          <p id="pText3" class="fade-seq font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-purple-100 to-indigo-200 drop-shadow-[0_0_10px_rgba(255,255,255,0.85)]">
             既婚者同士の恋愛<br>“婚外”が静かに広がっていた。
           </p>
-          <div id="pTitleCard" class="fade-seq pt-3 pb-2 my-2 border-y border-purple-500/30 bg-black/40 backdrop-blur-sm rounded-xl px-2">
-            <div class="text-[10px] sm:text-[11px] font-cinzel font-bold tracking-[0.3em] text-purple-300 uppercase mb-1.5">OUTROMANCE : SECRET CHRONICLE</div>
-            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_0_20px_rgba(157,78,221,0.8)]">
+
+          <!-- 新タイトル構成：小さくシミュレーター ＞ メイン「アウトロマンス」 ＞ サブ -->
+          <div id="pTitleCard" class="fade-seq pt-3 pb-2.5 my-2 border-y border-purple-500/40 bg-black/50 backdrop-blur-md rounded-2xl px-3 shadow-2xl">
+            <div class="text-[11px] sm:text-xs font-bold tracking-[0.25em] text-purple-200 uppercase mb-1 drop-shadow-[0_0_6px_rgba(192,132,252,0.6)]">
               婚外10年シミュレーター
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-100 to-indigo-300 drop-shadow-[0_0_20px_rgba(157,78,221,0.9)]">
+              アウトロマンス
             </h1>
-            <div class="text-xs sm:text-sm font-bold text-pink-300 tracking-[0.2em] mt-1.5">〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.85)] font-black text-sm sm:text-base mx-0.5">裏</span>歴史〜</div>
+            <div class="text-xs sm:text-sm font-bold text-pink-300 tracking-[0.2em] mt-1.5 drop-shadow-[0_0_6px_rgba(244,114,182,0.6)]">
+              〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_10px_rgba(244,63,94,0.9)] font-black text-sm sm:text-base mx-0.5">裏</span>歴史〜
+            </div>
           </div>
-          <p id="pText4" class="fade-seq text-white font-normal drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
+
+          <p id="pText4" class="fade-seq text-white font-bold drop-shadow-[0_0_10px_rgba(255,255,255,0.85)]">
             あなたも婚外の道に足を踏み入れる。
           </p>
         </div>
 
         <div id="pActionBtn" class="fade-seq mt-6 w-full max-w-xs">
-          <button onclick="goToStep1A(event)" class="w-full py-3.5 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.5)] transition transform active:scale-95 flex items-center justify-center gap-2">
+          <button onclick="goToStep1A(event)" class="w-full py-3.5 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.6)] transition transform active:scale-95 flex items-center justify-center gap-2">
             <span>スタート ▶</span>
           </button>
         </div>

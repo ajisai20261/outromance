@@ -65,8 +65,28 @@ const GENERATIONAL_NAMES = {
   }
 };
 
+/* 年代に応じた名前の抽出 */
+function pickGenerationalName(gender, age) {
+  const g = (gender === "female") ? GENERATIONAL_NAMES.female : GENERATIONAL_NAMES.male;
+  let pool = g.forties;
+  if (age < 30) pool = g.youth;
+  else if (age < 40) pool = g.thirties;
+  else if (age < 50) pool = g.forties;
+  else if (age < 65) pool = g.fifties;
+  else pool = g.senior;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 /* 裏事情タグ一覧 */
 const PARTNER_TAGS_POOL = ["平日昼", "年下独身", "夜間遠征", "秘密厳守", "冷えきり", "割り切り"];
+
+/* タグの決定 */
+function pickPartnerTag(age, job) {
+  if (age <= 28 && Math.random() < 0.6) return "年下独身";
+  if ((job.includes("医師") || job.includes("弁護士") || job.includes("役員") || job.includes("経営") || job.includes("金融")) && Math.random() < 0.55) return "秘密厳守";
+  if (Math.random() < 0.25) return "平日昼";
+  return PARTNER_TAGS_POOL[Math.floor(Math.random() * PARTNER_TAGS_POOL.length)];
+}
 
 /* 職業プール */
 const FEMALE_JOBS_POOL = [
@@ -80,7 +100,7 @@ const MALE_JOBS_POOL = [
   "経理", "ディレクター", "外資金融", "会社経営", "会社役員", "弁護士", "不動産企画", "出版編集者"
 ];
 
-/* エリア・最寄り駅一覧 */
+/* エリア一覧 */
 const AREAS_NO_STATION = {
   tokyo: [
     "中目黒", "恵比寿", "銀座", "神楽坂", "白金台", "二子玉川", "三軒茶屋", "代官山",
@@ -136,6 +156,17 @@ const PREF_PROPERTIES = {
     scoreBonus: 0
   }
 };
+
+/* エリア変更時の説明更新 */
+function onPrefChange() {
+  const prefSelect = document.getElementById("userPref");
+  const p = prefSelect ? prefSelect.value : "tokyo";
+  const prop = PREF_PROPERTIES[p] || PREF_PROPERTIES.tokyo;
+  const descEl = document.getElementById("prefDescBox");
+  if (descEl) {
+    descEl.innerHTML = `<span class="font-bold text-purple-300">${prop.title}</span> ${prop.desc}`;
+  }
+}
 
 const MONTH_EMOJIS = ["", "🎍", "🍫", "🎎", "🌸", "🌿", "☔", "🎋", "🌻", "🌕", "🎃", "🍂", "🎄"];
 const PARTNER_COLORS = ["#ec4899", "#8b5cf6", "#06b6d4", "#f59e0b"];

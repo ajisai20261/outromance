@@ -18,7 +18,7 @@ async function generateSquareCard() {
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, 1080, 1080);
 
-  // 外枠ライン
+  // 外枠ネオンライン
   ctx.strokeStyle = "rgba(157, 78, 221, 0.4)";
   ctx.lineWidth = 4;
   ctx.strokeRect(36, 36, 1008, 1008);
@@ -30,42 +30,45 @@ async function generateSquareCard() {
   ctx.fillText("AJISAI GAME STUDIO PRESENTS", 1008, 76);
   ctx.textAlign = "left";
 
-  // タイトルロゴ
+  // タイトルロゴ階層調整
+  // 1. 小さめの冠
   ctx.fillStyle = "#c084fc";
-  ctx.font = "900 20px 'Cinzel', serif";
-  ctx.fillText("OUTROMANCE : SECRET CHRONICLE", 72, 88);
+  ctx.font = "bold 18px 'Noto Sans JP', sans-serif";
+  ctx.fillText("婚外10年シミュレーター", 72, 86);
 
+  // 2. メインロゴ
   ctx.fillStyle = "#ffffff";
-  ctx.font = "900 50px 'Noto Sans JP', sans-serif";
-  ctx.fillText("婚外10年シミュレーター", 72, 146);
+  ctx.font = "900 52px 'Noto Sans JP', sans-serif";
+  ctx.fillText("アウトロマンス", 72, 144);
 
-  ctx.font = "bold 24px 'Noto Sans JP', sans-serif";
+  // 3. サブタイトル
+  ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
   ctx.fillStyle = "#f472b6";
-  ctx.fillText("〜既婚者たちの", 72, 186);
+  ctx.fillText("〜既婚者たちの", 72, 182);
   const preW = ctx.measureText("〜既婚者たちの").width;
   ctx.fillStyle = "#fb7185";
-  ctx.font = "900 28px 'Noto Sans JP', sans-serif";
-  ctx.fillText("裏", 72 + preW, 186);
+  ctx.font = "900 26px 'Noto Sans JP', sans-serif";
+  ctx.fillText("裏", 72 + preW, 182);
   const uraW = ctx.measureText("裏").width;
   ctx.fillStyle = "#f472b6";
-  ctx.font = "bold 24px 'Noto Sans JP', sans-serif";
-  ctx.fillText("歴史〜", 72 + preW + uraW, 186);
+  ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
+  ctx.fillText("歴史〜", 72 + preW + uraW, 182);
 
   // 獲得称号
   const titleEl = document.getElementById("resTitleBadge");
   const title = titleEl ? titleEl.innerText : "『首都圏の彷徨い人』";
   ctx.fillStyle = "#fef08a";
-  ctx.font = "900 52px 'Noto Sans JP', sans-serif";
-  ctx.fillText(title, 72, 264);
+  ctx.font = "900 50px 'Noto Sans JP', sans-serif";
+  ctx.fillText(title, 72, 260);
 
-  // プレイヤー情報
+  // プロフィール情報（「観測者:」「プレイヤー:」を排除）
   ctx.fillStyle = "#cbd5e1";
   ctx.font = "20px 'Noto Sans JP', sans-serif";
   const prefNameMap = { tokyo: "東京", kanagawa: "神奈川", saitama: "埼玉", chiba: "千葉" };
   const prefName = prefNameMap[appState.user.pref] || "東京";
   const finalAge = typeof getRealAge === "function" ? getRealAge(appState.sim.currentMonth) : appState.sim.currentAge;
   const familyStatusStr = appState.sim.isDivorced ? "家庭崩壊・離婚" : "配偶者と同居中";
-  ctx.fillText(`観測者: ${appState.user.name}（${appState.user.startAge}歳→${finalAge}歳 / ${prefName}） ${familyStatusStr}`, 72, 306);
+  ctx.fillText(`${appState.user.name}（${appState.user.startAge}歳→${finalAge}歳 / ${prefName}） ${familyStatusStr}`, 72, 304);
 
   // 主要スタッツ4項目
   const totalCountStr = document.getElementById("resTotalCount")?.innerText || `${appState.sim.partners.length}人`;
@@ -121,7 +124,7 @@ async function generateSquareCard() {
     ctx.fillText((a.ok ? "★ " : "☆ ") + a.name, ax + 14, ay + 28);
   });
 
-  // 最長・最高スコアパートナー
+  // パートナー情報
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
   const longestP = sortedByDuration[0] || { name: "なし", durationMonths: 0, area: "東京", avatarId: "F01", tag: "平日昼", endMonth: null };
   const highestScoreP = appState.sim.highestScorePartner || longestP;
@@ -172,10 +175,13 @@ async function generateSquareCard() {
   ctx.font = "italic 15px 'Noto Sans JP', sans-serif";
   wrapCanvasText(ctx, "「ホテルのシーツを掴んだまま息が止まりそうになったあの夜は、一生忘れられない。」", 552, 786, 436, 23);
 
-  // フッター署名
-  ctx.fillStyle = "#475569";
-  ctx.font = "16px 'Noto Sans JP', sans-serif";
-  ctx.fillText("OUTROMANCE | 10-Year Simulation 〜既婚者たちの裏歴史〜", 72, 980);
+  // フッター署名 ＆ URL
+  ctx.fillStyle = "#64748b";
+  ctx.font = "15px 'Noto Sans JP', sans-serif";
+  ctx.fillText("OUTROMANCE : 婚外10年シミュレーター 〜既婚者たちの裏歴史〜", 72, 980);
+  ctx.textAlign = "right";
+  ctx.fillText(window.location.origin + window.location.pathname, 1008, 980);
+  ctx.textAlign = "left";
 
   // モーダル表示＆ダウンロード
   const dataUrl = cvs.toDataURL("image/png");
@@ -213,13 +219,36 @@ function closeImageModal() {
 }
 
 function shareOnX() {
+  const name = appState.user.name || "名無し";
   const title = document.getElementById("resTitleBadge")?.innerText || "『首都圏の彷徨い人』";
-  const count = document.getElementById("resTotalCount")?.innerText || "0人";
-  const longestM = document.getElementById("twoYearSummaryLongest")?.innerText || "0ヶ月";
+  const count = document.getElementById("resTotalCount")?.innerText || `${appState.sim.partners.length}人`;
+  const sexCount = document.getElementById("resSexCount")?.innerText || "0回";
   const score = appState.sim.globalMaxSexScore || 0;
-  const youngest = document.getElementById("twoYearSummaryYoungest")?.innerText || "―";
-  const oldest = document.getElementById("twoYearSummaryOldest")?.innerText || "―";
+  const url = window.location.href;
 
-  const text = encodeURIComponent(`【婚外10年シミュレーター 〜既婚者たちの裏歴史〜】\n私の称号は ${title} でした。\n\n累計交際 ${count}\n最長期間 ${longestM}\n最高密会度 ${score} pt\n最年少/最年長:${youngest}/${oldest}\n\n#婚外恋愛 #不倫 #婚外10年シミュレーター`);
-  window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+  let outcomeLine = "";
+  if (appState.sim.isDivorced) {
+    const passedY = Math.floor(appState.sim.currentMonth / 12);
+    outcomeLine = `結末：${passedY}年目に決定打を握られ離婚…`;
+  } else if (appState.sim.isRetired) {
+    outcomeLine = "結末：破滅の手前で自らアプリ消去";
+  } else {
+    outcomeLine = "結末：家庭を守り切り完全生還";
+  }
+
+  // 140文字（280カウント）以内に最適化したテキスト
+  const textBody = 
+`【アウトロマンス 〜既婚者たちの裏歴史〜】
+${name}の10年が終了。
+
+称号：${title}
+${outcomeLine}
+累計交際：${count}（逢瀬${sexCount}）
+最高密会度：${score}pt
+
+▼10年後の裏歴史をシミュレート
+${url}
+#アウトロマンス #婚外恋愛 #フリーゲーム`;
+
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(textBody)}`, "_blank");
 }

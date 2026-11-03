@@ -2,13 +2,17 @@
    ui.js - OUTROMANCE UI描画・演出・音響制御
    ============================================================ */
 
-let isSoundOn = false;
-let audioCtx = null;
-let prologueStep = 0;
-let prologueAutoTimer = null;
-let tapStartX = 0, tapStartY = 0;
-let isTapInitialized = false;
-let lastTapAdvanceTime = 0;
+var isSoundOn = false;
+var audioCtx = null;
+var prologueStep = 0;
+var prologueAutoTimer = null;
+var tapStartX = 0, tapStartY = 0;
+var isTapInitialized = false;
+var lastTapAdvanceTime = 0;
+
+// スピード制御（0.5x / 1.0x / 2.0x）
+var simSpeedMs = 3000;
+var simTimer = null;
 
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -17,8 +21,10 @@ function initAudio() {
 function toggleSound() {
   initAudio();
   isSoundOn = !isSoundOn;
-  document.getElementById("soundIcon").innerText = isSoundOn ? "🔊" : "🔇";
-  document.getElementById("soundText").innerText = isSoundOn ? "音響: ON" : "音響: OFF";
+  const icon = document.getElementById("soundIcon");
+  const text = document.getElementById("soundText");
+  if (icon) icon.innerText = isSoundOn ? "🔊" : "🔇";
+  if (text) text.innerText = isSoundOn ? "音響: ON" : "音響: OFF";
   
   const bgm = document.getElementById("bgmAudio");
   if (bgm) {
@@ -30,6 +36,27 @@ function toggleSound() {
     }
   }
   if (isSoundOn) playTone(587.33, 0.12);
+}
+
+function toggleSpeed() {
+  const btn = document.getElementById("speedToggleBtn");
+  if (simSpeedMs === 3000) {
+    simSpeedMs = 1500;
+    if (btn) btn.innerText = "⏩ 2.0x";
+  } else if (simSpeedMs === 1500) {
+    simSpeedMs = 6000;
+    if (btn) btn.innerText = "🐢 0.5x";
+  } else {
+    simSpeedMs = 3000;
+    if (btn) btn.innerText = "⏩ 1.0x";
+  }
+  triggerVibrate(15);
+  if (typeof appState !== "undefined" && appState.sim && !appState.sim.isPaused && !appState.sim.isSkipping) {
+    clearTimeout(simTimer);
+    if (typeof simulationTick === "function") {
+      simTimer = setTimeout(simulationTick, simSpeedMs);
+    }
+  }
 }
 
 function playTone(freq, duration, type="sine") {
@@ -75,8 +102,10 @@ function triggerVibrate(pat) {
 function acceptDisclaimer() {
   initAudio();
   triggerVibrate(20);
-  document.getElementById("stepDisclaimer").classList.add("hidden");
-  document.getElementById("step0").classList.remove("hidden");
+  const stepDisc = document.getElementById("stepDisclaimer");
+  const step0 = document.getElementById("step0");
+  if (stepDisc) stepDisc.classList.add("hidden");
+  if (step0) step0.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
   runCinematicPrologue();
 }
@@ -117,34 +146,37 @@ function goToStep1A(e) {
   initAudio();
   if (isSoundOn) playTone(440, 0.15);
   triggerVibrate(20);
-  document.getElementById("step0").classList.add("hidden");
-  document.getElementById("step1a").classList.remove("hidden");
+  document.getElementById("step0")?.classList.add("hidden");
+  document.getElementById("step1a")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function onGenderChange() {
-  const g = document.getElementById("userGender").value;
+  const g = document.getElementById("userGender")?.value;
+  const nameEl = document.getElementById("userName");
+  const descEl = document.getElementById("lblBudgetDesc");
   if (g === "female") {
-    document.getElementById("userName").value = "マイ";
-    document.getElementById("lblBudgetDesc").innerText = "女性は活動費の効果は控えめ（外見が絶大な効果）";
+    if (nameEl) nameEl.value = "マイ";
+    if (descEl) descEl.innerText = "女性は活動費の効果は控えめ（外見が絶大な効果）";
   } else {
-    document.getElementById("userName").value = "ユウスケ";
-    document.getElementById("lblBudgetDesc").innerText = "男性は出会い・継続に絶大な効果（活動費必須）";
+    if (nameEl) nameEl.value = "ユウスケ";
+    if (descEl) descEl.innerText = "男性は出会い・継続に絶大な効果（活動費必須）";
   }
 }
 
 function goToStep1B() {
-  appState.user.name = document.getElementById("userName").value.trim() || "名無し";
-  appState.user.gender = document.getElementById("userGender").value;
-  appState.user.pref = document.getElementById("userPref").value;
-  appState.user.startAge = parseInt(document.getElementById("userAge").value);
-  appState.user.birthMonth = parseInt(document.getElementById("userBirthMonth").value);
+  const nameVal = document.getElementById("userName")?.value.trim();
+  appState.user.name = (nameVal && nameVal.length > 0) ? nameVal.slice(0, 5) : "名無し";
+  appState.user.gender = document.getElementById("userGender")?.value || "male";
+  appState.user.pref = document.getElementById("userPref")?.value || "tokyo";
+  appState.user.startAge = parseInt(document.getElementById("userAge")?.value) || 40;
+  appState.user.birthMonth = parseInt(document.getElementById("userBirthMonth")?.value) || 4;
 
   onGenderChange();
   rerollStats();
 
-  document.getElementById("step1a").classList.add("hidden");
-  document.getElementById("step1b").classList.remove("hidden");
+  document.getElementById("step1a")?.classList.add("hidden");
+  document.getElementById("step1b")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -190,8 +222,8 @@ function applyStylePreset(presetType) {
   appState.stats.stamina = appState.baseStamina || 4;
 
   if (presetType === "pure") {
-    concSelect.value = "1";
-    agePrefSelect.value = "same";
+    if (concSelect) concSelect.value = "1";
+    if (agePrefSelect) agePrefSelect.value = "same";
     while (appState.tempPoints > 0) {
       if (appState.stats.stamina < 9) { appState.stats.stamina++; appState.tempPoints--; }
       else if (appState.stats.looks < 9) { appState.stats.looks++; appState.tempPoints--; }
@@ -199,8 +231,8 @@ function applyStylePreset(presetType) {
       else break;
     }
   } else if (presetType === "carnage") {
-    concSelect.value = "4";
-    agePrefSelect.value = isMale ? "younger" : "same";
+    if (concSelect) concSelect.value = "4";
+    if (agePrefSelect) agePrefSelect.value = isMale ? "younger" : "same";
     if (isMale) {
       while (appState.tempPoints > 0 && appState.stats.budget < 10) {
         appState.stats.budget = Math.min(10, appState.stats.budget + 2);
@@ -223,13 +255,15 @@ function applyStylePreset(presetType) {
       }
     }
   } else {
-    concSelect.value = "2";
-    agePrefSelect.value = "same";
+    if (concSelect) concSelect.value = "2";
+    if (agePrefSelect) agePrefSelect.value = "same";
     if (isMale && appState.tempPoints >= 2) {
       appState.stats.budget = Math.min(10, appState.stats.budget + 2);
       appState.tempPoints--;
     }
-    autoAllocateRemainingPoints();
+    if (typeof autoAllocateRemainingPoints === "function") {
+      autoAllocateRemainingPoints();
+    }
   }
 
   renderStep1B();
@@ -238,7 +272,7 @@ function applyStylePreset(presetType) {
 function rerollStats() {
   const income = rollIncomeLevel();
   appState.stats.income = income;
-  appState.tempPoints = income + 1; // 素の初期値状態でポイントを満額保持
+  appState.tempPoints = income + 1; // 割り振り前ポイントを満額保持
 
   const totalTarget = rollInitialStatsTotal();
   let remain = totalTarget - 9;
@@ -266,38 +300,55 @@ function rerollStats() {
   appState.stats.budget = 0;
   appState.stats.spouseAlert = 3;
 
-  // 初期状態はスタイル未選択（ボタンの選択を外してそのまま描画）
   resetStylePresetButtons();
   renderStep1B();
   if (isSoundOn) playTone(523.25, 0.12);
 }
 
 function renderStep1B() {
-  document.getElementById("remainPoints").innerText = appState.tempPoints;
-  document.getElementById("valBudget").innerText = "Lv." + appState.stats.budget;
-  document.getElementById("barBudget").style.width = (appState.stats.budget * 10) + "%";
+  const rp = document.getElementById("remainPoints");
+  if (rp) rp.innerText = appState.tempPoints;
+  const vb = document.getElementById("valBudget");
+  if (vb) vb.innerText = "Lv." + appState.stats.budget;
+  const bb = document.getElementById("barBudget");
+  if (bb) bb.style.width = (appState.stats.budget * 10) + "%";
 
-  document.getElementById("valLooks").innerText = appState.stats.looks + " / 10";
-  document.getElementById("barLooks").style.width = (appState.stats.looks * 10) + "%";
+  const vl = document.getElementById("valLooks");
+  if (vl) vl.innerText = appState.stats.looks + " / 10";
+  const bl = document.getElementById("barLooks");
+  if (bl) bl.style.width = (appState.stats.looks * 10) + "%";
 
-  document.getElementById("valLibido").innerText = appState.stats.libido + " / 10";
-  document.getElementById("barLibido").style.width = (appState.stats.libido * 10) + "%";
+  const vlib = document.getElementById("valLibido");
+  if (vlib) vlib.innerText = appState.stats.libido + " / 10";
+  const blib = document.getElementById("barLibido");
+  if (blib) blib.style.width = (appState.stats.libido * 10) + "%";
 
-  document.getElementById("valStamina").innerText = appState.stats.stamina + " / 10";
-  document.getElementById("barStamina").style.width = (appState.stats.stamina * 10) + "%";
+  const vs = document.getElementById("valStamina");
+  if (vs) vs.innerText = appState.stats.stamina + " / 10";
+  const bs = document.getElementById("barStamina");
+  if (bs) bs.style.width = (appState.stats.stamina * 10) + "%";
 
-  document.getElementById("lblStatsTotal").innerText = (appState.stats.looks + appState.stats.libido + appState.stats.stamina);
-  document.getElementById("lblIncome").innerText = "Lv." + appState.stats.income;
-  document.getElementById("lblSpouseAlert").innerText = "Lv." + appState.stats.spouseAlert;
+  const totalEl = document.getElementById("lblStatsTotal");
+  if (totalEl) totalEl.innerText = (appState.stats.looks + appState.stats.libido + appState.stats.stamina);
+  const incEl = document.getElementById("lblIncome");
+  if (incEl) incEl.innerText = "Lv." + appState.stats.income;
+  const alertEl = document.getElementById("lblSpouseAlert");
+  if (alertEl) alertEl.innerText = "Lv." + appState.stats.spouseAlert;
 }
 
 function updateLiveStats() {
-  document.getElementById("liveStatLooks").innerText = `${appState.stats.looks}`;
-  document.getElementById("liveStatStamina").innerText = `${appState.stats.stamina}`;
-  document.getElementById("liveStatLibido").innerText = `${appState.stats.libido}`;
-  document.getElementById("liveStatBudget").innerText = `Lv.${appState.stats.budget}`;
-  document.getElementById("headerAssetVal").innerText = `Lv.${appState.stats.income}`;
-  document.getElementById("statSummaryText").innerText = `本業年収水準: Lv.${appState.stats.income}`;
+  const looksEl = document.getElementById("liveStatLooks");
+  if (looksEl) looksEl.innerText = `${appState.stats.looks}`;
+  const staEl = document.getElementById("liveStatStamina");
+  if (staEl) staEl.innerText = `${appState.stats.stamina}`;
+  const libEl = document.getElementById("liveStatLibido");
+  if (libEl) libEl.innerText = `${appState.stats.libido}`;
+  const budEl = document.getElementById("liveStatBudget");
+  if (budEl) budEl.innerText = `Lv.${appState.stats.budget}`;
+  const incEl = document.getElementById("liveStatIncome");
+  if (incEl) incEl.innerText = `Lv.${appState.stats.income}`;
+  const alertEl = document.getElementById("largeSpouseAlertVal");
+  if (alertEl) alertEl.innerText = `Lv.${appState.stats.spouseAlert} / 5`;
 }
 
 function initScreenTapHandler() {
@@ -326,7 +377,9 @@ function triggerScreenTapAdvance() {
   lastTapAdvanceTime = now;
 
   clearTimeout(simTimer);
-  simulationTick();
+  if (typeof simulationTick === "function") {
+    simulationTick();
+  }
 }
 
 function refresh24MatrixGrid() {
@@ -335,12 +388,16 @@ function refresh24MatrixGrid() {
   const endYearNum = startYearNum + 1;
   const userBirthMonth = appState.user.birthMonth || 4;
 
-  document.getElementById("matrixPhaseTitle").innerText = `第${cycleIndex + 1}期：${startYearNum}〜${endYearNum}年目（${cycleIndex * 24 + 1}〜${(cycleIndex + 1) * 24}ヶ月）`;
-  document.getElementById("matrixRow1Label").innerText = `${startYearNum}年目`;
-  document.getElementById("matrixRow2Label").innerText = `${endYearNum}年目`;
+  const titleEl = document.getElementById("matrixPhaseTitle");
+  if (titleEl) titleEl.innerText = `第${cycleIndex + 1}期：${startYearNum}〜${endYearNum}年目（${cycleIndex * 24 + 1}〜${(cycleIndex + 1) * 24}ヶ月）`;
+  const r1Lbl = document.getElementById("matrixRow1Label");
+  if (r1Lbl) r1Lbl.innerText = `${startYearNum}年目`;
+  const r2Lbl = document.getElementById("matrixRow2Label");
+  if (r2Lbl) r2Lbl.innerText = `${endYearNum}年目`;
 
   const r1 = document.getElementById("matrixGridRow1");
   const r2 = document.getElementById("matrixGridRow2");
+  if (!r1 || !r2) return;
   r1.innerHTML = "";
   r2.innerHTML = "";
 
@@ -459,33 +516,67 @@ function showLawsuitToast(p) {
 function renderAlertAndFlash(isCrisis, isSilent = false) {
   const alertBadge = document.getElementById("alertStateText");
   const alertLv = appState.stats.spouseAlert;
+  const largeVal = document.getElementById("largeSpouseAlertVal");
+  const largeBadge = document.getElementById("largeSpouseAlertBadge");
+
+  if (largeVal) {
+    largeVal.innerText = `Lv.${alertLv} / 5`;
+  }
 
   if (alertLv >= 5) {
-    alertBadge.innerText = "🚨 離婚危機・監視MAX";
-    alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500 font-black animate-ping";
-    document.getElementById("spouseStatusLabel").innerText = "配偶者と冷戦・修羅場中";
-    document.getElementById("spouseSituationLog").innerText = "家庭内は完全な臨戦態勢。スマホの着信音ひとつで怒号が飛ぶ極限状態。";
+    if (alertBadge) {
+      alertBadge.innerText = "🚨 離婚危機・監視MAX";
+      alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500 font-black animate-ping";
+    }
+    if (largeBadge) {
+      largeBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-950/80 border border-rose-500 animate-pulse";
+    }
+    if (largeVal) {
+      largeVal.className = "text-xs font-black text-rose-300";
+    }
+    const sitEl = document.getElementById("spouseSituationLog");
+    if (sitEl) sitEl.innerText = "家庭内は完全な臨戦態勢。スマホの着信音ひとつで怒号が飛ぶ極限状態。";
   } else if (isCrisis || alertLv === 4) {
     if (!isSilent && !appState.sim.isSkipping && !appState.sim.isPaused) {
       const overlay = document.getElementById("flashOverlay");
-      overlay.classList.add("red-flash-active");
-      setTimeout(() => overlay.classList.remove("red-flash-active"), 650);
+      if (overlay) {
+        overlay.classList.add("red-flash-active");
+        setTimeout(() => overlay.classList.remove("red-flash-active"), 650);
+      }
       playAlarm();
       triggerVibrate([100, 50, 100]);
     }
-    alertBadge.innerText = "⚠️ 身バレ危機！";
-    alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700 animate-pulse";
+    if (alertBadge) {
+      alertBadge.innerText = "⚠️ 身バレ危機！";
+      alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700 animate-pulse";
+    }
+    if (largeBadge) {
+      largeBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-950/60 border border-rose-600";
+    }
+    if (largeVal) {
+      largeVal.className = "text-xs font-black text-rose-400";
+    }
     const spouseEvents = [
       `休日の夕方、スマホのポップアップ通知を配偶者に凝視され冷や汗が流れた。`,
       `「最近、残業や怪しい用事多くない？」と配偶者から真顔で問い詰められた。`,
       `手帳のスケジュール帳を見咎められ、必死に仕事の言い訳を重ねた。`
     ];
-    document.getElementById("spouseSituationLog").innerText = spouseEvents[Math.floor(Math.random() * spouseEvents.length)];
+    const sitEl = document.getElementById("spouseSituationLog");
+    if (sitEl) sitEl.innerText = spouseEvents[Math.floor(Math.random() * spouseEvents.length)];
   } else {
     const activeCount = appState.sim.activePartnerIds.length;
-    alertBadge.innerText = (activeCount > 2) ? "多忙密会" : "平穏";
-    alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40";
-    document.getElementById("spouseSituationLog").innerText = "配偶者は平穏に日常を過ごしている。怪しまれる様子はない。";
+    if (alertBadge) {
+      alertBadge.innerText = (activeCount > 2) ? "多忙密会" : "平穏";
+      alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40";
+    }
+    if (largeBadge) {
+      largeBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80";
+    }
+    if (largeVal) {
+      largeVal.className = "text-xs font-black text-amber-400";
+    }
+    const sitEl = document.getElementById("spouseSituationLog");
+    if (sitEl) sitEl.innerText = "配偶者は平穏に日常を過ごしている。怪しまれる様子はない。";
   }
 }
 
@@ -493,14 +584,30 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
   const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
   const userBirthMonth = appState.user.birthMonth || 4;
   
-  if (calMonth === userBirthMonth) {
-    document.getElementById("seasonBadge").innerText = `🎂 ${calMonth}月（誕生月）`;
-  } else {
-    document.getElementById("seasonBadge").innerText = `${MONTH_EMOJIS[calMonth] || "🌸"} ${calMonth}月`;
+  const seasonBadge = document.getElementById("seasonBadge");
+  if (seasonBadge) {
+    if (calMonth === userBirthMonth) {
+      seasonBadge.innerText = `🎂 ${calMonth}月（誕生月）`;
+    } else {
+      seasonBadge.innerText = `${MONTH_EMOJIS[calMonth] || "🌸"} ${calMonth}月`;
+    }
   }
-  document.getElementById("monthTitleLog").innerText = seasons[calMonth];
+
+  const monthTitle = document.getElementById("monthTitleLog");
+  if (monthTitle) monthTitle.innerText = seasons[calMonth];
+
+  // 年齢の前にプレイヤー名を強調表示（例: ユウタ 48歳（婚外開始8年9ヶ月））
+  const simAgeEl = document.getElementById("simCurrentAge");
+  if (simAgeEl) {
+    const currentAge = getRealAge(mIdx);
+    const passedY = Math.floor(mIdx / 12);
+    const passedM = (mIdx % 12) + 1;
+    const elapsedStr = passedY > 0 ? `${passedY}年${passedM}ヶ月` : `${passedM}ヶ月`;
+    simAgeEl.innerHTML = `<span class="text-purple-300 font-black text-sm sm:text-base">${appState.user.name}</span> <span class="font-bold text-white text-xs sm:text-sm ml-1">${currentAge}歳</span> <span class="text-slate-400 text-[10.5px] sm:text-[11px] font-normal">（婚外開始 ${elapsedStr}）</span>`;
+  }
 
   const listContainer = document.getElementById("currentMonthPartnersLog");
+  if (!listContainer) return;
   const currentPartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
 
   if (currentPartners.length === 0) {
@@ -533,6 +640,9 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
     if (p.category === "senior") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-purple-900 text-purple-200 rounded border border-purple-500/30 font-bold">シニア</span>';
     if (p.category === "youth") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 font-bold">若手</span>';
 
+    // 相性バッジを交際中カードへ常時追加
+    let chemBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-pink-950/80 text-pink-300 rounded border border-pink-600/60 font-black">相性 ${p.chemistry}</span>`;
+
     monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score, tag: p.tag });
     const avatarSrc = AvatarCacheManager.get(p.avatarId);
 
@@ -555,6 +665,7 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
           </div>
           <div class="flex items-center gap-1 flex-wrap">
             ${catBadge}
+            ${chemBadge}
           </div>
           <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words">${actionText}</div>
         </div>
@@ -641,6 +752,7 @@ function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
 function showClickMonthDetail(mIdx) {
   const history = appState.sim.monthlyHistory[mIdx];
   const box = document.getElementById("clickMonthDetail");
+  if (!box) return;
   const age = getRealAge(mIdx);
   const yearNum = Math.floor(mIdx / 12) + 1;
   const m = (mIdx % 12) + 1;
@@ -672,16 +784,31 @@ function showClickMonthDetail(mIdx) {
   box.classList.remove("hidden");
 }
 
-function closeClickDetail() { document.getElementById("clickMonthDetail").classList.add("hidden"); }
+function closeClickDetail() { document.getElementById("clickMonthDetail")?.classList.add("hidden"); }
 
 function renderTwoYearModal() {
-  document.getElementById("twoYearRemainPoints").innerText = appState.twoYearTemp.points;
-  document.getElementById("twoYearValBudget").innerText = "Lv." + appState.twoYearTemp.budget;
-  document.getElementById("twoYearBarBudget").style.width = (appState.twoYearTemp.budget * 10) + "%";
-  document.getElementById("twoYearValLooks").innerText = appState.twoYearTemp.looks;
-  document.getElementById("twoYearValStamina").innerText = appState.twoYearTemp.stamina;
-  document.getElementById("twoYearValLibido").innerText = appState.twoYearTemp.libido;
-  document.getElementById("modalAlertVal").innerText = "Lv." + appState.twoYearTemp.spouseAlert;
+  const mIdx = appState.sim.currentMonth;
+  const currentAge = getRealAge(mIdx);
+  const yearIndex = (mIdx / 24) * 2;
+  const titleEl = document.getElementById("twoYearTitle");
+  if (titleEl) {
+    titleEl.innerHTML = `<span class="text-purple-300 font-black">${appState.user.name}</span> <span>${yearIndex}年目の節目：${currentAge}歳の現在</span>`;
+  }
+
+  const rp = document.getElementById("twoYearRemainPoints");
+  if (rp) rp.innerText = appState.twoYearTemp.points;
+  const vb = document.getElementById("twoYearValBudget");
+  if (vb) vb.innerText = "Lv." + appState.twoYearTemp.budget;
+  const bb = document.getElementById("twoYearBarBudget");
+  if (bb) bb.style.width = (appState.twoYearTemp.budget * 10) + "%";
+  const vl = document.getElementById("twoYearValLooks");
+  if (vl) vl.innerText = appState.twoYearTemp.looks;
+  const vs = document.getElementById("twoYearValStamina");
+  if (vs) vs.innerText = appState.twoYearTemp.stamina;
+  const vlib = document.getElementById("twoYearValLibido");
+  if (vlib) vlib.innerText = appState.twoYearTemp.libido;
+  const alertEl = document.getElementById("modalAlertVal");
+  if (alertEl) alertEl.innerText = "Lv." + appState.twoYearTemp.spouseAlert;
 
   const btnCare = document.getElementById("btnFamilyCare");
   if (btnCare) {
@@ -704,32 +831,36 @@ function renderTwoYearModal() {
 function renderTwoYearChronicle(currentMonth) {
   const activeList = document.getElementById("twoYearActivePartnersList");
   const active = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
-  if (active.length === 0) {
-    activeList.innerHTML = `<div class="text-[11px] text-slate-500 py-1">現在交際中のパートナーはいません。</div>`;
-  } else {
-    let h = "";
-    active.forEach(p => {
-      const avatarSrc = AvatarCacheManager.get(p.avatarId);
-      h += `
-        <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
-          <div class="flex items-center gap-2">
-            <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
-            <div>
-              <div class="font-bold text-white text-xs">${p.name} (${p.age}歳) <span class="text-[9px] text-indigo-300 font-normal">🏷️${p.tag}</span></div>
-              <div class="text-slate-400 text-[10px]">${p.job} / ${p.area}</div>
+  if (activeList) {
+    if (active.length === 0) {
+      activeList.innerHTML = `<div class="text-[11px] text-slate-500 py-1">現在交際中のパートナーはいません。</div>`;
+    } else {
+      let h = "";
+      active.forEach(p => {
+        const avatarSrc = AvatarCacheManager.get(p.avatarId);
+        // 「最高」を削除し、「相性 S ｜ 111pt」の形式に変更
+        h += `
+          <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+            <div class="flex items-center gap-2">
+              <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
+              <div>
+                <div class="font-bold text-white text-xs">${p.name} (${p.age}歳) <span class="text-[9px] text-indigo-300 font-normal">🏷️${p.tag}</span></div>
+                <div class="text-slate-400 text-[10px]">${p.job} / ${p.area}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-purple-300 font-bold text-[10px]">${p.durationMonths}ヶ月</span>
+              <span class="px-1.5 py-0.5 rounded bg-pink-950 border border-pink-700 text-pink-300 text-[9px] ml-1 font-bold">相性 ${p.chemistry} ｜ ${p.maxSexScore}pt</span>
             </div>
           </div>
-          <div class="text-right">
-            <span class="text-purple-300 font-bold text-[10px]">${p.durationMonths}ヶ月</span>
-            <span class="px-1.5 py-0.5 rounded bg-pink-950 border border-pink-700 text-pink-300 text-[9px] ml-1 font-bold">最高 ${p.maxSexScore}pt</span>
-          </div>
-        </div>
-      `;
-    });
-    activeList.innerHTML = h;
+        `;
+      });
+      activeList.innerHTML = h;
+    }
   }
 
   const scrollBox = document.getElementById("twoYearChronicleScroll");
+  if (!scrollBox) return;
   let scrollHtml = "";
   const startM = Math.max(0, currentMonth - 24);
   for (let m = startM; m < currentMonth; m++) {
@@ -781,13 +912,18 @@ function calculateAndRenderResult() {
   const finalAge = getRealAge(appState.sim.currentMonth);
   const isDivorced = appState.sim.isDivorced;
 
-  document.getElementById("resPlayerNameHeader").innerText = appState.user.name;
-  if (isDivorced) {
-    const passedY = Math.floor(appState.sim.currentMonth / 12);
-    const passedM = (appState.sim.currentMonth % 12) + 1;
-    document.getElementById("resAgeTrackHeader").innerText = `${startAge}歳から${finalAge}歳へ――${passedY}年${passedM}ヶ月で家庭崩壊・離婚`;
-  } else {
-    document.getElementById("resAgeTrackHeader").innerText = `${startAge}歳から${finalAge}歳へ――駆け抜けた逢瀬の軌跡`;
+  const resName = document.getElementById("resPlayerNameHeader");
+  if (resName) resName.innerText = appState.user.name;
+
+  const resAgeTrack = document.getElementById("resAgeTrackHeader");
+  if (resAgeTrack) {
+    if (isDivorced) {
+      const passedY = Math.floor(appState.sim.currentMonth / 12);
+      const passedM = (appState.sim.currentMonth % 12) + 1;
+      resAgeTrack.innerText = `${startAge}歳から${finalAge}歳へ――${passedY}年${passedM}ヶ月で家庭崩壊・離婚`;
+    } else {
+      resAgeTrack.innerText = `${startAge}歳から${finalAge}歳へ――駆け抜けた逢瀬の軌跡`;
+    }
   }
 
   let totalSex = 0, totalDates = 0;
@@ -797,10 +933,14 @@ function calculateAndRenderResult() {
   });
   const totalHours = totalDates * 3.5;
 
-  document.getElementById("resTotalCount").innerText = `${totalPartners}人`;
-  document.getElementById("resSexCount").innerText = `${totalSex}回`;
-  document.getElementById("resTotalHours").innerText = `${Math.round(totalHours)}時間`;
-  document.getElementById("resFinalIncome").innerText = `Lv.${appState.stats.income}`;
+  const resTotalCount = document.getElementById("resTotalCount");
+  if (resTotalCount) resTotalCount.innerText = `${totalPartners}人`;
+  const resSexCount = document.getElementById("resSexCount");
+  if (resSexCount) resSexCount.innerText = `${totalSex}回`;
+  const resTotalHours = document.getElementById("resTotalHours");
+  if (resTotalHours) resTotalHours.innerText = `${Math.round(totalHours)}時間`;
+  const resFinalIncome = document.getElementById("resFinalIncome");
+  if (resFinalIncome) resFinalIncome.innerText = `Lv.${appState.stats.income}`;
 
   let hasOlder20 = appState.sim.metOlder20Plus;
   let hasYounger20 = appState.sim.metYounger20Plus;
@@ -833,7 +973,8 @@ function calculateAndRenderResult() {
   updateAchievementCard("achieveCardGrandSlam", achGrandSlam, "bg-gradient-to-r from-amber-900/50 via-purple-900/50 to-pink-900/50 border-amber-400 shadow-[0_0_16px_rgba(251,191,36,0.8)]");
 
   const unlocked = [ach100Kills, ach5Years, achScore120, hasOlder20, hasYounger20, achGrandSlam].filter(Boolean).length;
-  document.getElementById("achieveUnlockedCount").innerText = unlocked;
+  const achUnlocked = document.getElementById("achieveUnlockedCount");
+  if (achUnlocked) achUnlocked.innerText = unlocked;
 
   let badgesHtml = "";
   if (isDivorced) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-950 text-rose-300 border border-rose-600 font-bold">🚨 離婚・家庭崩壊</span>';
@@ -851,7 +992,8 @@ function calculateAndRenderResult() {
   if (hasYounger20) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-pink-950 text-pink-300 border border-pink-500 font-bold">🍓 -20歳年下愛</span>';
   if (!hasOlder20 && !hasYounger20 && achDiff10) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-slate-300 border border-slate-700 font-bold">🧭 ±10歳差愛</span>';
 
-  document.getElementById("resAchieveBadgeList").innerHTML = badgesHtml;
+  const badgeListEl = document.getElementById("resAchieveBadgeList");
+  if (badgeListEl) badgeListEl.innerHTML = badgesHtml;
 
   let title = "『首都圏の彷徨い人』";
   let desc = "首都圏の喧騒の中、家庭と日常の狭間で静かに駆け抜けた10年間。";
@@ -888,8 +1030,10 @@ function calculateAndRenderResult() {
     desc = "泥沼に呑まれる前に自らアプリを消し、平穏な家庭の日常へと生還した賢明な選択者。";
   }
 
-  document.getElementById("resTitleBadge").innerText = title;
-  document.getElementById("resEndingDesc").innerText = desc;
+  const titleBadge = document.getElementById("resTitleBadge");
+  if (titleBadge) titleBadge.innerText = title;
+  const endingDesc = document.getElementById("resEndingDesc");
+  if (endingDesc) endingDesc.innerText = desc;
 
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
   const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null };
@@ -897,22 +1041,35 @@ function calculateAndRenderResult() {
   const isLongestActive = (longestP.endMonth === null || longestP.endMonth >= 120);
   longestP.lastLine = generateLastLineText(longestP, isTargetPartnerMale, isLongestActive);
 
-  document.getElementById("longestPartnerImg").src = AvatarCacheManager.get(longestP.avatarId);
-  document.getElementById("longestPartnerNameAge").innerHTML = `${longestP.name} (${longestP.endAge || longestP.startAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${longestP.tag} ｜ 相性 ${longestP.chemistry}</span>`;
-  document.getElementById("longestPartnerPeriod").innerText = `交際${longestP.durationMonths}ヶ月（約${(longestP.durationMonths/12).toFixed(1)}年）${isLongestActive ? " 【現在も継続中】" : ""}`;
-  document.getElementById("longestPartnerChem").innerText = `相性 ${longestP.chemistry}`;
-  document.getElementById("longestPartnerLineText").innerText = longestP.lastLine;
+  const longImg = document.getElementById("longestPartnerImg");
+  if (longImg) longImg.src = AvatarCacheManager.get(longestP.avatarId);
+  const longName = document.getElementById("longestPartnerNameAge");
+  if (longName) longName.innerHTML = `${longestP.name} (${longestP.endAge || longestP.startAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${longestP.tag} ｜ 相性 ${longestP.chemistry}</span>`;
+  const longPeriod = document.getElementById("longestPartnerPeriod");
+  if (longPeriod) longPeriod.innerText = `交際${longestP.durationMonths}ヶ月（約${(longestP.durationMonths/12).toFixed(1)}年）${isLongestActive ? " 【現在も継続中】" : ""}`;
+  const longChem = document.getElementById("longestPartnerChem");
+  if (longChem) longChem.innerText = `相性 ${longestP.chemistry}`;
+  const longLine = document.getElementById("longestPartnerLineText");
+  if (longLine) longLine.innerText = longestP.lastLine;
 
   const highestScoreP = appState.sim.highestScorePartner || longestP;
-  document.getElementById("highestScorePartnerImg").src = AvatarCacheManager.get(highestScoreP.avatarId);
-  document.getElementById("highestScorePartnerNameAge").innerHTML = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${highestScoreP.tag} ｜ 相性 ${highestScoreP.chemistry}</span>`;
-  document.getElementById("highestScoreDetail").innerText = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt`;
-  document.getElementById("highestScoreChem").innerText = `相性 ${highestScoreP.chemistry}`;
+  const highImg = document.getElementById("highestScorePartnerImg");
+  if (highImg) highImg.src = AvatarCacheManager.get(highestScoreP.avatarId);
+  const highName = document.getElementById("highestScorePartnerNameAge");
+  if (highName) highName.innerHTML = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${highestScoreP.tag} ｜ 相性 ${highestScoreP.chemistry}</span>`;
+  const highDetail = document.getElementById("highestScoreDetail");
+  if (highDetail) highDetail.innerText = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt`;
+  const highChem = document.getElementById("highestScoreChem");
+  if (highChem) highChem.innerText = `相性 ${highestScoreP.chemistry}`;
 
-  document.getElementById("resStatLooks").innerText = "Lv." + appState.stats.looks;
-  document.getElementById("resStatStamina").innerText = "Lv." + appState.stats.stamina;
-  document.getElementById("resStatLibido").innerText = "Lv." + appState.stats.libido;
-  document.getElementById("resStatBudget").innerText = "Lv." + appState.stats.budget;
+  const resStatLooks = document.getElementById("resStatLooks");
+  if (resStatLooks) resStatLooks.innerText = "Lv." + appState.stats.looks;
+  const resStatStam = document.getElementById("resStatStamina");
+  if (resStatStam) resStatStam.innerText = "Lv." + appState.stats.stamina;
+  const resStatLib = document.getElementById("resStatLibido");
+  if (resStatLib) resStatLib.innerText = "Lv." + appState.stats.libido;
+  const resStatBud = document.getElementById("resStatBudget");
+  if (resStatBud) resStatBud.innerText = "Lv." + appState.stats.budget;
 
   let allHtml = "";
   appState.sim.partners.forEach((p, idx) => {
@@ -928,13 +1085,15 @@ function calculateAndRenderResult() {
         </div>
         <div class="text-right">
           <span class="px-1.5 py-0.5 rounded bg-pink-950 text-pink-300 border border-pink-700 text-[10px] font-bold">相性 ${p.chemistry}</span>
-          <div class="text-amber-300 font-bold text-[11px] mt-0.5">最高: ${p.maxSexScore}pt (${p.durationMonths}ヶ月)</div>
+          <div class="text-amber-300 font-bold text-[11px] mt-0.5">${p.maxSexScore}pt (${p.durationMonths}ヶ月)</div>
         </div>
       </div>
     `;
   });
-  document.getElementById("allPartnersList").innerHTML = allHtml;
-  document.getElementById("toggleAllPartnersBtn").innerText = `すべての交際履歴（全${totalPartners}人）を確認する ▼`;
+  const allList = document.getElementById("allPartnersList");
+  if (allList) allList.innerHTML = allHtml;
+  const toggleBtn = document.getElementById("toggleAllPartnersBtn");
+  if (toggleBtn) toggleBtn.innerText = `すべての交際履歴（全${totalPartners}人）を確認する ▼`;
 
   let epilogueHtml = "";
   if (isDivorced) {
@@ -948,7 +1107,8 @@ function calculateAndRenderResult() {
       <p>甘美な逢瀬も、胸を締め付ける別れも、すべてを飲み込んであなたの人生の糧となった。誰にも知られない裏の歴史を胸に抱えたまま、今日も何食わぬ顔で日常を歩き続ける。</p>
     `;
   }
-  document.getElementById("epilogueText").innerHTML = epilogueHtml;
+  const epiEl = document.getElementById("epilogueText");
+  if (epiEl) epiEl.innerHTML = epilogueHtml;
 }
 
 function updateAchievementCard(elId, isAchieved, activeClass) {
@@ -961,6 +1121,7 @@ function updateAchievementCard(elId, isAchieved, activeClass) {
 function toggleAllPartners() {
   const wrap = document.getElementById("allHistoryWrapper");
   const btn = document.getElementById("toggleAllPartnersBtn");
+  if (!wrap || !btn) return;
   if (wrap.classList.contains("hidden")) {
     wrap.classList.remove("hidden");
     btn.innerText = "交際履歴を閉じる ▲";

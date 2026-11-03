@@ -8,7 +8,7 @@
   <!-- 外部 avatars.js が同階層にあれば自動で優先読み込み、無ければ内蔵ピクセルエンジンが自律描画 -->
   <script src="avatars.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;600;900&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -81,8 +81,8 @@
       image-rendering: crisp-edges;
     }
     .avatar-frame-lg {
-      width: 64px;
-      height: 64px;
+      width: 56px;
+      height: 56px;
       flex-shrink: 0;
       border-radius: 12px;
       background: radial-gradient(circle at 50% 30%, #2a344a 0%, #0a0c12 100%);
@@ -94,19 +94,19 @@
       overflow: hidden;
     }
     .avatar-frame-lg img, .avatar-frame-lg canvas {
-      width: 64px;
-      height: 64px;
+      width: 56px;
+      height: 56px;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
     }
 
     /* 画面赤フラッシュ（身バレ危機アラート） */
     @keyframes redFlash {
-      0% { background-color: rgba(239, 68, 68, 0.55); }
+      0% { background-color: rgba(239, 68, 68, 0.65); }
       100% { background-color: transparent; }
     }
     .red-flash-active {
-      animation: redFlash 0.6s ease-out;
+      animation: redFlash 0.65s ease-out;
     }
 
     .stat-bar-fill {
@@ -303,7 +303,7 @@
         </div>
 
         <!-- 居住エリアのマイルド特性解説バッジ -->
-        <div id="prefDescBox" class="p-2 rounded-lg bg-slate-950/80 border border-purple-900/40 text-[11px] text-purple-200">
+        <div id="prefDescBox" class="p-2.5 rounded-lg bg-slate-950/80 border border-purple-900/40 text-[11px] text-purple-200 leading-relaxed">
           <span class="font-bold text-purple-300">【都心の魔境】</span> 出逢いのチャンスは最大だが人の目も多い（出逢い+4% / 身バレ+2%）
         </div>
 
@@ -349,33 +349,33 @@
       <div class="flex items-center justify-between">
         <div>
           <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-B</span>
-          <h2 class="text-lg font-bold text-white">能力値と活動リソース配分</h2>
+          <h2 class="text-base sm:text-lg font-bold text-white">能力値と活動リソース配分</h2>
         </div>
-        <button onclick="rerollStats()" class="text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-purple-300 hover:bg-slate-700 flex items-center gap-1 transition">
+        <button onclick="rerollStats()" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-purple-300 hover:bg-slate-700 flex items-center gap-1 transition">
           <span>基礎再抽選 🔄</span>
         </button>
       </div>
 
       <!-- 婚外プレイスタイル・クイックプリセット選択 -->
-      <div class="space-y-2">
-        <div class="text-[11px] font-bold text-purple-300 flex items-center justify-between">
+      <div class="space-y-1.5">
+        <div class="text-[11px] font-bold text-purple-300">
           <span>🎯 婚外スタイル選択（タップで推奨設定を自動セット）</span>
         </div>
-        <div class="grid grid-cols-3 gap-2">
-          <button type="button" onclick="applyStylePreset('pure')" id="presetBtnPure" class="p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500">
-            <div class="text-base mb-1">💍</div>
-            <div class="text-xs font-bold text-white">純愛継続型</div>
-            <div class="text-[9px] text-slate-400 leading-tight mt-0.5">1人と深く長く。<br>5年の絆・最高点狙い</div>
+        <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+          <button type="button" onclick="applyStylePreset('pure')" id="presetBtnPure" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500">
+            <div class="text-sm sm:text-base mb-0.5">💍</div>
+            <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">純愛継続型</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">1人と深く長く。<br>5年の絆狙い</div>
           </button>
-          <button type="button" onclick="applyStylePreset('balanced')" id="presetBtnBalanced" class="p-2.5 rounded-xl border text-left transition-all bg-purple-950/60 border-purple-500 ring-1 ring-purple-500/50">
-            <div class="text-base mb-1">🍷</div>
-            <div class="text-xs font-bold text-white">分散余裕型</div>
-            <div class="text-[9px] text-slate-300 leading-tight mt-0.5">2人並行の王道。<br>平穏と逢瀬を両立</div>
+          <button type="button" onclick="applyStylePreset('balanced')" id="presetBtnBalanced" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-purple-950/60 border-purple-500 ring-1 ring-purple-500/50">
+            <div class="text-sm sm:text-base mb-0.5">🍷</div>
+            <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">分散余裕型</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-300 leading-tight mt-1">2人並行の王道。<br>平穏と逢瀬両立</div>
           </button>
-          <button type="button" onclick="applyStylePreset('carnage')" id="presetBtnCarnage" class="p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-pink-500">
-            <div class="text-base mb-1">⚔️</div>
-            <div class="text-xs font-bold text-white">100人斬り型</div>
-            <div class="text-[9px] text-slate-400 leading-tight mt-0.5">4人同時・超高速回転。<br>首都圏夜の覇者</div>
+          <button type="button" onclick="applyStylePreset('carnage')" id="presetBtnCarnage" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-pink-500">
+            <div class="text-sm sm:text-base mb-0.5">⚔️</div>
+            <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">100人斬り型</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">4人・超高速回転。<br>同年代で最速狙い</div>
           </button>
         </div>
       </div>
@@ -448,10 +448,10 @@
           </div>
         </div>
 
-        <!-- 体力 -->
+        <!-- 体力（トラブル抑制の要） -->
         <div class="space-y-1">
           <div class="flex justify-between text-xs">
-            <span class="text-cyan-400 font-medium">⚡ 体力・スケジュール管理（並行人数増で重要）</span>
+            <span class="text-cyan-400 font-medium">⚡ 体力・アリバイ管理（身バレ・家庭警戒・訴訟の抑止）</span>
             <span id="valStamina" class="font-bold text-white">4 / 10</span>
           </div>
           <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
@@ -519,17 +519,17 @@
     <section id="step2" class="hidden space-y-3 pb-24 select-none cursor-pointer">
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
         <div>
-          <span id="simCurrentAge" class="text-base font-bold text-white">40歳（1年目 1月）</span>
-          <span id="simProgressMonth" class="text-slate-400 ml-1.5">（1 / 120ヶ月）</span>
+          <span id="simCurrentAge" class="text-sm sm:text-base font-bold text-white">40歳（1年目 1月）</span>
+          <span id="simProgressMonth" class="text-slate-400 ml-1">（1 / 120ヶ月）</span>
         </div>
         <div class="flex items-center gap-3">
           <div class="text-right">
             <span class="text-slate-400 text-[10px]">並行人数</span>
-            <div id="simActiveCount" class="font-bold text-purple-400 text-sm">0 / 2人</div>
+            <div id="simActiveCount" class="font-bold text-purple-400 text-xs sm:text-sm">0 / 2人</div>
           </div>
           <div class="text-right">
             <span class="text-slate-400 text-[10px]">累計交際</span>
-            <div id="simTotalPartners" class="font-bold text-pink-400 text-sm">0人</div>
+            <div id="simTotalPartners" class="font-bold text-pink-400 text-xs sm:text-sm">0人</div>
           </div>
         </div>
       </div>
@@ -564,11 +564,11 @@
         <div class="space-y-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800/80">
           <div class="flex items-center gap-2">
             <span class="text-[9px] text-slate-500 w-7 flex-shrink-0" id="matrixRow1Label">1年目</span>
-            <div id="matrixGridRow1" class="grid grid-cols-12 gap-1.5 flex-1 items-center"></div>
+            <div id="matrixGridRow1" class="grid grid-cols-12 gap-1 sm:gap-1.5 flex-1 items-center"></div>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-[9px] text-slate-500 w-7 flex-shrink-0" id="matrixRow2Label">2年目</span>
-            <div id="matrixGridRow2" class="grid grid-cols-12 gap-1.5 flex-1 items-center"></div>
+            <div id="matrixGridRow2" class="grid grid-cols-12 gap-1 sm:gap-1.5 flex-1 items-center"></div>
           </div>
         </div>
         <div class="flex justify-between text-[9px] text-slate-500 px-1">
@@ -577,60 +577,88 @@
         </div>
       </div>
 
-      <!-- 新規マッチング時トースト通知（ダブルマッチ対応） -->
-      <div id="newPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-purple-950 via-pink-950 to-slate-900 border-2 border-pink-500 rounded-xl p-3 shadow-2xl">
-        <div class="flex items-center gap-3">
+      <!-- 新規マッチング時トースト通知 -->
+      <div id="newPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-purple-950 via-pink-950 to-slate-900 border-2 border-pink-500 rounded-xl p-2.5 sm:p-3 shadow-2xl">
+        <div class="flex items-center gap-2.5 sm:gap-3">
           <div class="avatar-frame-lg">
             <img src="" alt="" id="toastPartnerImg">
           </div>
           <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between">
-              <div class="space-y-0.5">
-                <div class="text-[10px] font-bold text-pink-300 flex items-center gap-1.5">
-                  <span class="animate-ping w-2 h-2 rounded-full bg-pink-400 inline-block"></span>
-                  <span id="toastHeaderTitle">💖 NEW PARTNER MATCHED!</span>
+            <div class="flex items-start justify-between gap-1">
+              <div class="space-y-0.5 min-w-0">
+                <div class="text-[9.5px] sm:text-[10px] font-bold text-pink-300 flex items-center gap-1 truncate">
+                  <span class="animate-ping w-1.5 h-1.5 rounded-full bg-pink-400 inline-block flex-shrink-0"></span>
+                  <span id="toastHeaderTitle" class="truncate">💖 NEW MATCHED!</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-xs sm:text-sm font-black text-white" id="toastPartnerName">カナコ (36歳)</span>
                   <span id="toastPartnerBadge"></span>
                 </div>
-                <div class="text-sm font-black text-white" id="toastPartnerName">カナコ (36歳)</div>
-                <div class="text-[11px] text-purple-200" id="toastPartnerAreaJob">東京・中目黒 ｜ 一般事務</div>
+                <div class="text-[10px] text-purple-200 truncate" id="toastPartnerAreaJob">東京・中目黒 ｜ 一般事務</div>
               </div>
-              <div class="text-right space-y-1">
-                <span id="toastPartnerChem" class="inline-block px-2 py-0.5 rounded text-[10px] font-black bg-pink-950 border border-pink-600 text-pink-200">相性 S</span>
+              <div class="text-right flex-shrink-0">
+                <span id="toastPartnerChem" class="inline-block px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-black bg-pink-950 border border-pink-600 text-pink-200">相性 S</span>
               </div>
             </div>
           </div>
         </div>
-        <p id="toastPartnerQuote" class="text-[10px] text-slate-300 italic pt-1.5 mt-2 border-t border-white/10">
+        <p id="toastPartnerQuote" class="text-[9.5px] sm:text-[10px] text-slate-300 italic pt-1 mt-1.5 border-t border-white/10 leading-snug">
           「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」
         </p>
       </div>
 
       <!-- 関係解消・破局時トースト通知 -->
-      <div id="breakupPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-slate-950 via-purple-950/60 to-slate-900 border-2 border-purple-400/80 rounded-xl p-3 shadow-2xl">
-        <div class="flex items-center gap-3">
+      <div id="breakupPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-slate-950 via-purple-950/60 to-slate-900 border-2 border-purple-400/80 rounded-xl p-2.5 sm:p-3 shadow-2xl">
+        <div class="flex items-center gap-2.5 sm:gap-3">
           <div class="avatar-frame-lg grayscale contrast-125">
             <img src="" alt="" id="toastBreakupImg">
           </div>
           <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between">
-              <div class="space-y-0.5">
-                <div class="text-[10px] font-bold text-purple-300 flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
-                  <span id="toastBreakupTag">🍂 PARTNER BREAKUP（逢瀬の終焉）</span>
+            <div class="flex items-start justify-between gap-1">
+              <div class="space-y-0.5 min-w-0">
+                <div class="text-[9.5px] sm:text-[10px] font-bold text-purple-300 flex items-center gap-1 truncate">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block flex-shrink-0"></span>
+                  <span id="toastBreakupTag" class="truncate">🍂 PARTNER BREAKUP</span>
                 </div>
-                <div class="text-sm font-black text-slate-200" id="toastBreakupName">カナコ (37歳)</div>
-                <div class="text-[10px] text-slate-400" id="toastBreakupPeriod">4ヶ月で関係解消</div>
+                <div class="text-xs sm:text-sm font-black text-slate-200 truncate" id="toastBreakupName">カナコ (37歳)</div>
+                <div class="text-[9.5px] text-slate-400" id="toastBreakupPeriod">4ヶ月で関係解消</div>
               </div>
             </div>
           </div>
         </div>
-        <p id="toastBreakupQuote" class="text-[10px] text-purple-200 italic pt-1.5 mt-2 border-t border-purple-500/20">
+        <p id="toastBreakupQuote" class="text-[9.5px] sm:text-[10px] text-purple-200 italic pt-1 mt-1.5 border-t border-purple-500/20 leading-snug">
           「今までありがとう。日常に戻らなきゃいけないの。」
         </p>
       </div>
 
+      <!-- 離婚最後通牒（執行猶予）警告トースト通知 -->
+      <div id="divorceWarningToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-rose-950 via-red-950 to-slate-950 border-2 border-rose-500 rounded-xl p-3 shadow-2xl">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="text-2xl sm:text-3xl flex-shrink-0 animate-ping">🚨</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-black text-rose-300">家庭崩壊寸前！ 離婚の最後通牒！</div>
+            <div class="text-[11px] text-white font-bold">配偶者から離婚届を突きつけられた！</div>
+            <div class="text-[9.5px] text-slate-300 pt-0.5 leading-tight">
+              ※直ちに身辺整理（1人以下に手放す）をしなければ、来月すべてを失います。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 相手配偶者からの訴訟トースト通知 -->
+      <div id="lawsuitToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-amber-950 via-rose-950 to-slate-950 border-2 border-amber-500 rounded-xl p-2.5 sm:p-3 shadow-2xl">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="text-2xl sm:text-3xl flex-shrink-0 animate-bounce">⚖️</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[11px] sm:text-xs font-black text-amber-300">相手の配偶者から内容証明郵便！</div>
+            <div class="text-xs sm:text-sm font-bold text-white truncate" id="toastLawsuitPartnerName">サオリ (33歳) の夫に発覚</div>
+            <div class="text-[9px] sm:text-[10px] text-rose-300 pt-0.5 leading-tight">示談金支払いにより本業年収Lvが低下（-2 Lv）</div>
+          </div>
+        </div>
+      </div>
+
       <!-- 月別並行パートナー＆逢瀬スコアログカード -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 sm:p-3.5 space-y-2.5">
         <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-1.5">
           <div class="font-bold text-slate-200 flex items-center gap-1.5">
             <span id="seasonBadge">🌸 4月</span>
@@ -649,7 +677,7 @@
         <div class="flex items-center justify-between text-slate-400 font-semibold">
           <div class="flex items-center gap-1">
             <span>🏠 家庭の気配:</span>
-            <span class="text-slate-300">配偶者と同居中</span>
+            <span id="spouseStatusLabel" class="text-slate-300">配偶者と同居中</span>
           </div>
           <span id="statSummaryText" class="text-[10px] text-slate-400">本業年収水準: Lv.4</span>
         </div>
@@ -743,7 +771,7 @@
               <div class="flex justify-between items-start">
                 <div>
                   <span class="text-[10px] tracking-wider text-pink-400 font-bold uppercase">👑 最長交際パートナーの記憶</span>
-                  <h3 id="longestPartnerNameAge" class="text-base font-bold text-white">エリコ (46歳)</h3>
+                  <h3 id="longestPartnerNameAge" class="text-sm sm:text-base font-bold text-white truncate">エリコ (46歳)</h3>
                   <div id="longestPartnerPeriod" class="text-xs text-purple-300">交際64ヶ月（5年4ヶ月）</div>
                 </div>
                 <div id="longestPartnerChem" class="px-2 py-0.5 rounded text-xs font-black bg-pink-950 border border-pink-700 text-pink-300">
@@ -766,7 +794,7 @@
               <div class="flex justify-between items-start">
                 <div>
                   <span class="text-[10px] tracking-wider text-amber-400 font-bold uppercase">🔥 歴代最高密会スコアの記憶</span>
-                  <h3 id="highestScorePartnerNameAge" class="text-base font-bold text-white">サオリ (32歳)</h3>
+                  <h3 id="highestScorePartnerNameAge" class="text-sm sm:text-base font-bold text-white truncate">サオリ (32歳)</h3>
                   <div id="highestScoreDetail" class="text-xs text-amber-300">最高スコア: 124 pt (限界突破)</div>
                 </div>
                 <div id="highestScoreChem" class="px-2 py-0.5 rounded text-xs font-black bg-amber-950 border border-amber-600 text-amber-200">
@@ -871,7 +899,6 @@
         <button id="pausePlayBtn" onclick="togglePauseSimulation()" class="w-10 h-10 rounded-xl bg-purple-700/80 hover:bg-purple-600 border border-purple-500 text-white flex items-center justify-center font-bold text-sm transition active:scale-95">
           ⏸️
         </button>
-        <!-- 進行速度トグルボタン（3.0s ⇄ 1.5s） -->
         <button id="speedToggleBtn" onclick="toggleSpeed()" class="px-2.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-purple-300 hover:bg-slate-700 transition active:scale-95">
           ⏩ 1.0x
         </button>
@@ -888,15 +915,15 @@
   </div>
 
   <!-- 2年ごとの節目モーダル -->
-  <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3.5 shadow-2xl my-auto">
+  <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl my-auto max-h-[88vh] overflow-y-auto">
       <div class="text-center space-y-1">
         <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold" id="twoYearHeaderTag">24-Month Milestone</span>
-        <h3 class="text-lg font-bold text-white" id="twoYearTitle">42歳を迎えて（2年経過）</h3>
+        <h3 class="text-base sm:text-lg font-bold text-white" id="twoYearTitle">42歳を迎えて（2年経過）</h3>
       </div>
 
       <!-- 10年史の途中サマリーカード群 -->
-      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
+      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-2.5 sm:p-3 space-y-2">
         <div class="text-[11px] font-bold text-amber-300 flex items-center justify-between">
           <span>📊 これまでの到達サマリー</span>
           <span class="text-[9px] text-slate-500">進捗</span>
@@ -915,7 +942,6 @@
             <span id="twoYearSummaryScore" class="font-bold text-amber-300">0 pt</span>
           </div>
         </div>
-        <!-- 最年少・最年長（シンプル表示） -->
         <div class="grid grid-cols-2 gap-1.5 text-[11px]">
           <div class="bg-slate-900 p-1.5 rounded border border-slate-800 flex justify-between items-center">
             <span class="text-slate-400 text-[10px]">最年少:</span>
@@ -929,7 +955,7 @@
       </div>
 
       <!-- 現在交際中のパートナー動向 -->
-      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
+      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-2.5 sm:p-3 space-y-1.5">
         <div class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
           <span>💖 現在継続中のパートナー</span>
         </div>
@@ -937,7 +963,7 @@
       </div>
 
       <!-- 本業年収Lv推移 -->
-      <div class="bg-slate-950/80 border border-emerald-900/60 rounded-xl p-3 flex justify-between items-center text-xs">
+      <div class="bg-slate-950/80 border border-emerald-900/60 rounded-xl p-2.5 sm:p-3 flex justify-between items-center text-xs">
         <div>
           <span class="text-slate-400 block text-[10px]">本業年収水準の推移</span>
           <span id="incomeChangeReport" class="font-bold text-emerald-400 text-sm">Lv.4 → Lv.5</span>
@@ -948,12 +974,12 @@
       </div>
 
       <!-- 加齢減退レポート -->
-      <div id="twoYearAgeDropDetail" class="bg-rose-950/40 border border-rose-800/60 rounded-xl p-3 space-y-2">
+      <div id="twoYearAgeDropDetail" class="bg-rose-950/40 border border-rose-800/60 rounded-xl p-2.5 sm:p-3 space-y-1.5">
         <div class="flex justify-between items-center text-xs">
           <span class="font-bold text-rose-300 flex items-center gap-1">📉 加齢による肉体変化</span>
           <span id="twoYearTotalDropText" class="text-[10px] px-2 py-0.5 rounded bg-rose-900 text-rose-200 font-bold">-2 pt</span>
         </div>
-        <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+        <div class="grid grid-cols-3 gap-1.5 text-center text-[11px]">
           <div class="bg-slate-950/70 p-1.5 rounded border border-rose-900/40">
             <div class="text-[10px] text-amber-300">✨ 外見</div>
             <div id="dropDetailLooks" class="font-bold text-white">5 → 4</div>
@@ -970,19 +996,32 @@
       </div>
 
       <!-- 再配分ポイント（+1底上げ） -->
-      <div class="bg-purple-950/40 border border-purple-800/50 rounded-xl p-3 flex justify-between items-center">
+      <div class="bg-purple-950/40 border border-purple-800/50 rounded-xl p-2.5 sm:p-3 flex justify-between items-center">
         <div>
           <div class="text-xs font-bold text-purple-200">再配分可能ポイント</div>
           <div class="text-[10px] text-slate-400">年収Lv + 1pt ＋ 成果ボーナス − 揉め事ペナルティ</div>
         </div>
         <div class="text-right">
-          <span id="twoYearRemainPoints" class="text-2xl font-black text-purple-300">5</span>
+          <span id="twoYearRemainPoints" class="text-xl sm:text-2xl font-black text-purple-300">5</span>
           <span class="text-xs text-slate-400"> pt</span>
         </div>
       </div>
 
+      <!-- 家庭ケア（家族旅行で監視警戒度を下げる） -->
+      <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-2.5 sm:p-3 flex justify-between items-center text-xs">
+        <div>
+          <div class="font-bold text-emerald-300 flex items-center gap-1">
+            <span>🏡 家庭ケア（家族旅行・機嫌取り）</span>
+          </div>
+          <div class="text-[10px] text-slate-400">配偶者警戒: <span id="modalAlertVal" class="font-bold text-amber-400">Lv.3</span> (1pt消費で -2Lv)</div>
+        </div>
+        <button type="button" onclick="buyFamilyCare()" id="btnFamilyCare" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95">
+          ケア実行 (-1pt)
+        </button>
+      </div>
+
       <!-- 活動費予算 -->
-      <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-3 space-y-1.5">
+      <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-2.5 sm:p-3 space-y-1.5">
         <div class="flex justify-between items-center text-xs">
           <span class="font-bold text-white">💳 婚外活動費（予算 Lv.0リセット済）</span>
           <span id="twoYearValBudget" class="font-black text-pink-300">Lv.0</span>
@@ -997,14 +1036,14 @@
       </div>
 
       <!-- アンチエイジング再投資 -->
-      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2.5">
+      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-2">
         <div class="text-[11px] font-semibold text-slate-400">アンチエイジング再投資</div>
         <div class="space-y-1">
           <div class="flex justify-between text-xs">
             <span class="text-amber-300">✨ 外見（出会い・継続。女性は影響大）</span>
             <span id="twoYearValLooks" class="font-bold text-white">4 / 10</span>
           </div>
-          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+          <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
             <div id="twoYearBarLooks" class="stat-bar-fill h-full bg-amber-400 w-[40%]"></div>
           </div>
           <div class="flex justify-end gap-2">
@@ -1015,10 +1054,10 @@
 
         <div class="space-y-1">
           <div class="flex justify-between text-xs">
-            <span class="text-cyan-400">⚡ 体力・生活管理</span>
+            <span class="text-cyan-400">⚡ 体力・アリバイ管理（トラブル・警戒抑止）</span>
             <span id="twoYearValStamina" class="font-bold text-white">4 / 10</span>
           </div>
-          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+          <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
             <div id="twoYearBarStamina" class="stat-bar-fill h-full bg-cyan-400 w-[40%]"></div>
           </div>
           <div class="flex justify-end gap-2">
@@ -1032,7 +1071,7 @@
             <span class="text-rose-400">🔥 性欲・意欲</span>
             <span id="twoYearValLibido" class="font-bold text-white">5 / 10</span>
           </div>
-          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+          <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
             <div id="twoYearBarLibido" class="stat-bar-fill h-full bg-rose-500 w-[50%]"></div>
           </div>
           <div class="flex justify-end gap-2">
@@ -1042,7 +1081,7 @@
         </div>
       </div>
 
-      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2">
+      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-2">
         <div class="flex justify-between items-center text-xs">
           <span class="font-semibold text-slate-300">同時交際上限の変更</span>
           <select id="twoYearMaxPartners" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
@@ -1178,18 +1217,29 @@
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
+    /* 裏事情タグ一覧（短縮表示で画面崩れ防止） */
+    const PARTNER_TAGS_POOL = ["平日昼", "年下独身", "夜間遠征", "秘密厳守", "冷えきり", "割り切り"];
+
+    function pickPartnerTag(age, job) {
+      if (age <= 28 && Math.random() < 0.6) return "年下独身";
+      if ((job.includes("医師") || job.includes("弁護士") || job.includes("役員") || job.includes("経営") || job.includes("金融")) && Math.random() < 0.55) return "秘密厳守";
+      if (Math.random() < 0.25) return "平日昼";
+      return PARTNER_TAGS_POOL[Math.floor(Math.random() * PARTNER_TAGS_POOL.length)];
+    }
+
+    /* 職業プール（短縮形に統一・会社経営と会社役員は両方残存） */
     const FEMALE_JOBS_POOL = [
-      "一般事務", "公務員", "専業主婦", "パート事務", "SE・プログラマー", "営業職",
-      "医療事務", "看護師", "カフェ店員", "アパレル販売", "高校教諭", "総務・経理",
-      "Webデザイナー", "美容師", "保育士", "食品メーカー事務", "エステサロン経営", "ピアノ講師"
+      "一般事務", "公務員", "専業主婦", "パート", "SE", "営業職",
+      "医療事務", "看護師", "カフェ店員", "アパレル", "高校教諭", "経理",
+      "デザイナー", "美容師", "保育士", "メーカー事務", "エステ経営", "ピアノ講師"
     ];
     const MALE_JOBS_POOL = [
-      "一般事務", "公務員", "専業主夫", "SE・プログラマー", "法人営業",
-      "医療事務", "大学病院医師", "カフェ店長", "高校教諭", "製造・物流",
-      "総務・経理", "Webディレクター", "外資系金融", "会社経営・役員", "企業弁護士", "不動産企画", "出版編集者"
+      "一般事務", "公務員", "専業主夫", "SE", "法人営業",
+      "医療事務", "医師", "カフェ店長", "高校教諭", "物流",
+      "経理", "ディレクター", "外資金融", "会社経営", "会社役員", "弁護士", "不動産企画", "出版編集者"
     ];
 
-    /* 各都県の最寄り駅プール（田園都市線・東横線・主要路線カルチャー重点拡張） */
+    /* 各都県の最寄り駅プール（短縮・新都心除外・埼玉千葉増量） */
     const AREAS_NO_STATION = {
       tokyo: [
         "中目黒", "恵比寿", "銀座", "神楽坂", "白金台", "二子玉川", "三軒茶屋", "代官山",
@@ -1197,16 +1247,16 @@
         "錦糸町", "荻窪", "立川"
       ],
       kanagawa: [
-        "たまプラーザ", "あざみ野", "青葉台", "溝の口", "鷺沼", "宮前平", "市が尾",
-        "みなとみらい", "元町", "武蔵小杉", "日吉", "湘南・鎌倉", "藤沢", "新横浜", "川崎"
+        "たまプラ", "あざみ野", "青葉台", "溝の口", "鷺沼", "宮前平", "市が尾",
+        "みなとみらい", "元町", "武蔵小杉", "日吉", "鎌倉", "藤沢", "新横浜", "川崎"
       ],
       saitama: [
-        "大宮", "浦和", "さいたま新都心", "武蔵浦和", "川越", "所沢", "越谷", "南越谷",
-        "草加", "和光市", "朝霞台", "川口"
+        "大宮", "浦和", "武蔵浦和", "川越", "所沢", "越谷", "南越谷",
+        "草加", "和光市", "朝霞台", "川口", "春日部", "熊谷", "上尾", "戸田", "志木"
       ],
       chiba: [
-        "本八幡", "船橋", "西船橋", "津田沼", "柏", "流山おおたかの森", "海浜幕張", "幕張",
-        "浦安", "新浦安", "妙典", "市川", "松戸"
+        "本八幡", "船橋", "西船橋", "津田沼", "柏", "流山", "海浜幕張", "幕張",
+        "浦安", "新浦安", "妙典", "市川", "松戸", "千葉", "八千代", "稲毛", "新松戸"
       ]
     };
 
@@ -1335,2029 +1385,8 @@
     let isSoundOn = false;
     let audioCtx = null;
     let simTimer = null;
-    let simSpeedMs = 3000; // デフォルト3.0秒
+    let simSpeedMs = 3000;
 
     let appState = {
       user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 40, birthMonth: 4 },
-      stats: { looks: 4, libido: 4, stamina: 4, budget: 0, income: 4, childBurden: 5, spouseAffection: 5, spouseAlert: 3, targetAgePref: "same", maxPartners: 2 },
-      tempPoints: 5,
-      sim: {
-        currentMonth: 0, currentAge: 40, isPaused: false, isSkipping: false,
-        partners: [], activePartnerIds: [], totalPartnerCounter: 0,
-        monthlyHistory: [], isRetired: false, lastMilestoneMonth: -1,
-        globalMaxSexScore: 0, highestScorePartner: null,
-        metOlder20Plus: false, metYounger20Plus: false,
-        crisisCountIn2Years: 0, breakupCountIn2Years: 0
-      },
-      twoYearTemp: { points: 5, looks: 4, libido: 4, stamina: 4, budget: 0 }
-    };
-
-    function getRealAge(mIdx) {
-      const b = appState.user.birthMonth || 4;
-      const startAge = appState.user.startAge || 40;
-      if (b === 1) return startAge + Math.floor(mIdx / 12);
-      return mIdx < b - 1 ? startAge : startAge + 1 + Math.floor((mIdx - (b - 1)) / 12);
-    }
-
-    function initAudio() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    function toggleSound() {
-      initAudio();
-      isSoundOn = !isSoundOn;
-      document.getElementById("soundIcon").innerText = isSoundOn ? "🔊" : "🔇";
-      document.getElementById("soundText").innerText = isSoundOn ? "音響: ON" : "音響: OFF";
-      
-      const bgm = document.getElementById("bgmAudio");
-      if (bgm) {
-        if (isSoundOn) {
-          bgm.volume = 0.35;
-          bgm.play().catch(e => {});
-        } else {
-          bgm.pause();
-        }
-      }
-      if (isSoundOn) playTone(587.33, 0.12);
-    }
-
-    /* 速度切り替えトグル（3.0秒 ⇄ 1.5秒） */
-    function toggleSpeed() {
-      if (simSpeedMs === 3000) {
-        simSpeedMs = 1500;
-        document.getElementById("speedToggleBtn").innerText = "⏩ 2.0x";
-        document.getElementById("stickySpeedText").innerText = "1.5秒/月 (早送り)";
-      } else {
-        simSpeedMs = 3000;
-        document.getElementById("speedToggleBtn").innerText = "⏩ 1.0x";
-        document.getElementById("stickySpeedText").innerText = "3.0秒/月 進行中";
-      }
-      triggerVibrate(15);
-      if (!appState.sim.isPaused && !appState.sim.isSkipping) {
-        clearTimeout(simTimer);
-        simTimer = setTimeout(simulationTick, simSpeedMs);
-      }
-    }
-
-    function playTone(freq, duration, type="sine") {
-      if (!isSoundOn || !audioCtx) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch(e) {}
-    }
-
-    function playAlarm() { if (isSoundOn && audioCtx) playTone(180, 0.35, "sawtooth"); }
-    function playRareChime() {
-      if (!isSoundOn || !audioCtx) return;
-      playTone(523.25, 0.12, "triangle");
-      setTimeout(() => playTone(659.25, 0.12, "triangle"), 90);
-      setTimeout(() => playTone(783.99, 0.22, "triangle"), 180);
-    }
-    function playBreakupChime() {
-      if (!isSoundOn || !audioCtx) return;
-      playTone(440.00, 0.15, "sine");
-      setTimeout(() => playTone(349.23, 0.25, "sine"), 120);
-    }
-    function playLimitBreakChime() {
-      if (!isSoundOn || !audioCtx) return;
-      playTone(587.33, 0.15, "triangle");
-      setTimeout(() => playTone(739.99, 0.15, "triangle"), 80);
-      setTimeout(() => playTone(880.00, 0.15, "triangle"), 160);
-      setTimeout(() => playTone(1174.66, 0.35, "sine"), 240);
-    }
-
-    function triggerVibrate(pat) {
-      if ("vibrate" in navigator) try { navigator.vibrate(pat); } catch(e) {}
-    }
-
-    /* ディスクレーマー承認 ＆ BGM開始 */
-    function acceptDisclaimer() {
-      initAudio();
-      isSoundOn = true;
-      document.getElementById("soundIcon").innerText = "🔊";
-      document.getElementById("soundText").innerText = "音響: ON";
-      
-      const bgm = document.getElementById("bgmAudio");
-      if (bgm) {
-        bgm.volume = 0.35;
-        bgm.play().catch(e => {});
-      }
-
-      playTone(523.25, 0.12);
-      triggerVibrate(20);
-      document.getElementById("stepDisclaimer").classList.add("hidden");
-      document.getElementById("step0").classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      runCinematicPrologue();
-    }
-
-    /* プロローグ進行（自動＆タップ早送り） */
-    let prologueStep = 0;
-    let prologueAutoTimer = null;
-
-    function runCinematicPrologue() {
-      clearTimeout(prologueAutoTimer);
-      prologueStep = 0;
-      ["pText1", "pText2", "pText3", "pTitleCard", "pText4", "pActionBtn"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove("visible");
-      });
-      advancePrologue();
-    }
-
-    function advancePrologue(e) {
-      if (e) e.stopPropagation();
-      clearTimeout(prologueAutoTimer);
-      prologueStep++;
-      if (prologueStep === 1) document.getElementById("pText1")?.classList.add("visible");
-      else if (prologueStep === 2) document.getElementById("pText2")?.classList.add("visible");
-      else if (prologueStep === 3) document.getElementById("pText3")?.classList.add("visible");
-      else if (prologueStep === 4) document.getElementById("pTitleCard")?.classList.add("visible");
-      else if (prologueStep === 5) document.getElementById("pText4")?.classList.add("visible");
-      else if (prologueStep >= 6) {
-        document.getElementById("pActionBtn")?.classList.add("visible");
-        return;
-      }
-      prologueAutoTimer = setTimeout(() => advancePrologue(), 1300);
-    }
-
-    function goToStep1A(e) {
-      if (e) e.stopPropagation();
-      initAudio();
-      if (isSoundOn) playTone(440, 0.15);
-      triggerVibrate(20);
-      document.getElementById("step0").classList.add("hidden");
-      document.getElementById("step1a").classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function onGenderChange() {
-      const g = document.getElementById("userGender").value;
-      if (g === "female") {
-        document.getElementById("userName").value = "マイ";
-        document.getElementById("lblBudgetDesc").innerText = "女性は活動費の効果は控えめ（外見が絶大な効果）";
-      } else {
-        document.getElementById("userName").value = "ユウスケ";
-        document.getElementById("lblBudgetDesc").innerText = "男性は出会い・継続に絶大な効果（活動費必須）";
-      }
-    }
-
-    function updateConcurrentDesc() {
-      const val = document.getElementById("userMaxConcurrent").value;
-      const descMap = { "1": "一途・破局率激減", "2": "分散満喫", "3": "多重密会", "4": "限界突破・100人斬り狙い" };
-      document.getElementById("lblConcurrentDesc").innerText = descMap[val] || "";
-    }
-
-    function rollIncomeLevel() {
-      const r = (Math.random() + Math.random() + Math.random() + Math.random()) / 4;
-      return Math.max(2, Math.min(7, Math.round(2 + r * 5)));
-    }
-
-    function rollInitialStatsTotal() {
-      const r = (Math.random() + Math.random() + Math.random() + Math.random()) / 4;
-      return Math.max(10, Math.min(18, Math.round(10 + r * 8)));
-    }
-
-    function goToStep1B() {
-      appState.user.name = document.getElementById("userName").value.trim() || "名無し";
-      appState.user.gender = document.getElementById("userGender").value;
-      appState.user.pref = document.getElementById("userPref").value;
-      appState.user.startAge = parseInt(document.getElementById("userAge").value);
-      appState.user.birthMonth = parseInt(document.getElementById("userBirthMonth").value);
-
-      onGenderChange();
-      rerollStats();
-
-      document.getElementById("step1a").classList.add("hidden");
-      document.getElementById("step1b").classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    /* 婚外プレイスタイルのクイックプリセット反映 */
-    function applyStylePreset(presetType) {
-      initAudio();
-      triggerVibrate(15);
-      if (isSoundOn) playTone(659.25, 0.1);
-
-      const pBtns = {
-        pure: document.getElementById("presetBtnPure"),
-        balanced: document.getElementById("presetBtnBalanced"),
-        carnage: document.getElementById("presetBtnCarnage")
-      };
-      Object.keys(pBtns).forEach(k => {
-        if (!pBtns[k]) return;
-        if (k === presetType) {
-          pBtns[k].className = "p-2.5 rounded-xl border text-left transition-all bg-purple-950/60 border-purple-500 ring-1 ring-purple-500/50 scale-[1.02]";
-        } else {
-          pBtns[k].className = "p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-80 scale-100";
-        }
-      });
-
-      const isMale = (appState.user.gender === "male");
-      const concSelect = document.getElementById("userMaxConcurrent");
-      const agePrefSelect = document.getElementById("targetAgePref");
-
-      appState.tempPoints = appState.stats.income + 1;
-      appState.stats.budget = 0;
-      appState.stats.looks = appState.baseLooks || 4;
-      appState.stats.libido = appState.baseLibido || 4;
-      appState.stats.stamina = appState.baseStamina || 4;
-
-      if (presetType === "pure") {
-        concSelect.value = "1";
-        agePrefSelect.value = "same";
-        while (appState.tempPoints > 0) {
-          if (appState.stats.stamina < 9) { appState.stats.stamina++; appState.tempPoints--; }
-          else if (appState.stats.looks < 9) { appState.stats.looks++; appState.tempPoints--; }
-          else if (appState.stats.libido < 9) { appState.stats.libido++; appState.tempPoints--; }
-          else break;
-        }
-      } else if (presetType === "carnage") {
-        concSelect.value = "4";
-        agePrefSelect.value = isMale ? "younger" : "same";
-        if (isMale) {
-          while (appState.tempPoints > 0 && appState.stats.budget < 10) {
-            appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-            appState.tempPoints--;
-          }
-          while (appState.tempPoints > 0) {
-            if (appState.stats.looks < 9) { appState.stats.looks++; appState.tempPoints--; }
-            else if (appState.stats.stamina < 9) { appState.stats.stamina++; appState.tempPoints--; }
-            else break;
-          }
-        } else {
-          while (appState.tempPoints > 0 && appState.stats.looks < 10) {
-            appState.stats.looks++;
-            appState.tempPoints--;
-          }
-          while (appState.tempPoints > 0) {
-            if (appState.stats.stamina < 9) { appState.stats.stamina++; appState.tempPoints--; }
-            else if (appState.stats.libido < 9) { appState.stats.libido++; appState.tempPoints--; }
-            else break;
-          }
-        }
-      } else {
-        concSelect.value = "2";
-        agePrefSelect.value = "same";
-        if (isMale && appState.tempPoints >= 2) {
-          appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-          appState.tempPoints--;
-        }
-        autoAllocateRemainingPoints();
-      }
-
-      updateConcurrentDesc();
-      renderStep1B();
-    }
-
-    function rerollStats() {
-      const income = rollIncomeLevel();
-      appState.stats.income = income;
-      appState.tempPoints = income + 1;
-
-      const totalTarget = rollInitialStatsTotal();
-      let remain = totalTarget - 9;
-      appState.stats.looks = 3;
-      appState.stats.libido = 3;
-      appState.stats.stamina = 3;
-
-      while (remain > 0) {
-        const pick = Math.floor(Math.random() * 3);
-        if (pick === 0 && appState.stats.looks < 9) { appState.stats.looks++; remain--; }
-        else if (pick === 1 && appState.stats.libido < 9) { appState.stats.libido++; remain--; }
-        else if (pick === 2 && appState.stats.stamina < 9) { appState.stats.stamina++; remain--; }
-        else {
-          if (appState.stats.looks < 9) { appState.stats.looks++; remain--; }
-          else if (appState.stats.stamina < 9) { appState.stats.stamina++; remain--; }
-          else if (appState.stats.libido < 9) { appState.stats.libido++; remain--; }
-          else break;
-        }
-      }
-
-      appState.baseLooks = appState.stats.looks;
-      appState.baseLibido = appState.stats.libido;
-      appState.baseStamina = appState.stats.stamina;
-
-      appState.stats.budget = 0;
-      appState.stats.childBurden = Math.max(2, Math.min(8, 10 - Math.floor((appState.user.startAge - 35) / 3)));
-      appState.stats.spouseAffection = 5;
-      appState.stats.spouseAlert = 3;
-
-      applyStylePreset('balanced');
-      if (isSoundOn) playTone(523.25, 0.12);
-    }
-
-    function renderStep1B() {
-      document.getElementById("remainPoints").innerText = appState.tempPoints;
-      document.getElementById("valBudget").innerText = "Lv." + appState.stats.budget;
-      document.getElementById("barBudget").style.width = (appState.stats.budget * 10) + "%";
-
-      document.getElementById("valLooks").innerText = appState.stats.looks + " / 10";
-      document.getElementById("barLooks").style.width = (appState.stats.looks * 10) + "%";
-
-      document.getElementById("valLibido").innerText = appState.stats.libido + " / 10";
-      document.getElementById("barLibido").style.width = (appState.stats.libido * 10) + "%";
-
-      document.getElementById("valStamina").innerText = appState.stats.stamina + " / 10";
-      document.getElementById("barStamina").style.width = (appState.stats.stamina * 10) + "%";
-
-      document.getElementById("lblStatsTotal").innerText = (appState.stats.looks + appState.stats.libido + appState.stats.stamina);
-      document.getElementById("lblIncome").innerText = "Lv." + appState.stats.income;
-      document.getElementById("lblChildBurden").innerText = "Lv." + appState.stats.childBurden;
-      document.getElementById("lblSpouseAffection").innerText = "Lv." + appState.stats.spouseAffection;
-      document.getElementById("lblSpouseAlert").innerText = "Lv." + appState.stats.spouseAlert;
-    }
-
-    function adjustStat(type, delta) {
-      if (delta > 0) {
-        if (appState.tempPoints <= 0) return;
-        if (type === "budget") {
-          if (appState.stats.budget >= 10) return;
-          appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-          appState.tempPoints -= 1;
-        } else {
-          if (appState.stats[type] >= 10) return;
-          appState.stats[type] += 1;
-          appState.tempPoints -= 1;
-        }
-      } else {
-        if (type === "budget") {
-          if (appState.stats.budget <= 0) return;
-          appState.stats.budget = Math.max(0, appState.stats.budget - 2);
-          appState.tempPoints += 1;
-        } else {
-          if (appState.stats[type] <= 1) return;
-          appState.stats[type] -= 1;
-          appState.tempPoints += 1;
-        }
-      }
-      renderStep1B();
-      triggerVibrate(12);
-    }
-
-    function autoAllocateRemainingPoints() {
-      if (appState.tempPoints <= 0) return;
-      const isMale = (appState.user.gender === "male");
-      const order = isMale ? ["budget", "looks", "stamina", "libido"] : ["looks", "libido", "stamina", "budget"];
-      let loopCount = 0;
-      while (appState.tempPoints > 0 && loopCount < 30) {
-        let allocatedThisRound = false;
-        for (const stat of order) {
-          if (appState.tempPoints <= 0) break;
-          if (stat === "budget") {
-            if (appState.stats.budget < 10) {
-              appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-              appState.tempPoints--;
-              allocatedThisRound = true;
-            }
-          } else {
-            if (appState.stats[stat] < 10) {
-              appState.stats[stat]++;
-              appState.tempPoints--;
-              allocatedThisRound = true;
-            }
-          }
-        }
-        if (!allocatedThisRound) break;
-        loopCount++;
-      }
-    }
-
-    function autoAllocateTwoYearPoints() {
-      if (appState.twoYearTemp.points <= 0) return;
-      const isMale = (appState.user.gender === "male");
-      const order = isMale ? ["budget", "looks", "stamina", "libido"] : ["looks", "libido", "stamina", "budget"];
-      let loopCount = 0;
-      while (appState.twoYearTemp.points > 0 && loopCount < 30) {
-        let allocatedThisRound = false;
-        for (const stat of order) {
-          if (appState.twoYearTemp.points <= 0) break;
-          if (stat === "budget") {
-            if (appState.twoYearTemp.budget < 10) {
-              appState.twoYearTemp.budget = Math.min(10, appState.twoYearTemp.budget + 2);
-              appState.twoYearTemp.points--;
-              allocatedThisRound = true;
-            }
-          } else {
-            if (appState.twoYearTemp[stat] < 10) {
-              appState.twoYearTemp[stat]++;
-              appState.twoYearTemp.points--;
-              allocatedThisRound = true;
-            }
-          }
-        }
-        if (!allocatedThisRound) break;
-        loopCount++;
-      }
-    }
-
-    /* ============================================================
-       シミュレーション進行ロジック
-       ============================================================ */
-    function updateLiveStats() {
-      document.getElementById("liveStatLooks").innerText = `${appState.stats.looks}/10`;
-      document.getElementById("liveStatStamina").innerText = `${appState.stats.stamina}/10`;
-      document.getElementById("liveStatLibido").innerText = `${appState.stats.libido}/10`;
-      document.getElementById("liveStatBudget").innerText = `Lv.${appState.stats.budget}`;
-      document.getElementById("headerAssetVal").innerText = `Lv.${appState.stats.income}`;
-      document.getElementById("statSummaryText").innerText = `本業年収水準: Lv.${appState.stats.income}`;
-    }
-
-    function startSimulation() {
-      if (appState.tempPoints > 0) {
-        autoAllocateRemainingPoints();
-        renderStep1B();
-      }
-
-      AvatarCacheManager.init();
-      appState.stats.maxPartners = parseInt(document.getElementById("userMaxConcurrent").value) || 2;
-      appState.stats.targetAgePref = document.getElementById("targetAgePref").value;
-      appState.sim.currentMonth = 0;
-      appState.sim.currentAge = appState.user.startAge;
-      appState.sim.lastMilestoneMonth = -1;
-      appState.sim.isPaused = false;
-      appState.sim.isSkipping = false;
-      appState.sim.partners = [];
-      appState.sim.activePartnerIds = [];
-      appState.sim.totalPartnerCounter = 0;
-      appState.sim.monthlyHistory = [];
-      appState.sim.isRetired = false;
-      appState.sim.globalMaxSexScore = 0;
-      appState.sim.highestScorePartner = null;
-      appState.sim.metOlder20Plus = false;
-      appState.sim.metYounger20Plus = false;
-      appState.sim.crisisCountIn2Years = 0;
-      appState.sim.breakupCountIn2Years = 0;
-
-      document.getElementById("step1b").classList.add("hidden");
-      document.getElementById("step2").classList.remove("hidden");
-      document.getElementById("stickyController").classList.remove("hidden");
-      document.getElementById("headerAssetBadge").classList.remove("hidden");
-      updateLiveStats();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-
-      initScreenTapHandler();
-      refresh24MatrixGrid();
-      startSimLoop();
-    }
-
-    let tapStartX = 0, tapStartY = 0;
-    function initScreenTapHandler() {
-      document.addEventListener("pointerdown", e => {
-        tapStartX = e.clientX;
-        tapStartY = e.clientY;
-      });
-      document.addEventListener("pointerup", e => {
-        const step2 = document.getElementById("step2");
-        if (!step2 || step2.classList.contains("hidden")) return;
-        if (e.target.closest("button, select, input, a, #twoYearModal, #clickMonthDetail, [id^='grid-dot-']")) return;
-        const dx = Math.abs(e.clientX - tapStartX);
-        const dy = Math.abs(e.clientY - tapStartY);
-        if (dx < 10 && dy < 10) triggerScreenTapAdvance();
-      });
-    }
-
-    function triggerScreenTapAdvance() {
-      if (appState.sim.isPaused || appState.sim.isSkipping) return;
-      clearTimeout(simTimer);
-      simulationTick();
-    }
-
-    function refresh24MatrixGrid() {
-      const cycleIndex = Math.floor(appState.sim.currentMonth / 24);
-      const startYearNum = cycleIndex * 2 + 1;
-      const endYearNum = startYearNum + 1;
-      const userBirthMonth = appState.user.birthMonth || 4;
-
-      document.getElementById("matrixPhaseTitle").innerText = `第${cycleIndex + 1}期：${startYearNum}〜${endYearNum}年目（${cycleIndex * 24 + 1}〜${(cycleIndex + 1) * 24}ヶ月）`;
-      document.getElementById("matrixRow1Label").innerText = `${startYearNum}年目`;
-      document.getElementById("matrixRow2Label").innerText = `${endYearNum}年目`;
-
-      const r1 = document.getElementById("matrixGridRow1");
-      const r2 = document.getElementById("matrixGridRow2");
-      r1.innerHTML = "";
-      r2.innerHTML = "";
-
-      for (let i = 0; i < 24; i++) {
-        const absMonth = cycleIndex * 24 + i;
-        const calMonth = (i % 12) + 1;
-
-        const dot = document.createElement("div");
-        dot.id = "grid-dot-" + i;
-        dot.className = "w-full aspect-square rounded-full transition-all duration-300 cursor-pointer hover:scale-125 flex items-center justify-center p-[2px] bg-slate-800 border border-slate-700/60";
-        dot.onclick = (e) => { e.stopPropagation(); showClickMonthDetail(absMonth); };
-
-        const centerCircle = document.createElement("div");
-        centerCircle.className = "w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-[9px] select-none";
-        // 誕生月マスは「🎂」絵文字に差し替え
-        const monthEmoji = (calMonth === userBirthMonth) ? "🎂" : (MONTH_EMOJIS[calMonth] || "🌸");
-        centerCircle.innerText = monthEmoji;
-        dot.appendChild(centerCircle);
-
-        if (i < 12) r1.appendChild(dot);
-        else r2.appendChild(dot);
-      }
-    }
-
-    function startSimLoop() {
-      clearTimeout(simTimer);
-      simTimer = setTimeout(simulationTick, simSpeedMs);
-    }
-
-    function pauseSimulationInternal() {
-      clearTimeout(simTimer);
-      appState.sim.isPaused = true;
-      document.getElementById("pausePlayBtn").innerText = "▶️";
-    }
-
-    function resumeSimulationInternal() {
-      appState.sim.isPaused = false;
-      document.getElementById("pausePlayBtn").innerText = "⏸️";
-      startSimLoop();
-    }
-
-    function togglePauseSimulation() {
-      if (appState.sim.isPaused) resumeSimulationInternal();
-      else pauseSimulationInternal();
-    }
-
-    function simulationTick() {
-      if (appState.sim.isPaused) return;
-      if (appState.sim.currentMonth >= 120) { finishSimulation(); return; }
-      if (appState.sim.currentMonth > 0 && appState.sim.currentMonth % 24 === 0 && appState.sim.currentMonth !== appState.sim.lastMilestoneMonth) {
-        pauseForTwoYearMilestone();
-        return;
-      }
-      simulateOneMonth(false);
-      appState.sim.currentMonth++;
-      startSimLoop();
-    }
-
-    function skipToEndOfTwoYears() {
-      pauseSimulationInternal();
-      appState.sim.isSkipping = true;
-      document.getElementById("flashOverlay").className = "fixed inset-0 pointer-events-none z-50 transition-colors";
-
-      let nextMile = (Math.floor(appState.sim.currentMonth / 24) + 1) * 24;
-      if (nextMile <= appState.sim.currentMonth) nextMile += 24;
-      nextMile = Math.min(120, nextMile);
-
-      while (appState.sim.currentMonth < nextMile) {
-        simulateOneMonth(true);
-        appState.sim.currentMonth++;
-      }
-      appState.sim.isSkipping = false;
-
-      if (appState.sim.currentMonth % 24 === 0 && appState.sim.currentMonth < 120) pauseForTwoYearMilestone();
-      else if (appState.sim.currentMonth >= 120) finishSimulation();
-    }
-
-    function simulateOneMonth(isSilent = false) {
-      const mIdx = appState.sim.currentMonth;
-      const calMonth = (mIdx % 12) + 1;
-      const yearNum = Math.floor(mIdx / 12) + 1;
-      const currentRealAge = getRealAge(mIdx);
-      appState.sim.currentAge = currentRealAge;
-
-      document.getElementById("simCurrentAge").innerText = `${currentRealAge}歳（${yearNum}年目 ${calMonth}月）`;
-      document.getElementById("simProgressMonth").innerText = `(${mIdx + 1} / 120ヶ月)`;
-      document.getElementById("stickyMonthText").innerText = `${currentRealAge}歳（${yearNum}年目 ${calMonth}月）`;
-
-      let activePartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
-      let isCrisisHappened = false;
-
-      const prefProp = PREF_PROPERTIES[appState.user.pref] || PREF_PROPERTIES.tokyo;
-
-      const activeCount = activePartners.length;
-      let riskRate = (appState.stats.spouseAlert * 0.02) + (activeCount * 0.02) + (prefProp.crisisBonus || 0);
-      if (appState.stats.stamina <= 3) riskRate += 0.04;
-      riskRate = Math.max(0.01, Math.min(0.40, riskRate));
-
-      if (Math.random() < riskRate && activeCount > 0) {
-        isCrisisHappened = true;
-        appState.sim.crisisCountIn2Years++;
-      }
-
-      const concurrentPenalty = { 1: 0.6, 2: 1.0, 3: 1.8, 4: 2.6 }[appState.stats.maxPartners] || 1.0;
-      const isUserMale = (appState.user.gender === "male");
-
-      activePartners.forEach(p => {
-        p.durationMonths++;
-        p.datesCount++;
-        p.age = p.startAge + Math.floor(p.durationMonths / 12);
-
-        const score = calculateSexScore(p, calMonth, isCrisisHappened, prefProp.scoreBonus || 0);
-        p.lastSexScore = score;
-        if (score > p.maxSexScore) p.maxSexScore = score;
-        if (score > appState.sim.globalMaxSexScore) {
-          appState.sim.globalMaxSexScore = score;
-          appState.sim.highestScorePartner = p;
-        }
-      });
-
-      let breakCandidate = null;
-      let highestBreakRoll = 0;
-
-      activePartners.forEach(p => {
-        let breakRate = 0.07;
-        if (p.chemistry === "S") breakRate = (appState.stats.libido >= 6) ? 0.015 : 0.03;
-        else if (p.chemistry === "A") breakRate = 0.04;
-        else if (p.chemistry === "C") breakRate = (appState.stats.libido >= 6) ? 0.32 : 0.22;
-
-        if (isUserMale) {
-          if (appState.stats.budget >= 6) breakRate *= 0.65;
-          if (appState.stats.budget <= 2) breakRate *= 1.4;
-        } else {
-          if (appState.stats.looks >= 7) breakRate *= 0.6;
-          if (appState.stats.looks <= 3) breakRate *= 1.4;
-        }
-
-        if (p.age >= currentRealAge + 10) breakRate *= 0.75;
-        if (p.age <= currentRealAge - 10) breakRate *= 1.35;
-        breakRate *= concurrentPenalty;
-
-        breakRate += (prefProp.breakBonus || 0);
-        breakRate = Math.max(0.008, breakRate);
-
-        if (p.durationMonths >= 2) {
-          const roll = Math.random();
-          if (roll < breakRate && roll > highestBreakRoll) {
-            highestBreakRoll = roll;
-            breakCandidate = p;
-          }
-        }
-      });
-
-      if (breakCandidate) {
-        appState.sim.activePartnerIds = appState.sim.activePartnerIds.filter(pid => pid !== breakCandidate.id);
-        breakCandidate.endMonth = mIdx;
-        breakCandidate.endAge = breakCandidate.age;
-        appState.sim.breakupCountIn2Years++;
-
-        if (!isSilent) {
-          showBreakupPartnerToast(breakCandidate, isUserMale, false);
-          playBreakupChime();
-          triggerVibrate([60, 40]);
-        }
-      }
-
-      // 新規マッチング判定（月最大2名獲得・エリア補正対応）
-      const maxAllowed = appState.stats.maxPartners || 2;
-      let emptySlots = maxAllowed - appState.sim.activePartnerIds.length;
-      let matchedPartners = [];
-
-      if (emptySlots > 0) {
-        let meetBase = isUserMale ? 0.28 : 0.42;
-        if (isUserMale) {
-          meetBase += (appState.stats.budget - 4) * 0.05;
-          meetBase += (appState.stats.looks - 5) * 0.02;
-        } else {
-          meetBase += (appState.stats.looks - 5) * 0.06;
-          meetBase += (appState.stats.budget - 4) * 0.01;
-        }
-
-        if (appState.stats.targetAgePref === "younger") meetBase *= 0.65;
-        if (appState.stats.targetAgePref === "older") meetBase *= 1.25;
-
-        meetBase += (prefProp.meetBonus || 0);
-        meetBase = Math.max(0.12, Math.min(0.85, meetBase));
-
-        // 1人目判定
-        if (Math.random() < meetBase) {
-          const p1 = createSynthesizedPartner(mIdx, currentRealAge);
-          appState.sim.partners.push(p1);
-          appState.sim.activePartnerIds.push(p1.id);
-          appState.sim.totalPartnerCounter++;
-          matchedPartners.push(p1);
-
-          if (p1.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
-          if (p1.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
-
-          // 2人目判定（空き枠が2以上ある場合のみ追加抽選）
-          if (emptySlots >= 2) {
-            let doubleRate = 0.10;
-            if (isUserMale) {
-              if (appState.stats.budget >= 8) doubleRate += 0.20;
-              else if (appState.stats.budget >= 6) doubleRate += 0.10;
-              if (appState.stats.looks >= 7) doubleRate += 0.10;
-            } else {
-              if (appState.stats.looks >= 8) doubleRate += 0.25;
-              else if (appState.stats.looks >= 6) doubleRate += 0.15;
-              if (appState.stats.libido >= 7) doubleRate += 0.10;
-            }
-
-            if (Math.random() < doubleRate) {
-              const p2 = createSynthesizedPartner(mIdx, currentRealAge);
-              appState.sim.partners.push(p2);
-              appState.sim.activePartnerIds.push(p2.id);
-              appState.sim.totalPartnerCounter++;
-              matchedPartners.push(p2);
-
-              if (p2.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
-              if (p2.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
-            }
-          }
-        }
-      }
-
-      // マッチングトーストの時間差表示制御
-      if (!isSilent && matchedPartners.length > 0) {
-        let baseDelay = breakCandidate ? 2800 : 0;
-        setTimeout(() => {
-          showNewPartnerToast(matchedPartners[0], false);
-          playRareChime();
-          triggerVibrate([40, 50, 40]);
-        }, baseDelay);
-
-        if (matchedPartners.length > 1) {
-          setTimeout(() => {
-            showNewPartnerToast(matchedPartners[1], true);
-            playLimitBreakChime();
-            triggerVibrate([50, 60, 50, 60]);
-          }, baseDelay + 2800);
-        }
-      }
-
-      renderAlertAndFlash(isCrisisHappened, isSilent);
-      updateMatrixDot(mIdx);
-      renderRealtimeMonthlyLog(mIdx, calMonth);
-
-      document.getElementById("simActiveCount").innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
-      document.getElementById("simTotalPartners").innerText = `${appState.sim.totalPartnerCounter}人`;
-    }
-
-    /* 手動フェードアウト（能動的な別れ） */
-    function manualBreakup(partnerId, event) {
-      if (event) event.stopPropagation();
-      const p = appState.sim.partners.find(item => item.id === partnerId);
-      if (!p) return;
-
-      const mIdx = appState.sim.currentMonth;
-      p.endMonth = mIdx;
-      p.endAge = p.age;
-      appState.sim.activePartnerIds = appState.sim.activePartnerIds.filter(pid => pid !== partnerId);
-      appState.sim.breakupCountIn2Years++;
-
-      showBreakupPartnerToast(p, appState.user.gender === "male", true);
-      playBreakupChime();
-      triggerVibrate([50, 40]);
-
-      const calMonth = (mIdx % 12) + 1;
-      updateMatrixDot(mIdx);
-      renderRealtimeMonthlyLog(mIdx, calMonth);
-
-      const maxAllowed = appState.stats.maxPartners || 2;
-      document.getElementById("simActiveCount").innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
-    }
-
-    function calculateSexScore(partner, month, isCrisis, prefBonus = 0) {
-      let base = 50;
-      if (partner.chemistry === "S") base = 85;
-      else if (partner.chemistry === "A") base = 72;
-      else if (partner.chemistry === "B") base = 55;
-      else if (partner.chemistry === "C") base = 35;
-
-      base += (Math.random() * 8) - 4;
-      const libidoBonus = (appState.stats.libido - 4) * 3.8;
-      const masteryBonus = Math.min(14, Math.floor(partner.durationMonths / 12) * 3.5);
-
-      let eventBonus = 0;
-      if (month === 12 || month === 2 || month === 4 || month === 8 || month === appState.user.birthMonth) {
-        eventBonus = 10 + Math.floor(Math.random() * 8);
-      }
-      const thrillBonus = isCrisis ? 15 : 0;
-      return Math.max(10, Math.round(base + libidoBonus + masteryBonus + eventBonus + thrillBonus + prefBonus));
-    }
-
-    function createSynthesizedPartner(startMonth, playerAge) {
-      const isTargetMale = (appState.user.gender === "female");
-      const prefix = isTargetMale ? "M" : "F";
-      const targetGender = isTargetMale ? "male" : "female";
-      const jobPool = isTargetMale ? MALE_JOBS_POOL : FEMALE_JOBS_POOL;
-      const job = jobPool[Math.floor(Math.random() * jobPool.length)];
-
-      const prefKey = appState.user.pref;
-      const areaList = AREAS_NO_STATION[prefKey] || AREAS_NO_STATION.tokyo;
-      const prefNameMap = { tokyo: "東京", kanagawa: "神奈川", saitama: "埼玉", chiba: "千葉" };
-      const area = `${prefNameMap[prefKey] || "東京"}・${areaList[Math.floor(Math.random() * areaList.length)]}`;
-
-      let partnerAge = playerAge;
-      const targetPref = appState.stats.targetAgePref;
-
-      if (targetPref === "younger") {
-        if (Math.random() < 0.70) partnerAge = Math.max(18, playerAge - Math.floor(3 + Math.random() * 6));
-        else if (Math.random() < 0.60) partnerAge = Math.max(18, playerAge - Math.floor(9 + Math.random() * 10));
-        else partnerAge = Math.max(18, playerAge - Math.floor(20 + Math.random() * 8));
-      } else if (targetPref === "older") {
-        if (Math.random() < 0.70) partnerAge = Math.min(85, playerAge + Math.floor(3 + Math.random() * 6));
-        else if (Math.random() < 0.60) partnerAge = Math.min(85, playerAge + Math.floor(9 + Math.random() * 10));
-        else partnerAge = Math.min(85, playerAge + Math.floor(20 + Math.random() * 8));
-      } else {
-        if (Math.random() < 0.75) partnerAge = Math.max(18, Math.min(85, playerAge + Math.floor(Math.random() * 7) - 3));
-        else partnerAge = Math.max(18, Math.min(85, playerAge + Math.floor(Math.random() * 11) - 5));
-      }
-
-      // 年代別の流行名前を自動割り当て（カタカナ表記）
-      const name = pickGenerationalName(targetGender, partnerAge);
-
-      let avatarNum, category = "normal";
-      if (partnerAge <= 25) {
-        avatarNum = 19 + Math.floor(Math.random() * 2);
-        category = "youth";
-      } else if (partnerAge >= 65) {
-        avatarNum = 17 + Math.floor(Math.random() * 2);
-        category = "senior";
-      } else {
-        avatarNum = 1 + Math.floor(Math.random() * 16);
-      }
-
-      const avatarId = prefix + String(avatarNum).padStart(2, '0');
-      const meta = AvatarCacheManager.getMeta(avatarId);
-
-      const rChem = Math.random();
-      let chemistry = "B";
-      if (partnerAge >= 60) {
-        if (rChem < 0.03) chemistry = "S";
-        else if (rChem < 0.15) chemistry = "A";
-        else if (rChem < 0.60) chemistry = "B";
-        else chemistry = "C";
-      } else {
-        if (rChem < 0.12) chemistry = "S";
-        else if (rChem < 0.35) chemistry = "A";
-        else if (rChem < 0.78) chemistry = "B";
-        else chemistry = "C";
-      }
-
-      const currentActive = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
-      const usedColors = currentActive.map(p => p.color);
-      const availableColor = PARTNER_COLORS.find(c => !usedColors.includes(c)) || PARTNER_COLORS[appState.sim.totalPartnerCounter % PARTNER_COLORS.length];
-
-      return {
-        id: "p_" + Date.now() + "_" + Math.floor(Math.random()*1000),
-        name, job, area, avatarId, category,
-        quote: meta.quote,
-        startAge: partnerAge,
-        age: partnerAge,
-        endAge: partnerAge,
-        startMonth,
-        endMonth: null,
-        durationMonths: 1,
-        datesCount: 1,
-        chemistry,
-        color: availableColor,
-        maxSexScore: 0,
-        lastSexScore: 0,
-        lastLine: ""
-      };
-    }
-
-    function showNewPartnerToast(p, isDouble = false) {
-      const toast = document.getElementById("newPartnerToast");
-      if (!toast) return;
-      document.getElementById("toastPartnerImg").src = AvatarCacheManager.get(p.avatarId);
-      document.getElementById("toastPartnerName").innerText = `${p.name} (${p.startAge}歳)`;
-      document.getElementById("toastPartnerAreaJob").innerText = `${p.area} ｜ ${p.job}`;
-      document.getElementById("toastPartnerChem").innerText = `相性 ${p.chemistry}`;
-
-      document.getElementById("toastHeaderTitle").innerText = isDouble ? "✨ DOUBLE MATCHED! (2/2)" : "💖 NEW PARTNER MATCHED!";
-
-      const badgeEl = document.getElementById("toastPartnerBadge");
-      if (p.category === "senior") badgeEl.innerHTML = '<span class="px-1.5 py-0.2 text-[9px] bg-purple-900 text-purple-200 rounded border border-purple-500/40 font-bold ml-1">シニア枠</span>';
-      else if (p.category === "youth") badgeEl.innerHTML = '<span class="px-1.5 py-0.2 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/40 font-bold ml-1">若手枠</span>';
-      else badgeEl.innerHTML = '';
-
-      document.getElementById("toastPartnerQuote").innerText = p.quote || "「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」";
-      toast.classList.remove("hidden");
-      setTimeout(() => { toast.classList.remove("scale-95", "opacity-0"); toast.classList.add("scale-100", "opacity-100"); }, 10);
-      setTimeout(() => {
-        toast.classList.remove("scale-100", "opacity-100");
-        toast.classList.add("scale-95", "opacity-0");
-        setTimeout(() => toast.classList.add("hidden"), 300);
-      }, 3200);
-    }
-
-    function showBreakupPartnerToast(p, isUserMale, isManual = false) {
-      const toast = document.getElementById("breakupPartnerToast");
-      if (!toast) return;
-      document.getElementById("toastBreakupImg").src = AvatarCacheManager.get(p.avatarId);
-      document.getElementById("toastBreakupName").innerText = `${p.name} (${p.age}歳)`;
-      document.getElementById("toastBreakupPeriod").innerText = `${p.durationMonths}ヶ月で関係解消`;
-
-      if (isManual) {
-        document.getElementById("toastBreakupTag").innerText = "👋 FADEOUT（自ら手放した逢瀬）";
-        const quote = MANUAL_BREAKUP_QUOTES[Math.floor(Math.random() * MANUAL_BREAKUP_QUOTES.length)];
-        document.getElementById("toastBreakupQuote").innerText = quote;
-      } else {
-        document.getElementById("toastBreakupTag").innerText = "🍂 PARTNER BREAKUP（逢瀬の終焉）";
-        const quotePool = isUserMale ? BREAKUP_QUOTES_FEMALE_PARTNER : BREAKUP_QUOTES_MALE_PARTNER;
-        const quote = quotePool[Math.floor(Math.random() * quotePool.length)];
-        document.getElementById("toastBreakupQuote").innerText = quote;
-      }
-
-      toast.classList.remove("hidden");
-      setTimeout(() => { toast.classList.remove("scale-95", "opacity-0"); toast.classList.add("scale-100", "opacity-100"); }, 10);
-      setTimeout(() => {
-        toast.classList.remove("scale-100", "opacity-100");
-        toast.classList.add("scale-95", "opacity-0");
-        setTimeout(() => toast.classList.add("hidden"), 300);
-      }, 3200);
-    }
-
-    function renderAlertAndFlash(isCrisis, isSilent = false) {
-      const alertBadge = document.getElementById("alertStateText");
-      if (isCrisis) {
-        if (!isSilent && !appState.sim.isSkipping && !appState.sim.isPaused) {
-          const overlay = document.getElementById("flashOverlay");
-          overlay.classList.add("red-flash-active");
-          setTimeout(() => overlay.classList.remove("red-flash-active"), 600);
-          playAlarm();
-          triggerVibrate([100, 50, 100]);
-        }
-        alertBadge.innerText = "⚠️ 身バレ危機！";
-        alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700 animate-pulse";
-        const spouseEvents = [
-          `休日の夕方、スマホのポップアップ通知を配偶者に凝視され冷や汗が流れた。`,
-          `「最近、残業や怪しい用事多くない？」と配偶者から真顔で問い詰められた。`,
-          `手帳のスケジュール帳を見咎められ、必死に仕事の言い訳を重ねた。`
-        ];
-        document.getElementById("spouseSituationLog").innerText = spouseEvents[Math.floor(Math.random() * spouseEvents.length)];
-      } else {
-        const activeCount = appState.sim.activePartnerIds.length;
-        alertBadge.innerText = (activeCount > 2) ? "多忙密会" : "平穏";
-        alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40";
-        document.getElementById("spouseSituationLog").innerText = "配偶者は平穏に日常を過ごしている。怪しまれる様子はない。";
-      }
-    }
-
-    function updateMatrixDot(mIdx) {
-      const dotIndex = mIdx % 24;
-      const dot = document.getElementById("grid-dot-" + dotIndex);
-      if (!dot) return;
-
-      for (let i = 0; i < 24; i++) {
-        const d = document.getElementById("grid-dot-" + i);
-        if (d) d.classList.remove("ring-pulse-rare");
-      }
-
-      const currentPartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
-      if (currentPartners.length === 0) {
-        dot.style.background = "#1e293b";
-      } else if (currentPartners.length === 1) {
-        dot.style.background = currentPartners[0].color;
-      } else {
-        const step = 100 / currentPartners.length;
-        let grad = "conic-gradient(";
-        currentPartners.forEach((p, idx) => { grad += `${p.color} ${idx * step}% ${(idx + 1) * step}%, `; });
-        dot.style.background = grad.slice(0, -2) + ")";
-      }
-      dot.classList.add("ring-pulse-rare");
-    }
-
-    function renderRealtimeMonthlyLog(mIdx, calMonth) {
-      const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
-      const userBirthMonth = appState.user.birthMonth || 4;
-      
-      // 誕生月の場合は🎂をバッジに表示
-      if (calMonth === userBirthMonth) {
-        document.getElementById("seasonBadge").innerText = `🎂 ${calMonth}月（誕生月）`;
-      } else {
-        document.getElementById("seasonBadge").innerText = `${MONTH_EMOJIS[calMonth] || "🌸"} ${calMonth}月`;
-      }
-      document.getElementById("monthTitleLog").innerText = seasons[calMonth];
-
-      const listContainer = document.getElementById("currentMonthPartnersLog");
-      const currentPartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
-
-      if (currentPartners.length === 0) {
-        listContainer.innerHTML = `<div class="text-xs text-slate-500 italic py-2.5 text-center">今月はアポなし。家庭と仕事に専念中……</div>`;
-        return;
-      }
-
-      let html = "";
-      const usedTexts = new Set();
-      const monthLogRecord = [];
-
-      currentPartners.forEach(p => {
-        const actionText = generateMonthlyActionText(p, calMonth, usedTexts);
-        usedTexts.add(actionText);
-
-        const score = p.lastSexScore;
-        let scoreBadge = "";
-        if (score >= 120) {
-          scoreBadge = `<span class="limit-break-badge bg-gradient-to-r from-amber-400 via-pink-400 to-purple-400 text-slate-950 font-black px-1.5 py-0.5 rounded text-[10px] shadow-lg">⚡ 密会: ${score}pt</span>`;
-          if (!appState.sim.isSkipping) playLimitBreakChime();
-        } else if (score >= 100) {
-          scoreBadge = `<span class="bg-amber-950 text-amber-300 border border-amber-600 font-bold px-1.5 py-0.5 rounded text-[10px]">密会: ${score}pt</span>`;
-        } else if (score >= 80) {
-          scoreBadge = `<span class="bg-pink-950 text-pink-300 border border-pink-700 font-bold px-1.5 py-0.5 rounded text-[10px]">密会: ${score}pt</span>`;
-        } else {
-          scoreBadge = `<span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[10px]">密会: ${score}pt</span>`;
-        }
-
-        let catBadge = "";
-        if (p.category === "senior") catBadge = '<span class="px-1 py-0.2 text-[8px] bg-purple-900 text-purple-200 rounded border border-purple-500/30">シニア</span>';
-        if (p.category === "youth") catBadge = '<span class="px-1 py-0.2 text-[8px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30">若手</span>';
-
-        monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score });
-        const avatarSrc = AvatarCacheManager.get(p.avatarId);
-
-        html += `
-          <div class="p-2 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center gap-2.5 text-xs group">
-            <div class="avatar-frame"><img src="${avatarSrc}" alt="${p.name}"></div>
-            <div class="flex-1 min-w-0 space-y-0.5">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-1.5 truncate">
-                  <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
-                  <span class="font-bold text-slate-200 truncate">${p.name} <span class="text-[10px] text-purple-300 font-normal">(${p.age}歳 / ${p.area})</span></span>
-                  ${catBadge}
-                </div>
-                <div class="flex items-center gap-1.5 flex-shrink-0 ml-1.5">
-                  ${scoreBadge}
-                  <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を手放す（フェードアウト）" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-400 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5">
-                    <span>👋</span><span class="text-[9px]">手放す</span>
-                  </button>
-                </div>
-              </div>
-              <div class="text-slate-300 text-[11px] leading-tight truncate">${actionText}</div>
-            </div>
-          </div>
-        `;
-      });
-      listContainer.innerHTML = html;
-      appState.sim.monthlyHistory[mIdx] = { month: mIdx, calMonth, partners: monthLogRecord };
-    }
-
-    /* エリア別日常密会 ＆ 田園都市線シチュエーション ＆ たまの遠隔地逃避行（約15%）対応ログ生成 */
-    function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
-      let pool = [];
-      const userPref = appState.user.pref || "tokyo";
-      const userBirthMonth = appState.user.birthMonth || 4;
-      const isRemoteDate = (Math.random() < 0.15); // 約15%で遠隔地・小旅行
-
-      if (partner.durationMonths <= 2) {
-        if (userPref === "kanagawa") {
-          pool = [
-            "初アポ。たまプラーザの落ち着いたカフェで、人目を気にしつつ乾杯。",
-            "あざみ野の静かな住宅街の隠れ家和食。指輪を外した日焼け跡を見つめ合う。",
-            "初ホテル。二子玉川から田園都市線で少し移動し、誰にも言えない午後へ。",
-            "みなとみらいの海風を感じるバーで合流。「怪しい人じゃなくて安心した」と笑い合う。",
-            "武蔵小杉のカフェで短時間ランチ。お互いの家庭の詮索はしないルールで抱き合った。"
-          ];
-        } else if (userPref === "saitama") {
-          pool = [
-            "初アポ。大宮駅東口の落ち着いた個室で安堵の笑顔。",
-            "浦和の閑静な和食ランチ。「知り合いに見つかりにくいね」と笑い合う。",
-            "初ホテル。湘南新宿ラインで新宿まで足を伸ばし、歌舞伎町を避けてホテルへ。",
-            "さいたま新都心のホテルデイユース。平日の静けさの中で抱き合った。"
-          ];
-        } else if (userPref === "chiba") {
-          pool = [
-            "初アポ。西船橋の個室ダイニングで秘密の乾杯。",
-            "幕張ベイエリアのテラス席で待ち合わせ。穏やかな笑顔に惹かれる。",
-            "初ホテル。東西線で都内方面へ移動し、人目を忍んでデイユースへ。",
-            "新浦安の静かなホテルラウンジから、そのまま人目のない客室へ。"
-          ];
-        } else {
-          pool = [
-            "初アポ。三軒茶屋の路地裏個室バルで乾杯。渋谷を避けるのが二人の暗黙ルール。",
-            "二子玉川のテラス席で平日ランチ。そのまま隣駅の静かなデイユースへ。",
-            "初ホテル。神楽坂の静かな隠れ家ホテルで、お互いの家庭を詮索せず抱き合った。",
-            "恵比寿の目立たないバーから、タクシーで隠れ家ホテルへ直行。"
-          ];
-        }
-      } else if (month === userBirthMonth) {
-        // 誕生月専用の特別密会ログ
-        pool = [
-          "「お誕生日おめでとう」とホテルで小さな包みを渡され、熱く深く抱き合った。",
-          "誕生日の夜。家族への言い訳を作り、わずか1時間の熱い逢瀬にすべてを捧げた。",
-          "誰にも言えない特別なバースデー。ホテルのワインを開け、二人きりで祝杯を交わす。"
-        ];
-      } else if (isRemoteDate) {
-        // たまの遠隔地逃避行デート（約15%）
-        const remotePool = [
-          "有休を重ねて急遽、ロマンスカーで箱根温泉へ日帰り逃避行。",
-          "熱海のオーシャンビューホテル。波音を聞きながら誰にも言えない午後を過ごした。",
-          "レンタカーで湘南・三浦半島へ海沿いドライブ。夕暮れの車内で手を重ねた。",
-          "人目を避けて舞浜・お台場のリゾートホテルへ。現実を忘れて深く肌を重ねた。",
-          "新幹線で軽井沢へ。避暑地の冷たい空気の中、コートに隠れて指を絡め合った。"
-        ];
-        pool = remotePool;
-      } else {
-        // エリア別・季節の日常逢瀬ログ（田園都市線・各線カルチャー反映）
-        switch (month) {
-          case 1:
-            pool = (userPref === "kanagawa")
-              ? [
-                  "年始の家族時間を終え、たまプラーザから車を走らせてホテルへ直行。",
-                  "「今年もよろしくね」と、みなとみらいの冷たい風の中そっと手を繋いだ。"
-                ]
-              : (userPref === "saitama")
-              ? [
-                  "年始の帰省を終え、大宮の個室で熱烈に抱き合った。",
-                  "新春の冷たい空気の中、池袋の隠れ家ホテルへ逃げ込んだ。"
-                ]
-              : (userPref === "chiba")
-              ? [
-                  "正月ムードの日常を抜け出し、西船橋のホテルで濃密な午後を過ごした。",
-                  "湾岸の潮風を感じながら、今年最初の逢瀬を確かめ合った。"
-                ]
-              : [
-                  "年始の家族時間を終え、三軒茶屋の隠れ家で飢えたように抱き合った。",
-                  "「今年もよろしくね」と、二子玉川の河川敷沿いでそっと指を絡めた。"
-                ];
-            break;
-          case 2:
-            pool = [
-              "人目を盗んで小さなチョコを手渡され、甘い密会へ。",
-              "「本命にはあげられないから」とホテルで照れながらチョコを渡された。"
-            ];
-            break;
-          case 3:
-            pool = (userPref === "kanagawa")
-              ? [
-                  "年度末の繁忙期、あざみ野の静かな個室ホテルで仕事帰りに癒やし合う。",
-                  "田園都市線の急行を見送り、各停の静かな駅で待ち合わせてホテルへ。"
-                ]
-              : (userPref === "saitama")
-              ? [
-                  "年度末の疲れを癒やすため、大宮の隠れ家ホテルで長い抱擁を交わす。",
-                  "仕事帰りの湘南新宿ライン、途中下車してホテルへ直行。"
-                ]
-              : [
-                  "年度末の繁忙期、仕事帰りに駆け込みでホテルへ。",
-                  "春風の冷たい夜、お互いの仕事の愚痴をホテルで癒やし合う。"
-                ];
-            break;
-          case 4:
-            pool = (userPref === "kanagawa")
-              ? [
-                  "田園都市線沿いの閑静な街並みを抜け、二人きりの部屋で春の逢瀬。",
-                  "桜舞い散る夜、コートを脱ぎ捨てて互いの温もりを確かめ合った。"
-                ]
-              : (userPref === "saitama")
-              ? [
-                  "大宮公園の喧騒を避け、静かな個室ホテルへ直行。",
-                  "夜桜を見上げるふりをして、そっと指先を絡め合った。"
-                ]
-              : [
-                  "人通りの少ない目黒川沿いで、息を潜めて夜桜散歩。",
-                  "二子玉川の静かな通りを抜け、隠れ家ホテルで春の午後を過ごした。"
-                ];
-            break;
-          case 5:
-            pool = [
-              "連休明けの平日昼下がり、久しぶりの逢瀬に飢えたように抱き合う。",
-              "初夏の心地よい陽気の中、人目を気にしつつランチとホテル。"
-            ];
-            break;
-          case 6:
-            pool = [
-              "ゲリラ豪雨を口実に、急遽シティホテルのデイユースへ。",
-              "梅雨の湿気の中、汗ばむ肌を重ねて秘密の午後を過ごした。"
-            ];
-            break;
-          case 7:
-            pool = (userPref === "kanagawa")
-              ? [
-                  "薄着の季節。「肌が綺麗だね」とホテルで囁かれた。",
-                  "たまプラーザから湘南方面へ足を伸ばし、海沿いのホテルで熱く過ごした。"
-                ]
-              : [
-                  "薄着の季節。「肌が綺麗だね」とホテルで囁かれた。",
-                  "夏の夜風に吹かれながら、シティホテルの高層階で夜通し過ごした。"
-                ];
-            break;
-          case 8:
-            pool = [
-              "お盆の帰省期間。全パートナーと連絡自粛の沈黙週間。",
-              "酷暑の午後、キンキンに冷えたホテルの部屋で肌を寄せ合った。"
-            ];
-            break;
-          case 9:
-            pool = (userPref === "chiba")
-              ? [
-                  "少し涼しくなった夜、幕張ベイエリアを当てもなくドライブ。",
-                  "初秋の気配に少し寂しさを感じながら、ホテルで深く愛し合う。"
-                ]
-              : [
-                  "少し涼しくなった夜、当てもなく夜風に吹かれドライブ。",
-                  "初秋の気配に少し寂しさを感じながら、ホテルで深く愛し合う。"
-                ];
-            break;
-          case 10:
-            pool = [
-              "平日に有休を合わせ、隠れ家個室の和食ランチへ。",
-              "紅葉の気配を感じながら、郊外のホテルでゆっくり羽を伸ばした。"
-            ];
-            break;
-          case 11:
-            pool = [
-              "寒くなった手を、コートのポケットの中でそっと握られた。",
-              "冷えた身体を温め合うように、ホテルで長い抱擁を交わす。"
-            ];
-            break;
-          case 12:
-            pool = [
-              "家庭があるからこそ、23日の昼間に平日フライング乾杯。",
-              "忘年会の口実で、終電を気にせずホテルで今年最後の密会。"
-            ];
-            break;
-          default:
-            pool = ["個室ディナーのあと、いつものホテルで濃密な2時間。"];
-        }
-      }
-
-      const choices = pool.filter(t => !usedTexts.has(t));
-      return choices.length > 0 ? choices[Math.floor(Math.random() * choices.length)] : pool[0];
-    }
-
-    function showClickMonthDetail(mIdx) {
-      const history = appState.sim.monthlyHistory[mIdx];
-      const box = document.getElementById("clickMonthDetail");
-      const age = getRealAge(mIdx);
-      const yearNum = Math.floor(mIdx / 12) + 1;
-      const m = (mIdx % 12) + 1;
-      const userBirthMonth = appState.user.birthMonth || 4;
-      const birthTag = (m === userBirthMonth) ? "🎂 誕生月の記憶" : "の記憶";
-      document.getElementById("detailMonthHeader").innerText = `${age}歳（${yearNum}年目 ${m}月）${birthTag}`;
-
-      if (!history || history.partners.length === 0) {
-        document.getElementById("detailMonthContent").innerHTML = `<div>この月はパートナーはおらず、家庭と仕事に専念していました。</div>`;
-      } else {
-        let txt = "";
-        history.partners.forEach(p => {
-          const avatarSrc = AvatarCacheManager.get(p.avatarId);
-          txt += `
-            <div class="flex items-center gap-2 border-b border-purple-900/50 pb-1.5">
-              <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
-              <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-center">
-                  <span class="font-bold text-slate-200">${p.name}</span>
-                  <span class="text-amber-300 font-bold">${p.score}pt</span>
-                </div>
-                <div class="text-[10px] text-slate-300 truncate">${p.action}</div>
-              </div>
-            </div>
-          `;
-        });
-        document.getElementById("detailMonthContent").innerHTML = txt;
-      }
-      box.classList.remove("hidden");
-    }
-
-    function closeClickDetail() { document.getElementById("clickMonthDetail").classList.add("hidden"); }
-
-    /* ============================================================
-       2年ごとの節目モーダル処理
-       ============================================================ */
-    function pauseForTwoYearMilestone() {
-      pauseSimulationInternal();
-      document.getElementById("flashOverlay").classList.remove("red-flash-active");
-
-      const mIdx = appState.sim.currentMonth;
-      appState.sim.lastMilestoneMonth = mIdx;
-      const currentAge = getRealAge(mIdx);
-      appState.sim.currentAge = currentAge;
-
-      document.getElementById("twoYearSummaryTotal").innerText = `${appState.sim.partners.length}人`;
-      const sortedByDur = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-      document.getElementById("twoYearSummaryLongest").innerText = sortedByDur[0] ? `${sortedByDur[0].durationMonths}ヶ月` : "0ヶ月";
-      document.getElementById("twoYearSummaryScore").innerText = `${appState.sim.globalMaxSexScore} pt`;
-
-      const youngest = [...appState.sim.partners].sort((a,b) => a.startAge - b.startAge)[0];
-      const oldest = [...appState.sim.partners].sort((a,b) => b.startAge - a.startAge)[0];
-
-      document.getElementById("twoYearSummaryYoungest").innerText = youngest ? `${youngest.startAge}歳` : "―";
-      document.getElementById("twoYearSummaryOldest").innerText = oldest ? `${oldest.startAge}歳` : "―";
-
-      const r = Math.random();
-      let dropTotal = 2;
-      if (r < 0.05) dropTotal = 0;
-      else if (r < 0.30) dropTotal = 1;
-      else if (r < 0.70) dropTotal = 2;
-      else if (r < 0.95) dropTotal = 3;
-      else dropTotal = 4;
-
-      const prevLooks = appState.stats.looks;
-      const prevStamina = appState.stats.stamina;
-      const prevLibido = appState.stats.libido;
-      let looksDrop = 0, staminaDrop = 0, libidoDrop = 0;
-      const isFemale = (appState.user.gender === "female");
-
-      if (isFemale) {
-        let remain = dropTotal;
-        looksDrop = Math.min(remain, Math.max(0, appState.stats.looks - 1));
-        remain -= looksDrop;
-        while (remain > 0) {
-          if (appState.stats.stamina - staminaDrop > 1 && Math.random() < 0.5) staminaDrop++;
-          else if (appState.stats.libido - libidoDrop > 1) libidoDrop++;
-          else if (appState.stats.stamina - staminaDrop > 1) staminaDrop++;
-          else break;
-          remain--;
-        }
-      } else {
-        for (let i = 0; i < dropTotal; i++) {
-          const pick = Math.floor(Math.random() * 3);
-          if (pick === 0 && appState.stats.looks - looksDrop > 1) looksDrop++;
-          else if (pick === 1 && appState.stats.stamina - staminaDrop > 1) staminaDrop++;
-          else if (pick === 2 && appState.stats.libido - libidoDrop > 1) libidoDrop++;
-          else if (appState.stats.stamina - staminaDrop > 1) staminaDrop++;
-        }
-      }
-
-      appState.stats.looks = Math.max(1, appState.stats.looks - looksDrop);
-      appState.stats.stamina = Math.max(1, appState.stats.stamina - staminaDrop);
-      appState.stats.libido = Math.max(1, appState.stats.libido - libidoDrop);
-
-      document.getElementById("twoYearTotalDropText").innerText = `-${dropTotal} pt`;
-      document.getElementById("dropDetailLooks").innerText = `${prevLooks} → ${appState.stats.looks}`;
-      document.getElementById("dropDetailStamina").innerText = `${prevStamina} → ${appState.stats.stamina}`;
-      document.getElementById("dropDetailLibido").innerText = `${prevLibido} → ${appState.stats.libido}`;
-
-      let bonus = 0, penalty = 0;
-      if (appState.sim.globalMaxSexScore >= 95) bonus++;
-      if (appState.sim.crisisCountIn2Years >= 2) penalty++;
-      if (appState.sim.breakupCountIn2Years >= 2) penalty++;
-
-      const prevIncome = appState.stats.income;
-      let incomeDelta = 0;
-      const rollIncome = Math.random();
-
-      if (!isFemale) {
-        let pPlus2 = 0.03 + bonus * 0.03 - penalty * 0.02;
-        let pPlus1 = 0.25 + bonus * 0.05 - penalty * 0.04;
-        let pSame = 0.52;
-        if (rollIncome < pPlus2) incomeDelta = 2;
-        else if (rollIncome < pPlus2 + pPlus1) incomeDelta = 1;
-        else if (rollIncome < pPlus2 + pPlus1 + pSame) incomeDelta = 0;
-        else incomeDelta = -1;
-      } else {
-        let pPlus1 = 0.15 + bonus * 0.04 - penalty * 0.03;
-        let pSame = 0.65;
-        if (rollIncome < pPlus1) incomeDelta = 1;
-        else if (rollIncome < pPlus1 + pSame) incomeDelta = 0;
-        else incomeDelta = -1;
-      }
-
-      appState.stats.income = Math.max(2, Math.min(8, appState.stats.income + incomeDelta));
-      document.getElementById("incomeChangeReport").innerText = `Lv.${prevIncome} → Lv.${appState.stats.income}`;
-
-      appState.stats.budget = 0;
-      const reallocPoints = Math.max(2, appState.stats.income + 1 + bonus - penalty);
-
-      appState.twoYearTemp.points = reallocPoints;
-      appState.twoYearTemp.budget = 0;
-      appState.twoYearTemp.looks = appState.stats.looks;
-      appState.twoYearTemp.stamina = appState.stats.stamina;
-      appState.twoYearTemp.libido = appState.stats.libido;
-      appState.twoYearTemp.min_looks = appState.stats.looks;
-      appState.twoYearTemp.min_stamina = appState.stats.stamina;
-      appState.twoYearTemp.min_libido = appState.stats.libido;
-
-      appState.sim.crisisCountIn2Years = 0;
-      appState.sim.breakupCountIn2Years = 0;
-
-      document.getElementById("twoYearHeaderTag").innerText = `${mIdx}ヶ月目の節目`;
-      document.getElementById("twoYearTitle").innerText = `${currentAge}歳を迎えて（${mIdx/12}年経過）`;
-      document.getElementById("twoYearMaxPartners").value = String(appState.stats.maxPartners || 2);
-      document.getElementById("twoYearTargetAgePref").value = appState.stats.targetAgePref || "same";
-
-      renderTwoYearModal();
-      renderTwoYearChronicle(mIdx);
-      document.getElementById("twoYearModal").classList.remove("hidden");
-      if (isSoundOn) playTone(440, 0.2);
-    }
-
-    function renderTwoYearModal() {
-      document.getElementById("twoYearRemainPoints").innerText = appState.twoYearTemp.points;
-      document.getElementById("twoYearValBudget").innerText = "Lv." + appState.twoYearTemp.budget;
-      document.getElementById("twoYearBarBudget").style.width = (appState.twoYearTemp.budget * 10) + "%";
-      document.getElementById("twoYearValLooks").innerText = appState.twoYearTemp.looks + " / 10";
-      document.getElementById("twoYearBarLooks").style.width = (appState.twoYearTemp.looks * 10) + "%";
-      document.getElementById("twoYearValStamina").innerText = appState.twoYearTemp.stamina + " / 10";
-      document.getElementById("twoYearBarStamina").style.width = (appState.twoYearTemp.stamina * 10) + "%";
-      document.getElementById("twoYearValLibido").innerText = appState.twoYearTemp.libido + " / 10";
-      document.getElementById("twoYearBarLibido").style.width = (appState.twoYearTemp.libido * 10) + "%";
-    }
-
-    function adjustTwoYearStat(type, delta) {
-      if (delta > 0) {
-        if (appState.twoYearTemp.points <= 0) return;
-        if (type === "budget") {
-          if (appState.twoYearTemp.budget >= 10) return;
-          appState.twoYearTemp.budget = Math.min(10, appState.twoYearTemp.budget + 2);
-          appState.twoYearTemp.points -= 1;
-        } else {
-          if (appState.twoYearTemp[type] >= 10) return;
-          appState.twoYearTemp[type] += 1;
-          appState.twoYearTemp.points -= 1;
-        }
-      } else {
-        if (type === "budget") {
-          if (appState.twoYearTemp.budget <= 0) return;
-          appState.twoYearTemp.budget = Math.max(0, appState.twoYearTemp.budget - 2);
-          appState.twoYearTemp.points += 1;
-        } else {
-          const minVal = appState.twoYearTemp["min_" + type] || 1;
-          if (appState.twoYearTemp[type] <= minVal) return;
-          appState.twoYearTemp[type] -= 1;
-          appState.twoYearTemp.points += 1;
-        }
-      }
-      renderTwoYearModal();
-      triggerVibrate(12);
-    }
-
-    function renderTwoYearChronicle(currentMonth) {
-      const activeList = document.getElementById("twoYearActivePartnersList");
-      const active = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
-      if (active.length === 0) {
-        activeList.innerHTML = `<div class="text-[11px] text-slate-500 py-1">現在交際中のパートナーはいません。</div>`;
-      } else {
-        let h = "";
-        active.forEach(p => {
-          const avatarSrc = AvatarCacheManager.get(p.avatarId);
-          h += `
-            <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
-              <div class="flex items-center gap-2">
-                <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
-                <div>
-                  <div class="font-bold text-white text-xs">${p.name} (${p.age}歳)</div>
-                  <div class="text-slate-400 text-[10px]">${p.job} / ${p.area}</div>
-                </div>
-              </div>
-              <div class="text-right">
-                <span class="text-purple-300 font-bold text-[10px]">${p.durationMonths}ヶ月</span>
-                <span class="px-1.5 py-0.5 rounded bg-pink-950 border border-pink-700 text-pink-300 text-[9px] ml-1 font-bold">最高 ${p.maxSexScore}pt</span>
-              </div>
-            </div>
-          `;
-        });
-        activeList.innerHTML = h;
-      }
-
-      const scrollBox = document.getElementById("twoYearChronicleScroll");
-      let scrollHtml = "";
-      const startM = Math.max(0, currentMonth - 24);
-      for (let m = startM; m < currentMonth; m++) {
-        const hist = appState.sim.monthlyHistory[m];
-        const age = getRealAge(m);
-        const yearNum = Math.floor(m / 12) + 1;
-        const calM = (m % 12) + 1;
-        if (hist && hist.partners.length > 0) {
-          scrollHtml += `<div class="border-b border-slate-900 pb-1 mb-1"><span class="font-bold text-slate-400">【${age}歳（${yearNum}年目 ${calM}月）】</span>`;
-          hist.partners.forEach(p => {
-            scrollHtml += `<div class="pl-2 text-slate-300">・${p.name}: ${p.action} (${p.score}pt)</div>`;
-          });
-          scrollHtml += `</div>`;
-        }
-      }
-      scrollBox.innerHTML = scrollHtml || `<div class="text-slate-500">直近の記録はありません。</div>`;
-    }
-
-    function resumeNextTwoYears() {
-      if (appState.twoYearTemp.points > 0) {
-        autoAllocateTwoYearPoints();
-      }
-
-      appState.stats.looks = appState.twoYearTemp.looks;
-      appState.stats.stamina = appState.twoYearTemp.stamina;
-      appState.stats.libido = appState.twoYearTemp.libido;
-      appState.stats.budget = appState.twoYearTemp.budget;
-
-      appState.stats.maxPartners = parseInt(document.getElementById("twoYearMaxPartners").value) || 2;
-      appState.stats.targetAgePref = document.getElementById("twoYearTargetAgePref").value;
-
-      document.getElementById("twoYearModal").classList.add("hidden");
-      updateLiveStats();
-      refresh24MatrixGrid();
-      resumeSimulationInternal();
-    }
-
-    function retireFromTwoYear() {
-      clearTimeout(simTimer);
-      document.getElementById("twoYearModal").classList.add("hidden");
-      appState.sim.isRetired = true;
-      const mIdx = appState.sim.currentMonth;
-      appState.sim.partners.forEach(p => {
-        if (appState.sim.activePartnerIds.includes(p.id)) {
-          p.endMonth = mIdx;
-          p.endAge = p.age;
-        }
-      });
-      appState.sim.activePartnerIds = [];
-      finishSimulation();
-    }
-
-    /* ============================================================
-       リザルト計算＆描画
-       ============================================================ */
-    function finishSimulation() {
-      clearTimeout(simTimer);
-      const mIdx = appState.sim.currentMonth;
-      appState.sim.partners.forEach(p => {
-        if (!p.endAge || appState.sim.activePartnerIds.includes(p.id)) {
-          p.endMonth = mIdx;
-          p.endAge = p.age;
-        }
-      });
-      appState.sim.activePartnerIds = [];
-
-      document.getElementById("step2").classList.add("hidden");
-      document.getElementById("stickyController").classList.add("hidden");
-      document.getElementById("step3").classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-
-      calculateAndRenderResult();
-    }
-
-    function generateLastLineText(partner, isPartnerMale) {
-      if (partner.durationMonths >= 60) {
-        return isPartnerMale
-          ? "「5年もの長い間、俺だけを想い続けてくれてありがとう。お前は俺の裏の人生最高の誇りだよ。」"
-          : "「5年以上もの長い月日、私の人生のすべてを彩ってくれて本当にありがとう。あなたに出会えた奇跡を一生忘れません。」";
-      }
-      if (partner.maxSexScore >= 120) {
-        return isPartnerMale
-          ? "「お前と過ごしたベッドの熱気、生涯墓場まで持っていく最高の宝物だ。女として幸せにしてくれてありがとう。」"
-          : "「あんなに激しく魂まで奪われたのは、後にも先にもあなただけでした。一生消えない甘い傷痕を残してくれてありがとう。」";
-      }
-      if (partner.chemistry === "S") {
-        return isPartnerMale
-          ? "「生まれ変わったら、必ず俺がお前を一番に見つける。男としての自信を取り戻せた最高の宝物だった。」"
-          : "「生まれ変わったら奥さんより先に私を一番に見つけてね……本当に幸せだったよ。」";
-      }
-      return isPartnerMale
-        ? "「父親・夫の役目に戻るよ。短い間だったけど、本当に楽しかった。ありがとう。」"
-        : "「ごめんね、今は母親に戻らなきゃいけないの。今まで本当にありがとう。」";
-    }
-
-    function calculateAndRenderResult() {
-      const isTargetPartnerMale = (appState.user.gender === "female");
-      const totalPartners = appState.sim.partners.length;
-      const startAge = appState.user.startAge;
-      const finalAge = getRealAge(appState.sim.currentMonth);
-
-      document.getElementById("resPlayerNameHeader").innerText = appState.user.name;
-      document.getElementById("resAgeTrackHeader").innerText = `${startAge}歳から${finalAge}歳へ――駆け抜けた逢瀬の軌跡`;
-
-      let totalSex = 0, totalDates = 0;
-      appState.sim.partners.forEach(p => {
-        totalDates += p.datesCount;
-        totalSex += (p.chemistry === "S" ? p.datesCount * 2 : p.datesCount);
-      });
-      const totalHours = totalDates * 3.5;
-
-      document.getElementById("resTotalCount").innerText = `${totalPartners}人`;
-      document.getElementById("resSexCount").innerText = `${totalSex}回`;
-      document.getElementById("resTotalHours").innerText = `${Math.round(totalHours)}時間`;
-      document.getElementById("resFinalIncome").innerText = `Lv.${appState.stats.income}`;
-
-      let hasOlder20 = appState.sim.metOlder20Plus;
-      let hasYounger20 = appState.sim.metYounger20Plus;
-      let hasOlder10 = false, hasYounger10 = false;
-
-      appState.sim.partners.forEach(p => {
-        const playerAgeAtMeet = getRealAge(p.startMonth);
-        const diff = p.startAge - playerAgeAtMeet;
-        if (diff >= 20) hasOlder20 = true;
-        if (diff <= -20) hasYounger20 = true;
-        if (diff >= 10) hasOlder10 = true;
-        if (diff <= -10) hasYounger20 = true;
-      });
-
-      const ach100Kills = totalPartners >= 100;
-      const ach5Years = appState.sim.partners.some(p => p.durationMonths >= 60);
-      const achScore120 = appState.sim.globalMaxSexScore >= 120;
-      const achGrandSlam = (ach100Kills && ach5Years && achScore120 && hasOlder20 && hasYounger20);
-
-      const ach50Kills = totalPartners >= 50;
-      const ach3Years = appState.sim.partners.some(p => p.durationMonths >= 36);
-      const achScore100 = appState.sim.globalMaxSexScore >= 100;
-      const achDiff10 = (hasOlder10 || hasYounger10);
-
-      updateAchievementCard("achieveCard100", ach100Kills, "bg-rose-950/40 border-rose-500/80 shadow-[0_0_10px_rgba(244,63,94,0.5)]");
-      updateAchievementCard("achieveCard5Y", ach5Years, "bg-amber-950/40 border-amber-500/80 shadow-[0_0_10px_rgba(245,158,11,0.5)]");
-      updateAchievementCard("achieveCardScore120", achScore120, "bg-purple-950/40 border-purple-500/80 shadow-[0_0_10px_rgba(157,78,221,0.5)]");
-      updateAchievementCard("achieveCardAgeOlder", hasOlder20, "bg-indigo-950/40 border-indigo-500/80 shadow-[0_0_10px_rgba(99,102,241,0.5)]");
-      updateAchievementCard("achieveCardAgeYounger", hasYounger20, "bg-pink-950/40 border-pink-500/80 shadow-[0_0_10px_rgba(236,72,153,0.5)]");
-      updateAchievementCard("achieveCardGrandSlam", achGrandSlam, "bg-gradient-to-r from-amber-900/50 via-purple-900/50 to-pink-900/50 border-amber-400 shadow-[0_0_16px_rgba(251,191,36,0.8)]");
-
-      const unlocked = [ach100Kills, ach5Years, achScore120, hasOlder20, hasYounger20, achGrandSlam].filter(Boolean).length;
-      document.getElementById("achieveUnlockedCount").innerText = unlocked;
-
-      let badgesHtml = "";
-      if (ach100Kills) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-950 text-rose-300 border border-rose-600 font-bold">⚔️ 100人斬り達成</span>';
-      else if (ach50Kills) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-950/60 text-rose-300 border border-rose-800 font-bold">⚔️ 50人斬り達成</span>';
-
-      if (ach5Years) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-950 text-amber-300 border border-amber-600 font-bold">💍 5年継続達成</span>';
-      else if (ach3Years) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-950/60 text-amber-300 border border-amber-800 font-bold">💍 3年継続達成</span>';
-
-      if (achScore120) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-purple-950 text-purple-300 border border-purple-500 font-bold">⚡ 密会120pt突破</span>';
-      else if (achScore100) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-purple-950/60 text-purple-300 border border-purple-800 font-bold">⚡ 密会100pt突破</span>';
-
-      if (hasOlder20) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-500 font-bold">🍷 +20歳年上愛</span>';
-      if (hasYounger20) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-pink-950 text-pink-300 border border-pink-500 font-bold">🍓 -20歳年下愛</span>';
-      if (!hasOlder20 && !hasYounger20 && achDiff10) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-slate-300 border border-slate-700 font-bold">🧭 ±10歳差愛</span>';
-
-      document.getElementById("resAchieveBadgeList").innerHTML = badgesHtml;
-
-      let title = "『首都圏の彷徨い人』";
-      let desc = "首都圏の喧騒の中、家庭と日常の狭間で静かに駆け抜けた10年間。";
-
-      if (achGrandSlam) {
-        title = "『完全制覇・全能の覇皇』";
-        desc = "100人斬り、5年の純愛、スコア120超え、20歳上下両制覇。婚外のすべてを極め尽くした究極の伝説。";
-      } else if (ach100Kills && ach5Years) {
-        title = "『多重純愛の矛盾王』";
-        desc = "100人以上の異性と逢瀬を重ねながら、特定の伴侶と5年以上愛を深めた驚異の二重生活者。";
-      } else if (hasOlder20 && hasYounger20) {
-        title = "『世代超越の覇王』";
-        desc = "20歳以上年上の品格と、20歳以上年下の情熱。極限の年齢差を双方魅了し尽くした奇跡の存在。";
-      } else if (ach100Kills && achScore120) {
-        title = "『夜の絶対帝王』";
-        desc = "圧倒的な出逢いの母数と、理性を焼き尽くす極限の密会スコアを両立させた夜の支配者。";
-      } else if (ach5Years && achScore120) {
-        title = "『生涯唯一の絶頂伴侶』";
-        desc = "5年以上の歳月を共に重ね、心身ともにこれ以上ない絶頂共鳴へと至った至高の純白パートナー。";
-      } else if (ach100Kills) {
-        title = "『首都圏の婚外修羅』";
-        desc = "10年間で100人以上の異性と関係を紡ぎ、夜の首都圏を完全に支配した伝説のアチーブメント。";
-      } else if (ach5Years) {
-        title = "『五年の絆・純白伴侶』";
-        desc = "加齢や家庭の波を共に乗り越え、5年（60ヶ月）以上愛を深め抜いた至高の純愛。";
-      } else if (achScore120) {
-        title = "『歓喜の特異点』";
-        desc = "理性を完全に吹き飛ばす120pt超えの密会を達成し、官能の極致に到達した者。";
-      } else if (hasOlder20) {
-        title = "『大人の抱擁・年上制覇』";
-        desc = "20歳以上離れた大人の包容力に身を委ね、甘美な時を重ねた者。";
-      } else if (hasYounger20) {
-        title = "『背徳の蜜月・年下魅了』";
-        desc = "20歳以上若い若年世代を狂わせ、圧倒的な大人の魅力で翻弄した者。";
-      } else if (ach50Kills && ach3Years) {
-        title = "『情愛と放蕩の交差点』";
-        desc = "50人以上の出逢いを駆け巡りながらも、特定の相手と3年間の絆を維持した手練れ。";
-      } else if (ach50Kills && achScore100) {
-        title = "『夜を駆ける快楽者』";
-        desc = "数多の出逢いと熱烈な逢瀬を両立し、官能の快楽を追い求めた猛者。";
-      } else if (ach3Years && achScore100) {
-        title = "『深愛の共鳴者』";
-        desc = "3年以上の交際を通じて互いの身体と心を深く知り尽くした愛好家。";
-      } else if (achDiff10 && ach3Years) {
-        title = "『世代差の愛好家』";
-        desc = "10歳以上のジェネレーションギャップを愛で埋め、3年以上寄り添った者。";
-      } else if (ach50Kills) {
-        title = "『百戦錬磨の艶名』";
-        desc = "首都圏の夜を駆け巡り、50人以上の逢瀬を重ねた手練れの婚外者。";
-      } else if (ach3Years) {
-        title = "『三年の情愛』";
-        desc = "家庭の日常を保ちながら、1人の相手と3年間（36ヶ月）秘密を分かち合った者。";
-      } else if (achScore100) {
-        title = "『甘美なる熱情者』";
-        desc = "100ptを超える濃厚な密会を経験し、婚外の歓喜を噛み締めた者。";
-      } else if (achDiff10) {
-        title = "『年の差マイスター』";
-        desc = "10歳以上離れた異性との逢瀬を楽しみ、大人の余裕を見せた者。";
-      } else if (appState.sim.isRetired) {
-        title = "『静寂の帰還者』";
-        desc = "泥沼に呑まれる前に自らアプリを消し、平穏な家庭の日常へと生還した賢明な選択者。";
-      }
-
-      document.getElementById("resTitleBadge").innerText = title;
-      document.getElementById("resEndingDesc").innerText = desc;
-
-      const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-      const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01" };
-      longestP.lastLine = generateLastLineText(longestP, isTargetPartnerMale);
-
-      document.getElementById("longestPartnerImg").src = AvatarCacheManager.get(longestP.avatarId);
-      document.getElementById("longestPartnerNameAge").innerText = `${longestP.name} (${longestP.endAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})`;
-      document.getElementById("longestPartnerPeriod").innerText = `交際${longestP.durationMonths}ヶ月（約${(longestP.durationMonths/12).toFixed(1)}年）`;
-      document.getElementById("longestPartnerChem").innerText = `相性 ${longestP.chemistry}`;
-      document.getElementById("longestPartnerLineText").innerText = longestP.lastLine;
-
-      const highestScoreP = appState.sim.highestScorePartner || longestP;
-      document.getElementById("highestScorePartnerImg").src = AvatarCacheManager.get(highestScoreP.avatarId);
-      document.getElementById("highestScorePartnerNameAge").innerText = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})`;
-      document.getElementById("highestScoreDetail").innerText = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt`;
-      document.getElementById("highestScoreChem").innerText = `相性 ${highestScoreP.chemistry}`;
-
-      document.getElementById("resStatLooks").innerText = "Lv." + appState.stats.looks;
-      document.getElementById("resStatStamina").innerText = "Lv." + appState.stats.stamina;
-      document.getElementById("resStatLibido").innerText = "Lv." + appState.stats.libido;
-      document.getElementById("resStatBudget").innerText = "Lv." + appState.stats.budget;
-
-      let allHtml = "";
-      appState.sim.partners.forEach((p, idx) => {
-        const avatarSrc = AvatarCacheManager.get(p.avatarId);
-        allHtml += `
-          <div class="p-2 rounded bg-slate-950/50 border border-slate-850 flex justify-between items-center text-xs">
-            <div class="flex items-center gap-2">
-              <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
-              <div>
-                <span class="font-bold text-white">${idx + 1}. ${p.name} (${p.startAge}歳)</span>
-                <span class="text-slate-400 ml-1 text-[10px]">${p.job} / ${p.area}</span>
-              </div>
-            </div>
-            <div class="text-right">
-              <span class="text-amber-300 font-bold text-[11px]">最高: ${p.maxSexScore}pt</span>
-              <span class="text-slate-400 text-[10px] ml-1">(${p.durationMonths}ヶ月)</span>
-            </div>
-          </div>
-        `;
-      });
-      document.getElementById("allPartnersList").innerHTML = allHtml;
-      document.getElementById("toggleAllPartnersBtn").innerText = `すべての交際履歴（全${totalPartners}人）を確認する ▼`;
-
-      let epilogueHtml = "";
-      if (achGrandSlam || (ach100Kills && ach5Years) || (ach100Kills && achScore120)) {
-        epilogueHtml = `
-          <p>10年という歳月は、あなたにとってゴールではなく単なる通過点に過ぎなかった。</p>
-          <p>100人を超える逢瀬、理性を焼き尽くす120pt超えの歓喜、そして何年もの間途切れなかった特別な絆。そのすべてを両立し、家庭の平穏すら手玉に取り続けたあなたの情熱は、枯れるどころか円熟の輝きを増している。</p>
-          <p class="text-amber-300 font-bold">「さて、次はどんな相手と新しい秘密を始めようか」――何食わぬ顔で日常を歩みながら、あなたの指先は密かに次の出逢いを探している。あなたの裏歴史は、ここからが本番だ。</p>
-        `;
-      } else if (ach100Kills || ach50Kills) {
-        epilogueHtml = `
-          <p>首都圏の夜を駆け巡り、数え切れないほどの異性と肌を重ねてきた10年間。</p>
-          <p>改札での別れ際、指輪をはめ直す仕草、スマートに逢瀬を楽しむ手腕はもはや芸術の域に達している。どれほど人数を重ねても、新しい誰かと出会う瞬間の胸の高鳴りは決して色褪せない。</p>
-          <p class="text-pink-300 font-bold">家庭を守り抜きながら欲望も妥協しない。10年の修羅場を生き抜いたあなたの足取りは、むしろ最初の一歩を踏み出した時よりも軽やかだ。「まだまだ私の現役は終わらない」と微笑みながら。</p>
-        `;
-      } else if (ach5Years || ach3Years) {
-        epilogueHtml = `
-          <p>めまぐるしく移り変わる東京の街並みの中で、奇跡のように紡ぎ続けた年月。</p>
-          <p>家庭の事情や加齢の波を共に乗り越え、法的な誓約を超えて魂と身体で結ばれた相手がいた。10年が経った今でも、二人きりでホテルへ向かう道すがらは、出逢った当初のような甘い緊張感に包まれている。</p>
-          <p class="text-purple-300 font-bold">「来年も、その先も、ずっと一緒にいようね」――誰にも知られることのない二人の純愛クロニクルは、10年の節目を超えてこれからも静かに刻まれ続けていく。</p>
-        `;
-      } else if (achScore120 || achScore100) {
-        epilogueHtml = `
-          <p>理性を完全に焼き尽くすほどの極限の逢瀬。ホテルのシーツを掴んだまま息が止まりそうになったあの夜の記憶。</p>
-          <p>日常の平穏では決して味わえない、生きている実感を骨の髄まで叩き込まれた10年間だった。一度極限の絶頂を知ってしまった身体は、もはや退屈なだけの日常には戻れない。</p>
-          <p class="text-rose-300 font-bold">ふとした瞬間に蘇る甘い熱気と渇き。あなたの胸の奥底で燻り続ける背徳の炎は、これからも決して消えることはないだろう。</p>
-        `;
-      } else if (hasOlder20 || hasYounger20 || achDiff10) {
-        epilogueHtml = `
-          <p>世代という境界線すら軽々と飛び越え、異なる時代を生きる相手と熱情を交わした10年間。</p>
-          <p>大人の圧倒的な包容力に甘えた夜もあれば、若さゆえの真っ直ぐな熱気に溺れた昼下がりもあった。年齢などただの記号に過ぎないと知るあなたの瞳には、抗いがたい大人の色気が宿っている。</p>
-          <p class="text-cyan-300 font-bold">「次はどんな世代の魅力に触れてみようか」――年齢を重ねるごとに増していく自信を胸に、あなたは夜の街へ静かに視線を投げかけている。</p>
-        `;
-      } else if (appState.sim.isRetired) {
-        epilogueHtml = `
-          <p>泥沼の修羅場に呑まれる前に自らアプリを消し、平穏な家庭の日常へと生還した10年目。</p>
-          <p>あのスリル、秘密の合言葉、誰にも言えない甘い時間は、心の奥深くにある鍵付きの金庫へと大切に仕舞い込まれた。家族と囲む夕食の温もりを噛み締めながら、ふと窓の外の夜空を見上げる。</p>
-          <p class="text-slate-400 font-bold">あの熱狂の日々を生き抜いた誇りと、ほんの少しの切ない孤独を抱きしめて、静かに大人の余生を歩み始める。</p>
-        `;
-      } else {
-        epilogueHtml = `
-          <p>家庭と仕事の狭間、電車の乗り換えのわずかな隙間に息を潜めて愛を求めた10年間。</p>
-          <p>甘美な逢瀬も、胸を締め付ける別れも、すべてを飲み込んであなたの人生の糧となった。誰にも知られない裏の歴史を胸に抱えたまま、今日も何食わぬ顔で日常を歩き続ける。</p>
-          <p class="text-purple-300 font-bold">家庭の日常に戻ったあなたの横顔には、あの10年間を生き抜いた者だけが持つ、大人の孤独と温もりが宿っていた。</p>
-        `;
-      }
-      document.getElementById("epilogueText").innerHTML = epilogueHtml;
-    }
-
-    function updateAchievementCard(elId, isAchieved, activeClass) {
-      const card = document.getElementById(elId);
-      if (!card) return;
-      if (isAchieved) card.className = `p-2 rounded-xl border text-center transition-all ${activeClass} opacity-100 scale-105`;
-      else card.className = `p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-30`;
-    }
-
-    function toggleAllPartners() {
-      const wrap = document.getElementById("allHistoryWrapper");
-      const btn = document.getElementById("toggleAllPartnersBtn");
-      if (wrap.classList.contains("hidden")) {
-        wrap.classList.remove("hidden");
-        btn.innerText = "交際履歴を閉じる ▲";
-      } else {
-        wrap.classList.add("hidden");
-        btn.innerText = `すべての交際履歴（全${appState.sim.partners.length}人）を確認する ▼`;
-      }
-    }
-
-    /* ============================================================
-       1080×1080 Canvas 成績表カード生成
-       ============================================================ */
-    async function generateSquareCard() {
-      if (document.fonts) try { await document.fonts.ready; } catch(e) {}
-      const cvs = document.getElementById("exportCanvas");
-      const ctx = cvs.getContext("2d");
-
-      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1080);
-      bgGrad.addColorStop(0, "#07080d");
-      bgGrad.addColorStop(0.5, "#121422");
-      bgGrad.addColorStop(1, "#090912");
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, 1080, 1080);
-
-      ctx.strokeStyle = "rgba(157, 78, 221, 0.4)";
-      ctx.lineWidth = 4;
-      ctx.strokeRect(36, 36, 1008, 1008);
-
-      ctx.fillStyle = "#64748b";
-      ctx.font = "bold 16px 'Cinzel', serif";
-      ctx.textAlign = "right";
-      ctx.fillText("AJISAI GAME STUDIO PRESENTS", 1008, 76);
-      ctx.textAlign = "left";
-
-      ctx.fillStyle = "#c084fc";
-      ctx.font = "900 20px 'Cinzel', serif";
-      ctx.fillText("OUTROMANCE : SECRET CHRONICLE", 72, 88);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "900 50px 'Noto Sans JP', sans-serif";
-      ctx.fillText("婚外10年シミュレーター", 72, 146);
-
-      ctx.font = "bold 24px 'Noto Sans JP', sans-serif";
-      ctx.fillStyle = "#f472b6";
-      ctx.fillText("〜既婚者たちの", 72, 186);
-      const preW = ctx.measureText("〜既婚者たちの").width;
-      ctx.fillStyle = "#fb7185";
-      ctx.font = "900 28px 'Noto Sans JP', sans-serif";
-      ctx.fillText("裏", 72 + preW, 186);
-      const uraW = ctx.measureText("裏").width;
-      ctx.fillStyle = "#f472b6";
-      ctx.font = "bold 24px 'Noto Sans JP', sans-serif";
-      ctx.fillText("歴史〜", 72 + preW + uraW, 186);
-
-      const title = document.getElementById("resTitleBadge").innerText;
-      ctx.fillStyle = "#fef08a";
-      ctx.font = "900 52px 'Noto Sans JP', sans-serif";
-      ctx.fillText(title, 72, 264);
-
-      ctx.fillStyle = "#cbd5e1";
-      ctx.font = "20px 'Noto Sans JP', sans-serif";
-      const prefName = { tokyo: "東京", kanagawa: "神奈川", saitama: "埼玉", chiba: "千葉" }[appState.user.pref] || "東京";
-      const finalAge = getRealAge(appState.sim.currentMonth);
-      ctx.fillText(`観測者: ${appState.user.name}（${appState.user.startAge}歳→${finalAge}歳 / ${prefName}） 配偶者と同居中`, 72, 306);
-
-      const stats = [
-        { label: "累計交際人数", val: document.getElementById("resTotalCount").innerText, col: "#f472b6" },
-        { label: "肌を重ねた回数", val: document.getElementById("resSexCount").innerText, col: "#fb7185" },
-        { label: "密会・正味時間", val: document.getElementById("resTotalHours").innerText, col: "#38bdf8" },
-        { label: "最終本業年収", val: document.getElementById("resFinalIncome").innerText, col: "#4ade80" }
-      ];
-
-      stats.forEach((s, i) => {
-        const x = 72 + (i % 2) * 480;
-        const y = 345 + Math.floor(i / 2) * 125;
-        ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
-        ctx.fillRect(x, y, 440, 105);
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, 440, 105);
-
-        ctx.fillStyle = "#94a3b8";
-        ctx.font = "16px 'Noto Sans JP', sans-serif";
-        ctx.fillText(s.label, x + 24, y + 34);
-
-        ctx.fillStyle = s.col;
-        ctx.font = "900 38px 'Noto Sans JP', sans-serif";
-        ctx.fillText(s.val, x + 24, y + 84);
-      });
-
-      const achs = [
-        { name: "100人斬り", ok: appState.sim.partners.length >= 100 },
-        { name: "五年の絆", ok: appState.sim.partners.some(p => p.durationMonths >= 60) },
-        { name: "密会120pt", ok: appState.sim.globalMaxSexScore >= 120 },
-        { name: "+20歳年上", ok: appState.sim.metOlder20Plus },
-        { name: "-20歳年下", ok: appState.sim.metYounger20Plus }
-      ];
-
-      achs.forEach((a, i) => {
-        const ax = 72 + i * 190;
-        const ay = 600;
-        ctx.fillStyle = a.ok ? "rgba(245, 158, 11, 0.15)" : "rgba(30, 41, 59, 0.4)";
-        ctx.fillRect(ax, ay, 175, 45);
-        ctx.strokeStyle = a.ok ? "#f59e0b" : "rgba(255, 255, 255, 0.1)";
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(ax, ay, 175, 45);
-
-        ctx.fillStyle = a.ok ? "#fde047" : "#64748b";
-        ctx.font = "bold 13px 'Noto Sans JP', sans-serif";
-        ctx.fillText((a.ok ? "★ " : "☆ ") + a.name, ax + 14, ay + 28);
-      });
-
-      const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-      const longestP = sortedByDuration[0] || { name: "なし", durationMonths: 0, area: "東京", avatarId: "F01" };
-      const highestScoreP = appState.sim.highestScorePartner || longestP;
-
-      ctx.imageSmoothingEnabled = false;
-
-      // 左：最長交際
-      ctx.fillStyle = "rgba(24, 18, 43, 0.85)";
-      ctx.fillRect(72, 670, 440, 240);
-      ctx.strokeStyle = "rgba(168, 85, 247, 0.45)";
-      ctx.strokeRect(72, 670, 440, 240);
-
-      const longestImg = new Image();
-      longestImg.src = AvatarCacheManager.get(longestP.avatarId);
-      ctx.drawImage(longestImg, 92, 692, 56, 56);
-
-      ctx.fillStyle = "#f472b6";
-      ctx.font = "bold 15px 'Noto Sans JP', sans-serif";
-      ctx.fillText("👑 最長交際パートナー", 160, 712);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
-      ctx.fillText(`${longestP.name} (${longestP.durationMonths}ヶ月)`, 160, 742);
-
-      ctx.fillStyle = "#a7f3d0";
-      ctx.font = "italic 15px 'Noto Sans JP', sans-serif";
-      wrapCanvasText(ctx, longestP.lastLine || "「……」", 92, 786, 400, 23);
-
-      // 右：最高スコア
-      ctx.fillStyle = "rgba(30, 18, 25, 0.85)";
-      ctx.fillRect(532, 670, 476, 240);
-      ctx.strokeStyle = "rgba(244, 63, 94, 0.45)";
-      ctx.strokeRect(532, 670, 476, 240);
-
-      const highestImg = new Image();
-      highestImg.src = AvatarCacheManager.get(highestScoreP.avatarId);
-      ctx.drawImage(highestImg, 552, 692, 56, 56);
-
-      ctx.fillStyle = "#fbbf24";
-      ctx.font = "bold 15px 'Noto Sans JP', sans-serif";
-      ctx.fillText("🔥 歴代最高密会スコア", 620, 712);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
-      ctx.fillText(`${highestScoreP.name} (${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt)`, 620, 742);
-
-      ctx.fillStyle = "#cbd5e1";
-      ctx.font = "italic 15px 'Noto Sans JP', sans-serif";
-      wrapCanvasText(ctx, "「ホテルのシーツを掴んだまま息が止まりそうになったあの夜は、一生忘れられない。」", 552, 786, 436, 23);
-
-      ctx.fillStyle = "#475569";
-      ctx.font = "16px 'Noto Sans JP', sans-serif";
-      ctx.fillText("OUTROMANCE | 10-Year Simulation 〜既婚者たちの裏歴史〜", 72, 980);
-
-      const dataUrl = cvs.toDataURL("image/png");
-      document.getElementById("generatedCardImage").src = dataUrl;
-      document.getElementById("imageSaveModal").classList.remove("hidden");
-
-      try {
-        const link = document.createElement("a");
-        link.download = `OUTROMANCE_${appState.user.name}_婚外10年成績表.png`;
-        link.href = dataUrl;
-        link.click();
-      } catch(e) {}
-    }
-
-    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
-      let line = "";
-      for (let n = 0; n < text.length; n++) {
-        const testLine = line + text[n];
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
-          ctx.fillText(line, x, y);
-          line = text[n];
-          y += lineHeight;
-        } else {
-          line = testLine;
-        }
-      }
-      ctx.fillText(line, x, y);
-    }
-
-    function closeImageModal() { document.getElementById("imageSaveModal").classList.add("hidden"); }
-
-    function shareOnX() {
-      const title = document.getElementById("resTitleBadge").innerText;
-      const count = document.getElementById("resTotalCount").innerText;
-      const score = appState.sim.globalMaxSexScore || 0;
-      const text = encodeURIComponent(`【婚外10年シミュレーター 〜既婚者たちの裏歴史〜】\n私の10年後の称号は ${title} でした。\n\n・累計交際人数: ${count}\n・最高密会スコア: ${score}pt\n・首都圏711万人のリアルな十年史\n\n#婚外10年シミュレーター #婚外シミュレーター #既婚者たちの裏歴史 #AjisaiGameStudio #既婚者マチアプ`);
-      window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
-    }
-
-    function restartApp() {
-      document.getElementById("step3").classList.add("hidden");
-      document.getElementById("step0").classList.remove("hidden");
-      document.getElementById("headerAssetBadge").classList.add("hidden");
-      runCinematicPrologue();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function initApp() {
-      document.getElementById("stepDisclaimer").classList.remove("hidden");
-      onPrefChange();
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initApp);
-    } else {
-      initApp();
-    }
-  </script>
-</body>
-</html>
+      stats: { looks:

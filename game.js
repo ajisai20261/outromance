@@ -2,6 +2,7 @@
    game.js - OUTROMANCE メインループ ＆ ライフサイクル制御
    ============================================================ */
 
+// アバター内蔵フォールバック生成エンジン
 const PixelAvatarEngine = {
   generate(idStr) {
     const cvs = document.createElement("canvas");
@@ -33,6 +34,7 @@ const PixelAvatarEngine = {
   }
 };
 
+// アバターキャッシュ管理
 const AvatarCacheManager = {
   cache: {},
   init() {
@@ -55,26 +57,7 @@ const AvatarCacheManager = {
   }
 };
 
-let simTimer = null;
-let simSpeedMs = 3000;
-
-function toggleSpeed() {
-  if (simSpeedMs === 3000) {
-    simSpeedMs = 1500;
-    document.getElementById("speedToggleBtn").innerText = "⏩ 2.0x";
-    document.getElementById("stickySpeedText").innerText = "1.5秒/月 (早送り)";
-  } else {
-    simSpeedMs = 3000;
-    document.getElementById("speedToggleBtn").innerText = "⏩ 1.0x";
-    document.getElementById("stickySpeedText").innerText = "3.0秒/月 進行中";
-  }
-  triggerVibrate(15);
-  if (!appState.sim.isPaused && !appState.sim.isSkipping) {
-    clearTimeout(simTimer);
-    simTimer = setTimeout(simulationTick, simSpeedMs);
-  }
-}
-
+// シミュレーション開始
 function startSimulation() {
   if (appState.tempPoints > 0) {
     autoAllocateRemainingPoints();
@@ -82,8 +65,8 @@ function startSimulation() {
   }
 
   AvatarCacheManager.init();
-  appState.stats.maxPartners = parseInt(document.getElementById("userMaxConcurrent").value) || 2;
-  appState.stats.targetAgePref = document.getElementById("targetAgePref").value;
+  appState.stats.maxPartners = parseInt(document.getElementById("userMaxConcurrent")?.value) || 2;
+  appState.stats.targetAgePref = document.getElementById("targetAgePref")?.value || "same";
   appState.sim.currentMonth = 0;
   appState.sim.currentAge = appState.user.startAge;
   appState.sim.lastMilestoneMonth = -1;
@@ -103,10 +86,9 @@ function startSimulation() {
   appState.sim.breakupCountIn2Years = 0;
   appState.sim.lawsuitCount = 0;
 
-  document.getElementById("step1b").classList.add("hidden");
-  document.getElementById("step2").classList.remove("hidden");
-  document.getElementById("stickyController").classList.remove("hidden");
-  document.getElementById("headerAssetBadge").classList.remove("hidden");
+  document.getElementById("step1b")?.classList.add("hidden");
+  document.getElementById("step2")?.classList.remove("hidden");
+  document.getElementById("stickyController")?.classList.remove("hidden");
   updateLiveStats();
   window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -115,6 +97,7 @@ function startSimulation() {
   startSimLoop();
 }
 
+// ループ制御
 function startSimLoop() {
   clearTimeout(simTimer);
   simTimer = setTimeout(simulationTick, simSpeedMs);
@@ -123,12 +106,14 @@ function startSimLoop() {
 function pauseSimulationInternal() {
   clearTimeout(simTimer);
   appState.sim.isPaused = true;
-  document.getElementById("pausePlayBtn").innerText = "▶️";
+  const btn = document.getElementById("pausePlayBtn");
+  if (btn) btn.innerText = "▶️";
 }
 
 function resumeSimulationInternal() {
   appState.sim.isPaused = false;
-  document.getElementById("pausePlayBtn").innerText = "⏸️";
+  const btn = document.getElementById("pausePlayBtn");
+  if (btn) btn.innerText = "⏸️";
   startSimLoop();
 }
 
@@ -139,7 +124,10 @@ function togglePauseSimulation() {
 
 function simulationTick() {
   if (appState.sim.isPaused) return;
-  if (appState.sim.currentMonth >= 120) { finishSimulation(); return; }
+  if (appState.sim.currentMonth >= 120) {
+    finishSimulation();
+    return;
+  }
   if (appState.sim.currentMonth > 0 && appState.sim.currentMonth % 24 === 0 && appState.sim.currentMonth !== appState.sim.lastMilestoneMonth) {
     pauseForTwoYearMilestone();
     return;
@@ -150,10 +138,12 @@ function simulationTick() {
   startSimLoop();
 }
 
+// 2年後へスキップ（2年分の出会い・破局・判定をすべて内部連続計算）
 function skipToEndOfTwoYears() {
   pauseSimulationInternal();
   appState.sim.isSkipping = true;
-  document.getElementById("flashOverlay").className = "fixed inset-0 pointer-events-none z-50 transition-colors";
+  const overlay = document.getElementById("flashOverlay");
+  if (overlay) overlay.className = "fixed inset-0 pointer-events-none z-50 transition-colors";
 
   let nextMile = (Math.floor(appState.sim.currentMonth / 24) + 1) * 24;
   if (nextMile <= appState.sim.currentMonth) nextMile += 24;
@@ -169,15 +159,19 @@ function skipToEndOfTwoYears() {
   }
   appState.sim.isSkipping = false;
 
-  if (appState.sim.currentMonth % 24 === 0 && appState.sim.currentMonth < 120) pauseForTwoYearMilestone();
-  else if (appState.sim.currentMonth >= 120) finishSimulation();
+  if (appState.sim.currentMonth % 24 === 0 && appState.sim.currentMonth < 120) {
+    pauseForTwoYearMilestone();
+  } else if (appState.sim.currentMonth >= 120) {
+    finishSimulation();
+  }
 }
 
+// 離婚・家庭崩壊ゲームオーバー
 function triggerDivorceGameOver(mIdx, isSilent = false) {
   clearTimeout(simTimer);
   appState.sim.isDivorced = true;
   const overlay = document.getElementById("flashOverlay");
-  overlay.classList.add("red-flash-active");
+  if (overlay) overlay.classList.add("red-flash-active");
   playAlarm();
   triggerVibrate([200, 100, 200, 100, 200]);
 
@@ -190,17 +184,19 @@ function triggerDivorceGameOver(mIdx, isSilent = false) {
   appState.sim.activePartnerIds = [];
 
   setTimeout(() => {
-    document.getElementById("step2").classList.add("hidden");
-    document.getElementById("stickyController").classList.add("hidden");
-    document.getElementById("step3").classList.remove("hidden");
+    document.getElementById("step2")?.classList.add("hidden");
+    document.getElementById("stickyController")?.classList.add("hidden");
+    document.getElementById("step3")?.classList.remove("hidden");
     window.scrollTo({ top: 0, behavior: "smooth" });
     calculateAndRenderResult();
   }, isSilent ? 0 : 800);
 }
 
+// 2年ごとの節目処理
 function pauseForTwoYearMilestone() {
   pauseSimulationInternal();
-  document.getElementById("flashOverlay").classList.remove("red-flash-active");
+  const overlay = document.getElementById("flashOverlay");
+  if (overlay) overlay.classList.remove("red-flash-active");
   closeClickDetail();
 
   const mIdx = appState.sim.currentMonth;
@@ -208,16 +204,20 @@ function pauseForTwoYearMilestone() {
   const currentAge = getRealAge(mIdx);
   appState.sim.currentAge = currentAge;
 
-  document.getElementById("twoYearSummaryTotal").innerText = `${appState.sim.partners.length}人`;
+  const totalEl = document.getElementById("twoYearSummaryTotal");
+  if (totalEl) totalEl.innerText = `${appState.sim.partners.length}人`;
   const sortedByDur = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-  document.getElementById("twoYearSummaryLongest").innerText = sortedByDur[0] ? `${sortedByDur[0].durationMonths}ヶ月` : "0ヶ月";
-  document.getElementById("twoYearSummaryScore").innerText = `${appState.sim.globalMaxSexScore} pt`;
+  const longestEl = document.getElementById("twoYearSummaryLongest");
+  if (longestEl) longestEl.innerText = sortedByDur[0] ? `${sortedByDur[0].durationMonths}ヶ月` : "0ヶ月";
+  const scoreEl = document.getElementById("twoYearSummaryScore");
+  if (scoreEl) scoreEl.innerText = `${appState.sim.globalMaxSexScore} pt`;
 
   const youngest = [...appState.sim.partners].sort((a,b) => a.startAge - b.startAge)[0];
   const oldest = [...appState.sim.partners].sort((a,b) => b.startAge - a.startAge)[0];
-
-  document.getElementById("twoYearSummaryYoungest").innerText = youngest ? `${youngest.startAge}歳` : "―";
-  document.getElementById("twoYearSummaryOldest").innerText = oldest ? `${oldest.startAge}歳` : "―";
+  const youngEl = document.getElementById("twoYearSummaryYoungest");
+  if (youngEl) youngEl.innerText = youngest ? `${youngest.startAge}歳` : "―";
+  const oldEl = document.getElementById("twoYearSummaryOldest");
+  if (oldEl) oldEl.innerText = oldest ? `${oldest.startAge}歳` : "―";
 
   const r = Math.random();
   let dropTotal = 2;
@@ -258,10 +258,14 @@ function pauseForTwoYearMilestone() {
   appState.stats.stamina = Math.max(1, appState.stats.stamina - staminaDrop);
   appState.stats.libido = Math.max(1, appState.stats.libido - libidoDrop);
 
-  document.getElementById("twoYearTotalDropText").innerText = `-${dropTotal} pt`;
-  document.getElementById("dropDetailLooks").innerText = `${prevLooks} → ${appState.stats.looks}`;
-  document.getElementById("dropDetailStamina").innerText = `${prevStamina} → ${appState.stats.stamina}`;
-  document.getElementById("dropDetailLibido").innerText = `${prevLibido} → ${appState.stats.libido}`;
+  const dropTxt = document.getElementById("twoYearTotalDropText");
+  if (dropTxt) dropTxt.innerText = `-${dropTotal} pt`;
+  const dLooks = document.getElementById("dropDetailLooks");
+  if (dLooks) dLooks.innerText = `${prevLooks} → ${appState.stats.looks}`;
+  const dStam = document.getElementById("dropDetailStamina");
+  if (dStam) dStam.innerText = `${prevStamina} → ${appState.stats.stamina}`;
+  const dLib = document.getElementById("dropDetailLibido");
+  if (dLib) dLib.innerText = `${prevLibido} → ${appState.stats.libido}`;
 
   let bonus = 0, penalty = 0;
   if (appState.sim.globalMaxSexScore >= 95) bonus++;
@@ -289,7 +293,8 @@ function pauseForTwoYearMilestone() {
   }
 
   appState.stats.income = Math.max(2, Math.min(8, appState.stats.income + incomeDelta));
-  document.getElementById("incomeChangeReport").innerText = `Lv.${prevIncome} → Lv.${appState.stats.income}`;
+  const incReport = document.getElementById("incomeChangeReport");
+  if (incReport) incReport.innerText = `Lv.${prevIncome} → Lv.${appState.stats.income}`;
 
   appState.stats.budget = 0;
   const reallocPoints = Math.max(2, appState.stats.income + 1 + bonus - penalty);
@@ -307,15 +312,17 @@ function pauseForTwoYearMilestone() {
   appState.sim.crisisCountIn2Years = 0;
   appState.sim.breakupCountIn2Years = 0;
 
-  const yearIndex = (mIdx / 24) * 2;
-  document.getElementById("twoYearHeaderTag").innerText = `${mIdx}ヶ月目の節目`;
-  document.getElementById("twoYearTitle").innerText = `${yearIndex}年目の節目：${currentAge}歳の現在`;
-  document.getElementById("twoYearMaxPartners").value = String(appState.stats.maxPartners || 2);
-  document.getElementById("twoYearTargetAgePref").value = appState.stats.targetAgePref || "same";
+  const tagEl = document.getElementById("twoYearHeaderTag");
+  if (tagEl) tagEl.innerText = `${mIdx}ヶ月目の節目`;
+
+  const maxP = document.getElementById("twoYearMaxPartners");
+  if (maxP) maxP.value = String(appState.stats.maxPartners || 2);
+  const targetAge = document.getElementById("twoYearTargetAgePref");
+  if (targetAge) targetAge.value = appState.stats.targetAgePref || "same";
 
   renderTwoYearModal();
   renderTwoYearChronicle(mIdx);
-  document.getElementById("twoYearModal").classList.remove("hidden");
+  document.getElementById("twoYearModal")?.classList.remove("hidden");
   if (isSoundOn) playTone(440, 0.2);
 }
 
@@ -330,10 +337,10 @@ function resumeNextTwoYears() {
   appState.stats.budget = appState.twoYearTemp.budget;
   appState.stats.spouseAlert = appState.twoYearTemp.spouseAlert;
 
-  appState.stats.maxPartners = parseInt(document.getElementById("twoYearMaxPartners").value) || 2;
-  appState.stats.targetAgePref = document.getElementById("twoYearTargetAgePref").value;
+  appState.stats.maxPartners = parseInt(document.getElementById("twoYearMaxPartners")?.value) || 2;
+  appState.stats.targetAgePref = document.getElementById("twoYearTargetAgePref")?.value || "same";
 
-  document.getElementById("twoYearModal").classList.add("hidden");
+  document.getElementById("twoYearModal")?.classList.add("hidden");
   updateLiveStats();
   refresh24MatrixGrid();
   resumeSimulationInternal();
@@ -341,7 +348,7 @@ function resumeNextTwoYears() {
 
 function retireFromTwoYear() {
   clearTimeout(simTimer);
-  document.getElementById("twoYearModal").classList.add("hidden");
+  document.getElementById("twoYearModal")?.classList.add("hidden");
   appState.sim.isRetired = true;
   const mIdx = appState.sim.currentMonth;
   appState.sim.partners.forEach(p => {
@@ -354,6 +361,7 @@ function retireFromTwoYear() {
   finishSimulation();
 }
 
+// 10年完走処理
 function finishSimulation() {
   clearTimeout(simTimer);
   const mIdx = appState.sim.currentMonth;
@@ -365,25 +373,26 @@ function finishSimulation() {
   });
   appState.sim.activePartnerIds = [];
 
-  document.getElementById("step2").classList.add("hidden");
-  document.getElementById("stickyController").classList.add("hidden");
-  document.getElementById("step3").classList.remove("hidden");
+  document.getElementById("step2")?.classList.add("hidden");
+  document.getElementById("stickyController")?.classList.add("hidden");
+  document.getElementById("step3")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 
   calculateAndRenderResult();
 }
 
 function restartApp() {
-  document.getElementById("step3").classList.add("hidden");
-  document.getElementById("step0").classList.remove("hidden");
-  document.getElementById("headerAssetBadge").classList.add("hidden");
+  document.getElementById("step3")?.classList.add("hidden");
+  document.getElementById("step0")?.classList.remove("hidden");
   runCinematicPrologue();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function initApp() {
-  document.getElementById("stepDisclaimer").classList.remove("hidden");
-  onPrefChange();
+  document.getElementById("stepDisclaimer")?.classList.remove("hidden");
+  if (typeof onPrefChange === "function") {
+    onPrefChange();
+  }
 }
 
 if (document.readyState === "loading") {

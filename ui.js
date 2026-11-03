@@ -272,7 +272,7 @@ function applyStylePreset(presetType) {
 function rerollStats() {
   const income = rollIncomeLevel();
   appState.stats.income = income;
-  appState.tempPoints = income + 1; // 割り振り前ポイントを満額保持
+  appState.tempPoints = income + 1;
 
   const totalTarget = rollInitialStatsTotal();
   let remain = totalTarget - 9;
@@ -596,7 +596,7 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
   const monthTitle = document.getElementById("monthTitleLog");
   if (monthTitle) monthTitle.innerText = seasons[calMonth];
 
-  // 年齢の前にプレイヤー名を強調表示（例: ユウタ 48歳（婚外開始8年9ヶ月））
+  // 年齢の前に名前を強調表示
   const simAgeEl = document.getElementById("simCurrentAge");
   if (simAgeEl) {
     const currentAge = getRealAge(mIdx);
@@ -640,7 +640,7 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
     if (p.category === "senior") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-purple-900 text-purple-200 rounded border border-purple-500/30 font-bold">シニア</span>';
     if (p.category === "youth") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 font-bold">若手</span>';
 
-    // 相性バッジを交際中カードへ常時追加
+    // 相性バッジ
     let chemBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-pink-950/80 text-pink-300 rounded border border-pink-600/60 font-black">相性 ${p.chemistry}</span>`;
 
     monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score, tag: p.tag });
@@ -838,19 +838,22 @@ function renderTwoYearChronicle(currentMonth) {
       let h = "";
       active.forEach(p => {
         const avatarSrc = AvatarCacheManager.get(p.avatarId);
-        // 「最高」を削除し、「相性 S ｜ 111pt」の形式に変更
         h += `
-          <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
-            <div class="flex items-center gap-2">
-              <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
-              <div>
-                <div class="font-bold text-white text-xs">${p.name} (${p.age}歳) <span class="text-[9px] text-indigo-300 font-normal">🏷️${p.tag}</span></div>
-                <div class="text-slate-400 text-[10px]">${p.job} / ${p.area}</div>
+          <div class="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-900 border border-slate-800 gap-2">
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+              <div class="avatar-frame-sm flex-shrink-0"><img src="${avatarSrc}" alt="${p.name}"></div>
+              <div class="min-w-0 flex-1">
+                <div class="font-bold text-white text-xs truncate flex items-center gap-1">
+                  <span>${p.name}</span>
+                  <span class="text-slate-400 text-[10px]">(${p.age}歳)</span>
+                  <span class="text-[9px] text-indigo-300 font-normal px-1 rounded bg-indigo-950 border border-indigo-800/50 flex-shrink-0">🏷️${p.tag}</span>
+                </div>
+                <div class="text-slate-400 text-[10px] truncate">${p.job} / ${p.area}</div>
               </div>
             </div>
-            <div class="text-right">
-              <span class="text-purple-300 font-bold text-[10px]">${p.durationMonths}ヶ月</span>
-              <span class="px-1.5 py-0.5 rounded bg-pink-950 border border-pink-700 text-pink-300 text-[9px] ml-1 font-bold">相性 ${p.chemistry} ｜ ${p.maxSexScore}pt</span>
+            <div class="text-right flex-shrink-0 flex flex-col items-end gap-0.5">
+              <span class="text-purple-300 font-bold text-[10.5px]">${p.durationMonths}ヶ月</span>
+              <span class="px-1.5 py-0.5 rounded bg-pink-950/80 border border-pink-700/80 text-pink-300 text-[9px] font-bold whitespace-nowrap">相性${p.chemistry} ｜ ${p.maxSexScore}pt</span>
             </div>
           </div>
         `;

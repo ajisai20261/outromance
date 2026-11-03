@@ -133,12 +133,6 @@ function onGenderChange() {
   }
 }
 
-function updateConcurrentDesc() {
-  const val = document.getElementById("userMaxConcurrent").value;
-  const descMap = { "1": "一途・破局率激減", "2": "分散満喫", "3": "多重密会", "4": "限界突破・100人斬り狙い" };
-  document.getElementById("lblConcurrentDesc").innerText = descMap[val] || "";
-}
-
 function goToStep1B() {
   appState.user.name = document.getElementById("userName").value.trim() || "名無し";
   appState.user.gender = document.getElementById("userGender").value;
@@ -152,6 +146,18 @@ function goToStep1B() {
   document.getElementById("step1a").classList.add("hidden");
   document.getElementById("step1b").classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function resetStylePresetButtons() {
+  const pBtns = {
+    pure: document.getElementById("presetBtnPure"),
+    balanced: document.getElementById("presetBtnBalanced"),
+    carnage: document.getElementById("presetBtnCarnage")
+  };
+  Object.keys(pBtns).forEach(k => {
+    if (!pBtns[k]) return;
+    pBtns[k].className = "p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-90 scale-100";
+  });
 }
 
 function applyStylePreset(presetType) {
@@ -226,14 +232,13 @@ function applyStylePreset(presetType) {
     autoAllocateRemainingPoints();
   }
 
-  updateConcurrentDesc();
   renderStep1B();
 }
 
 function rerollStats() {
   const income = rollIncomeLevel();
   appState.stats.income = income;
-  appState.tempPoints = income + 1;
+  appState.tempPoints = income + 1; // 素の初期値状態でポイントを満額保持
 
   const totalTarget = rollInitialStatsTotal();
   let remain = totalTarget - 9;
@@ -259,11 +264,11 @@ function rerollStats() {
   appState.baseStamina = appState.stats.stamina;
 
   appState.stats.budget = 0;
-  appState.stats.childBurden = Math.max(2, Math.min(8, 10 - Math.floor((appState.user.startAge - 35) / 3)));
-  appState.stats.spouseAffection = 5;
   appState.stats.spouseAlert = 3;
 
-  applyStylePreset('balanced');
+  // 初期状態はスタイル未選択（ボタンの選択を外してそのまま描画）
+  resetStylePresetButtons();
+  renderStep1B();
   if (isSoundOn) playTone(523.25, 0.12);
 }
 
@@ -283,8 +288,6 @@ function renderStep1B() {
 
   document.getElementById("lblStatsTotal").innerText = (appState.stats.looks + appState.stats.libido + appState.stats.stamina);
   document.getElementById("lblIncome").innerText = "Lv." + appState.stats.income;
-  document.getElementById("lblChildBurden").innerText = "Lv." + appState.stats.childBurden;
-  document.getElementById("lblSpouseAffection").innerText = "Lv." + appState.stats.spouseAffection;
   document.getElementById("lblSpouseAlert").innerText = "Lv." + appState.stats.spouseAlert;
 }
 

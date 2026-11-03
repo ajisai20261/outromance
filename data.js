@@ -125,7 +125,7 @@ const AREAS_NO_STATION = {
 const PREF_PROPERTIES = {
   tokyo: {
     title: "【都心の魔境】",
-    desc: "出逢いのチャンスは最大だが人の目も多い（出逢い+4% / 身バレ+2%）",
+    desc: "出逢いのチャンスは最大だが人の目も多い。",
     meetBonus: 0.04,
     crisisBonus: 0.02,
     breakBonus: 0.0,
@@ -133,7 +133,7 @@ const PREF_PROPERTIES = {
   },
   kanagawa: {
     title: "【港街と洗練】",
-    desc: "田都・東横・みなとみらい。洗練された密会で盛り上がりやすい（密会スコア+3pt）",
+    desc: "田都・東横・みなとみらい。洗練された密会で盛り上がりやすい。",
     meetBonus: 0.0,
     crisisBonus: 0.0,
     breakBonus: 0.0,
@@ -141,7 +141,7 @@ const PREF_PROPERTIES = {
   },
   saitama: {
     title: "【鉄壁の隠密】",
-    desc: "都内へ直通し生活圏をスマートに切り離せる（身バレ危機率-2%）",
+    desc: "都内へ直通し生活圏をスマートに切り離せる。",
     meetBonus: 0.0,
     crisisBonus: -0.02,
     breakBonus: 0.0,
@@ -149,7 +149,7 @@ const PREF_PROPERTIES = {
   },
   chiba: {
     title: "【堅実な安定】",
-    desc: "東西線や湾岸。落ち着いた大人の逢瀬で関係が長続きしやすい（破局率-1.5%）",
+    desc: "落ち着いた大人の逢瀬で関係が長続きしやすい。",
     meetBonus: 0.0,
     crisisBonus: 0.0,
     breakBonus: -0.015,

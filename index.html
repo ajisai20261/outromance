@@ -98,7 +98,6 @@
 
       <div id="prologueWrapper" class="w-full flex flex-col items-center justify-center transition-opacity duration-300 relative z-10">
         <div class="space-y-4 font-serif-jp text-white text-sm sm:text-[15px] tracking-[0.16em] leading-[2.2em] max-w-md px-3 mx-auto">
-          <!-- 文字の周囲に白い光彩（ホワイトグロー）と黒シャドウを二重掛けして視認性を大幅強化 -->
           <p id="pText1" class="fade-seq font-semibold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]">
             2020年代<br>世界最大の人口を誇る、東京首都圏。
           </p>
@@ -240,6 +239,18 @@
         </div>
       </div>
 
+      <!-- プリセット直下のクイックスタート導線 -->
+      <div class="space-y-1.5 pt-0.5 pb-1">
+        <button onclick="startSimulation()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.35)] transition active:scale-95 flex items-center justify-center gap-2">
+          <span>この設定で10年の婚外へ旅立つ！ 🚀</span>
+        </button>
+        <div class="flex items-center gap-2 pt-1">
+          <div class="h-[1px] bg-slate-800 flex-1"></div>
+          <span class="text-[10px] text-purple-300/80 font-medium whitespace-nowrap">▼ こだわりたい方は下で自由に微調整できます</span>
+          <div class="h-[1px] bg-slate-800 flex-1"></div>
+        </div>
+      </div>
+
       <div class="bg-purple-950/40 border border-purple-800/60 rounded-xl p-3 flex items-center justify-between">
         <div>
           <div class="text-[11px] text-purple-200">配分可能ポイント（本業年収Lv + 1pt）</div>
@@ -354,7 +365,7 @@
       </div>
 
       <button onclick="startSimulation()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.3)] transition active:scale-95 flex items-center justify-center gap-2">
-        <span>10年の婚外に旅立つ！ 🚀</span>
+        <span>この設定で10年の婚外へ旅立つ！ 🚀</span>
       </button>
       <p class="text-center text-[10px] text-slate-400">※未割り振りのポイントは最適なバランスで自動配分されます</p>
     </section>

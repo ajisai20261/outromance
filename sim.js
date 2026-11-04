@@ -264,7 +264,9 @@ function createSynthesizedPartner(startMonth, playerAge) {
     color: availableColor,
     maxSexScore: 0,
     lastSexScore: 0,
-    lastLine: ""
+    lastLine: "",
+    lastActionText: null,
+    giftProtectedUntil: null
   };
 }
 
@@ -316,6 +318,8 @@ function simulateOneMonth(isSilent = false) {
   const isUserMale = (appState.user.gender === "male");
 
   activePartners.forEach(p => {
+    // ターン進行時に前月の手動アクションテキストをクリア
+    p.lastActionText = null;
     p.durationMonths++;
     p.datesCount++;
     p.age = p.startAge + Math.floor(p.durationMonths / 12);
@@ -394,8 +398,13 @@ function simulateOneMonth(isSilent = false) {
       if (appState.stats.libido <= 3) breakRate *= 1.8;
     }
 
+    // 🎁 贈物による継続保護（有効期間中は破局率 80% カット）
+    if (p.giftProtectedUntil && p.giftProtectedUntil >= mIdx) {
+      breakRate *= 0.2;
+    }
+
     breakRate += (prefProp.breakBonus || 0);
-    breakRate = Math.max(0.008, breakRate);
+    breakRate = Math.max(0.005, breakRate);
 
     if (p.durationMonths >= 2) {
       const roll = Math.random();

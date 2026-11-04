@@ -180,6 +180,84 @@ function goToStep1B() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// Step 1-B: ステータス増減
+function adjustStat(statKey, delta) {
+  initAudio();
+  if (delta > 0) {
+    if (appState.tempPoints <= 0) return;
+    if (statKey === "budget") {
+      if (appState.stats.budget >= 10) return;
+      appState.stats.budget = Math.min(10, appState.stats.budget + 2);
+    } else {
+      if (appState.stats[statKey] >= 10) return;
+      appState.stats[statKey]++;
+    }
+    appState.tempPoints--;
+    if (isSoundOn) playTone(587.33, 0.08);
+  } else {
+    if (statKey === "budget") {
+      if (appState.stats.budget <= 0) return;
+      appState.stats.budget = Math.max(0, appState.stats.budget - 2);
+    } else {
+      const minBase = statKey === "looks" ? (appState.baseLooks || 1) : (statKey === "libido" ? (appState.baseLibido || 1) : (appState.baseStamina || 1));
+      if (appState.stats[statKey] <= minBase) return;
+      appState.stats[statKey]--;
+    }
+    appState.tempPoints++;
+    if (isSoundOn) playTone(440, 0.08);
+  }
+  resetStylePresetButtons();
+  renderStep1B();
+}
+
+// Step 1-B: 未配分ポイントの自動最適配分
+function autoAllocateRemainingPoints() {
+  const isMale = (appState.user.gender === "male");
+  while (appState.tempPoints > 0) {
+    if (isMale && appState.stats.budget < 4 && appState.tempPoints >= 1) {
+      appState.stats.budget = Math.min(10, appState.stats.budget + 2);
+      appState.tempPoints--;
+    } else if (!isMale && appState.stats.looks < 9) {
+      appState.stats.looks++;
+      appState.tempPoints--;
+    } else if (appState.stats.stamina < 9) {
+      appState.stats.stamina++;
+      appState.tempPoints--;
+    } else if (appState.stats.looks < 9) {
+      appState.stats.looks++;
+      appState.tempPoints--;
+    } else if (appState.stats.libido < 9) {
+      appState.stats.libido++;
+      appState.tempPoints--;
+    } else {
+      break;
+    }
+  }
+}
+
+// 2年節目: 未配分ポイントの自動配分
+function autoAllocateTwoYearPoints() {
+  if (!appState.twoYearTemp) return;
+  const isMale = (appState.user.gender === "male");
+  while (appState.twoYearTemp.points > 0) {
+    if (isMale && appState.twoYearTemp.budget < 4) {
+      appState.twoYearTemp.budget = Math.min(10, appState.twoYearTemp.budget + 2);
+      appState.twoYearTemp.points--;
+    } else if (appState.twoYearTemp.stamina < 8) {
+      appState.twoYearTemp.stamina++;
+      appState.twoYearTemp.points--;
+    } else if (appState.twoYearTemp.looks < 8) {
+      appState.twoYearTemp.looks++;
+      appState.twoYearTemp.points--;
+    } else if (appState.twoYearTemp.libido < 8) {
+      appState.twoYearTemp.libido++;
+      appState.twoYearTemp.points--;
+    } else {
+      break;
+    }
+  }
+}
+
 function resetStylePresetButtons() {
   const pBtns = {
     pure: document.getElementById("presetBtnPure"),
@@ -261,9 +339,7 @@ function applyStylePreset(presetType) {
       appState.stats.budget = Math.min(10, appState.stats.budget + 2);
       appState.tempPoints--;
     }
-    if (typeof autoAllocateRemainingPoints === "function") {
-      autoAllocateRemainingPoints();
-    }
+    autoAllocateRemainingPoints();
   }
 
   renderStep1B();
@@ -349,6 +425,16 @@ function updateLiveStats() {
   if (incEl) incEl.innerText = `Lv.${appState.stats.income}`;
   const alertEl = document.getElementById("largeSpouseAlertVal");
   if (alertEl) alertEl.innerText = `Lv.${appState.stats.spouseAlert}/5`;
+
+  const maxP = appState.stats.maxPartners || 2;
+  const activeCountEl = document.getElementById("simActiveCount");
+  if (activeCountEl) {
+    activeCountEl.innerText = `${appState.sim.activePartnerIds.length}/${maxP}人`;
+  }
+  const totalCountEl = document.getElementById("simTotalPartners");
+  if (totalCountEl) {
+    totalCountEl.innerText = `${appState.sim.partners.length}人`;
+  }
 }
 
 function initScreenTapHandler() {
@@ -453,7 +539,7 @@ function showNewPartnerToast(p, isDouble = false) {
   document.getElementById("toastPartnerAreaJob").innerText = `${p.area} ｜ ${p.job}`;
   document.getElementById("toastPartnerChem").innerText = `相性 ${p.chemistry}`;
 
-  document.getElementById("toastHeaderTitle").innerText = isDouble ? "✨ DOUBLE MATCHED! (2/2)" : "💖 NEW PARTNER MATCHED!";
+  document.getElementById("toastHeaderTitle").innerText = isDouble ? "✨ DOUBLE MATCHED! (2/2)" : "💖 NEW MATCHED!";
 
   const badgeEl = document.getElementById("toastPartnerBadge");
   let badges = `<span class="px-1.5 py-0.2 text-[9px] bg-indigo-950 text-indigo-300 rounded border border-indigo-700/60 font-bold">🏷️${p.tag}</span>`;
@@ -601,6 +687,16 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
     const passedM = (mIdx % 12) + 1;
     const elapsedStr = passedY > 0 ? `${passedY}年${passedM}ヶ月` : `${passedM}ヶ月`;
     simAgeEl.innerHTML = `<span class="text-purple-300 font-black text-sm">${appState.user.name}</span> <span class="font-bold text-white text-xs ml-1">${currentAge}歳</span> <span class="text-slate-400 text-[10.5px] font-normal">（婚外開始 ${elapsedStr}）</span>`;
+  }
+
+  const maxP = appState.stats.maxPartners || 2;
+  const activeCountEl = document.getElementById("simActiveCount");
+  if (activeCountEl) {
+    activeCountEl.innerText = `${appState.sim.activePartnerIds.length}/${maxP}人`;
+  }
+  const totalCountEl = document.getElementById("simTotalPartners");
+  if (totalCountEl) {
+    totalCountEl.innerText = `${appState.sim.partners.length}人`;
   }
 
   const listContainer = document.getElementById("currentMonthPartnersLog");
@@ -780,6 +876,43 @@ function showClickMonthDetail(mIdx) {
 
 function closeClickDetail() { document.getElementById("clickMonthDetail")?.classList.add("hidden"); }
 
+// プレイヤーによる手動破局（別れるボタン）
+function manualBreakup(partnerId, e) {
+  if (e) e.stopPropagation();
+  initAudio();
+  triggerVibrate(20);
+
+  const idx = appState.sim.activePartnerIds.indexOf(partnerId);
+  if (idx === -1) return;
+
+  const partner = appState.sim.partners.find(p => p.id === partnerId);
+  if (!partner) return;
+
+  appState.sim.activePartnerIds.splice(idx, 1);
+  partner.endMonth = appState.sim.currentMonth;
+
+  let isTroubled = false;
+  if (partner.tag === "年下独身" && Math.random() < 0.35) {
+    isTroubled = true;
+  } else if (partner.tag === "割り切り") {
+    isTroubled = false;
+  } else if (Math.random() < 0.12) {
+    isTroubled = true;
+  }
+
+  if (isTroubled) {
+    appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
+    if (!appState.sim.isSkipping) playAlarm();
+  }
+
+  showBreakupPartnerToast(partner, (appState.user.gender === "male"), true, isTroubled);
+
+  const calMonth = (appState.sim.currentMonth % 12) + 1;
+  renderRealtimeMonthlyLog(appState.sim.currentMonth, calMonth);
+  updateLiveStats();
+}
+
+// 2年節目: モーダル描画
 function renderTwoYearModal() {
   const mIdx = appState.sim.currentMonth;
   const currentAge = getRealAge(mIdx);
@@ -822,6 +955,51 @@ function renderTwoYearModal() {
   }
 }
 
+// 2年節目: ステータス増減
+function adjustTwoYearStat(statKey, delta) {
+  initAudio();
+  if (delta > 0) {
+    if (appState.twoYearTemp.points <= 0) return;
+    if (statKey === "budget") {
+      if (appState.twoYearTemp.budget >= 10) return;
+      appState.twoYearTemp.budget = Math.min(10, appState.twoYearTemp.budget + 2);
+    } else {
+      if (appState.twoYearTemp[statKey] >= 10) return;
+      appState.twoYearTemp[statKey]++;
+    }
+    appState.twoYearTemp.points--;
+    if (isSoundOn) playTone(587.33, 0.08);
+  } else {
+    if (statKey === "budget") {
+      if (appState.twoYearTemp.budget <= 0) return;
+      appState.twoYearTemp.budget = Math.max(0, appState.twoYearTemp.budget - 2);
+    } else {
+      // min_looks, min_stamina, min_libido に完全対応
+      const minVal = appState.twoYearTemp["min_" + statKey] || 1;
+      if (appState.twoYearTemp[statKey] <= minVal) return;
+      appState.twoYearTemp[statKey]--;
+    }
+    appState.twoYearTemp.points++;
+    if (isSoundOn) playTone(440, 0.08);
+  }
+  renderTwoYearModal();
+}
+
+// 2年節目: 家庭ケア
+function buyFamilyCare() {
+  if (!appState.twoYearTemp) return;
+  if (appState.twoYearTemp.points <= 0) return;
+  if (appState.twoYearTemp.spouseAlert <= 1) return;
+
+  initAudio();
+  appState.twoYearTemp.points--;
+  appState.twoYearTemp.spouseAlert = Math.max(1, appState.twoYearTemp.spouseAlert - 2);
+  if (isSoundOn) playTone(659.25, 0.12);
+  triggerVibrate(20);
+  renderTwoYearModal();
+}
+
+// 2年節目: パートナー一覧＆振り返り
 function renderTwoYearChronicle(currentMonth) {
   const activeList = document.getElementById("twoYearActivePartnersList");
   const active = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
@@ -909,7 +1087,6 @@ function calculateAndRenderResult() {
   const finalAge = getRealAge(appState.sim.currentMonth);
   const isDivorced = appState.sim.isDivorced;
 
-  // 進行中のヘッダーボタンを非表示化
   document.getElementById("headerControls")?.classList.add("hidden");
 
   const resName = document.getElementById("resPlayerNameHeader");
@@ -1044,7 +1221,7 @@ function calculateAndRenderResult() {
   const longImg = document.getElementById("longestPartnerImg");
   if (longImg) longImg.src = AvatarCacheManager.get(longestP.avatarId);
   const longName = document.getElementById("longestPartnerNameAge");
-  if (longName) longName.innerHTML = `${longestP.name} (${longestP.endAge || longestP.startAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})<br><span class="text-[10px] text-indigo-300 font-normal">🏷️${longestP.tag} ｜ 相性 ${longestP.chemistry}</span>`;
+  if (longName) longName.innerHTML = `${longestP.name} (${longestP.endAge || longestP.startAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${longestP.tag} ｜ 相性 ${longestP.chemistry}</span>`;
   const longPeriod = document.getElementById("longestPartnerPeriod");
   if (longPeriod) longPeriod.innerText = `交際${longestP.durationMonths}ヶ月（約${(longestP.durationMonths/12).toFixed(1)}年）${isLongestActive ? " 【現在も継続中】" : ""}`;
   const longLine = document.getElementById("longestPartnerLineText");
@@ -1054,7 +1231,7 @@ function calculateAndRenderResult() {
   const highImg = document.getElementById("highestScorePartnerImg");
   if (highImg) highImg.src = AvatarCacheManager.get(highestScoreP.avatarId);
   const highName = document.getElementById("highestScorePartnerNameAge");
-  if (highName) highName.innerHTML = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})<br><span class="text-[10px] text-indigo-300 font-normal">🏷️${highestScoreP.tag} ｜ 相性 ${highestScoreP.chemistry}</span>`;
+  if (highName) highName.innerHTML = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${highestScoreP.tag} ｜ 相性 ${highestScoreP.chemistry}</span>`;
   const highDetail = document.getElementById("highestScoreDetail");
   if (highDetail) highDetail.innerText = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt`;
 

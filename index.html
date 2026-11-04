@@ -108,7 +108,6 @@
             既婚者同士の恋愛<br>“婚外”が静かに広がっていた。
           </p>
 
-          <!-- 新タイトル構成：小さくシミュレーター ＞ メイン「アウトロマンス」 ＞ サブ -->
           <div id="pTitleCard" class="fade-seq pt-3 pb-2.5 my-2 border-y border-purple-500/40 bg-black/50 backdrop-blur-md rounded-2xl px-3 shadow-2xl">
             <div class="text-[11px] sm:text-xs font-bold tracking-[0.25em] text-purple-200 uppercase mb-1 drop-shadow-[0_0_6px_rgba(192,132,252,0.6)]">
               婚外10年シミュレーター
@@ -500,7 +499,7 @@
       </div>
 
       <!-- 配偶者の警戒レベルを大きめに配置した家庭状況ログ -->
-      <div class="bg-slate-950 border border-slate-850 rounded-xl p-3 text-xs space-y-2">
+      <div class="bg-slate-950 border border-slate-855 rounded-xl p-3 text-xs space-y-2">
         <div class="flex items-center justify-between">
           <span class="text-slate-300 font-bold flex items-center gap-1.5">
             <span>🏠 家庭の気配</span>
@@ -588,23 +587,17 @@
         </div>
       </div>
 
+      <!-- パートナー記憶カード（右上バッジを廃止し全幅確保） -->
       <div class="space-y-3">
         <div class="bg-gradient-to-b from-purple-950/40 to-slate-900/90 border border-purple-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
           <div class="flex items-center gap-3">
-            <div class="avatar-frame-lg">
+            <div class="avatar-frame-lg flex-shrink-0">
               <img src="" alt="" id="longestPartnerImg">
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-start">
-                <div>
-                  <span class="text-[10px] tracking-wider text-pink-400 font-bold uppercase">👑 最長交際パートナーの記憶</span>
-                  <h3 id="longestPartnerNameAge" class="text-sm sm:text-base font-bold text-white truncate">エリコ (46歳)</h3>
-                  <div id="longestPartnerPeriod" class="text-xs text-purple-300">交際64ヶ月（5年4ヶ月）</div>
-                </div>
-                <div id="longestPartnerChem" class="px-2 py-0.5 rounded text-xs font-black bg-pink-950 border border-pink-700 text-pink-300">
-                  相性 S
-                </div>
-              </div>
+            <div class="flex-1 min-w-0 space-y-0.5">
+              <span class="text-[10px] tracking-wider text-pink-400 font-bold uppercase block">👑 最長交際パートナーの記憶</span>
+              <h3 id="longestPartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">エリコ (46歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
+              <div id="longestPartnerPeriod" class="text-xs text-purple-300 pt-0.5">交際64ヶ月（5年4ヶ月）</div>
             </div>
           </div>
           <div class="p-2 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-200 text-xs leading-relaxed italic" id="longestPartnerLineText">
@@ -614,20 +607,13 @@
 
         <div class="bg-gradient-to-b from-rose-950/30 to-slate-900/90 border border-rose-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
           <div class="flex items-center gap-3">
-            <div class="avatar-frame-lg">
+            <div class="avatar-frame-lg flex-shrink-0">
               <img src="" alt="" id="highestScorePartnerImg">
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-start">
-                <div>
-                  <span class="text-[10px] tracking-wider text-amber-400 font-bold uppercase">🔥 歴代最高密会スコアの記憶</span>
-                  <h3 id="highestScorePartnerNameAge" class="text-sm sm:text-base font-bold text-white truncate">サオリ (32歳)</h3>
-                  <div id="highestScoreDetail" class="text-xs text-amber-300">最高スコア: 124 pt (限界突破)</div>
-                </div>
-                <div id="highestScoreChem" class="px-2 py-0.5 rounded text-xs font-black bg-amber-950 border border-amber-600 text-amber-200">
-                  絶頂共鳴
-                </div>
-              </div>
+            <div class="flex-1 min-w-0 space-y-0.5">
+              <span class="text-[10px] tracking-wider text-amber-400 font-bold uppercase block">🔥 歴代最高密会スコアの記憶</span>
+              <h3 id="highestScorePartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">サオリ (32歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
+              <div id="highestScoreDetail" class="text-xs text-amber-300 pt-0.5">最高スコア: 124 pt (限界突破)</div>
             </div>
           </div>
           <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-300 text-xs leading-relaxed" id="highestScoreMemories">

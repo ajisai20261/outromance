@@ -26,14 +26,16 @@ function getRealAge(mIdx) {
   return mIdx < b - 1 ? startAge : startAge + 1 + Math.floor((mIdx - (b - 1)) / 12);
 }
 
+// 本業年収水準: Lv.4〜6（中間〜高め帯）
 function rollIncomeLevel() {
-  const r = (Math.random() + Math.random() + Math.random() + Math.random()) / 4;
-  return Math.max(2, Math.min(7, Math.round(2 + r * 5)));
+  const r = (Math.random() + Math.random()) / 2;
+  return Math.min(6, Math.max(4, Math.round(4 + r * 2)));
 }
 
+// 基礎能力値合計: 13〜16pt（下振れをカットした安定帯）
 function rollInitialStatsTotal() {
-  const r = (Math.random() + Math.random() + Math.random() + Math.random()) / 4;
-  return Math.max(10, Math.min(18, Math.round(10 + r * 8)));
+  const r = (Math.random() + Math.random()) / 2;
+  return Math.min(16, Math.max(13, Math.round(13 + r * 3)));
 }
 
 function adjustStat(type, delta) {

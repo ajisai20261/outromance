@@ -711,9 +711,13 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
   let html = "";
   const usedTexts = new Set();
   const monthLogRecord = [];
+  const hasBudget = (appState.stats.budget > 0);
+  const budgetBtnClass = hasBudget
+    ? "bg-slate-800 hover:bg-purple-900/80 border-slate-700 hover:border-purple-500 text-purple-200 cursor-pointer"
+    : "bg-slate-900/40 border-slate-800 text-slate-600 cursor-not-allowed opacity-50";
 
   currentPartners.forEach(p => {
-    const actionText = generateMonthlyActionText(p, calMonth, usedTexts);
+    const actionText = p.lastActionText || generateMonthlyActionText(p, calMonth, usedTexts);
     usedTexts.add(actionText);
 
     const score = p.lastSexScore;
@@ -738,32 +742,116 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
     monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score, tag: p.tag });
     const avatarSrc = AvatarCacheManager.get(p.avatarId);
 
+    // 【レイアウト最適化】
+    // 1行目: 名前・属性 ＋ 相性・スコア（右上寄せ）
+    // 2行目: 3連アクションボタン（💓刺激 ｜ 🎁贈物 ｜ 👋別れ）
+    // 3行目: 逢瀬エピソード
     html += `
       <div class="p-2 sm:p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs">
         <div class="avatar-frame mt-0.5"><img src="${avatarSrc}" alt="${p.name}"></div>
-        <div class="flex-1 min-w-0 space-y-0.5">
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
-            <span class="font-bold text-slate-200 text-xs sm:text-[13px] truncate">${p.name}</span>
-            <span class="text-[10px] text-purple-300 truncate">(${p.age}歳 / ${p.area})</span>
-          </div>
-          <div class="flex items-center justify-between gap-1 pt-0.5">
-            <div class="flex items-center gap-1 flex-wrap">
+        <div class="flex-1 min-w-0 space-y-1">
+          <!-- 上段: 名前・属性 ＆ 右側に相性・pt -->
+          <div class="flex items-center justify-between gap-1 min-w-0">
+            <div class="flex items-center gap-1.5 min-w-0 truncate">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
+              <span class="font-bold text-slate-200 text-xs sm:text-[13px] truncate">${p.name}</span>
+              <span class="text-[10px] text-purple-300 truncate">(${p.age}歳 / ${p.area})</span>
               ${catBadge}
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
               ${chemBadge}
               ${scoreBadge}
             </div>
-            <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-2 py-0.5 rounded text-[9.5px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5 flex-shrink-0">
-              <span>👋</span><span>別れる</span>
+          </div>
+
+          <!-- 中段: アクションボタングループ（💓刺激 ｜ 🎁贈物 ｜ 👋別れ） -->
+          <div class="flex items-center justify-end gap-1.5 pt-0.5">
+            <button type="button" onclick="giveStimulus('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：大人のおもちゃで密会度を急上昇" class="px-2 py-0.5 rounded text-[10px] border transition active:scale-95 flex items-center gap-0.5 ${budgetBtnClass}">
+              <span>💓</span><span>刺激</span>
+            </button>
+            <button type="button" onclick="giveGift('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：プレゼントで関係継続・破局防止" class="px-2 py-0.5 rounded text-[10px] border transition active:scale-95 flex items-center gap-0.5 ${budgetBtnClass}">
+              <span>🎁</span><span>贈物</span>
+            </button>
+            <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-2 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5 flex-shrink-0">
+              <span>👋</span><span>別れ</span>
             </button>
           </div>
-          <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words pt-0.5">${actionText}</div>
+
+          <!-- 下段: 逢瀬エピソードテキスト -->
+          <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words pt-0.5 border-t border-slate-800/60">${actionText}</div>
         </div>
       </div>
     `;
   });
   listContainer.innerHTML = html;
   appState.sim.monthlyHistory[mIdx] = { month: mIdx, calMonth, partners: monthLogRecord };
+}
+
+// 💓 刺激：大人のおもちゃ（密会スコア急上昇）
+function giveStimulus(partnerId, e) {
+  if (e) e.stopPropagation();
+  if (appState.stats.budget <= 0) return;
+
+  const partner = appState.sim.partners.find(p => p.id === partnerId);
+  if (!partner) return;
+
+  initAudio();
+  triggerVibrate([40, 60, 40]);
+  appState.stats.budget = Math.max(0, appState.stats.budget - 1);
+
+  partner.lastSexScore = (partner.lastSexScore || 50) + 25;
+  if (partner.lastSexScore > partner.maxSexScore) {
+    partner.maxSexScore = partner.lastSexScore;
+  }
+  if (partner.lastSexScore > appState.sim.globalMaxSexScore) {
+    appState.sim.globalMaxSexScore = partner.lastSexScore;
+    appState.sim.highestScorePartner = partner;
+  }
+
+  playLimitBreakChime();
+
+  const stimulusTexts = [
+    "密かに用意した小さな小箱を開けると、相手は赤面しながらも熱っぽい瞳で頷いた。",
+    "家庭では絶対に口にできない秘密の道具をベッドへ。理性を吹き飛ばすほどの悦楽に溺れた。",
+    "『こんなの初めて…』とシーツを強く握りしめる相手を、時間を忘れて翻弄し尽くした。",
+    "背徳的な新しい刺激に火がつき、互いの理性が焼き切れるような熱狂の夜を過ごした。",
+    "密かに取り寄せたトイを試す夜。罪悪感と官能が混ざり合い、かつてないほど濃密に肌を重ねた。"
+  ];
+  partner.lastActionText = stimulusTexts[Math.floor(Math.random() * stimulusTexts.length)];
+
+  const mIdx = appState.sim.currentMonth;
+  const calMonth = (mIdx % 12) + 1;
+  updateLiveStats();
+  renderRealtimeMonthlyLog(mIdx, calMonth);
+}
+
+// 🎁 贈物：プレゼント（関係継続＆破局防止）
+function giveGift(partnerId, e) {
+  if (e) e.stopPropagation();
+  if (appState.stats.budget <= 0) return;
+
+  const partner = appState.sim.partners.find(p => p.id === partnerId);
+  if (!partner) return;
+
+  initAudio();
+  triggerVibrate(30);
+  appState.stats.budget = Math.max(0, appState.stats.budget - 1);
+
+  // 6ヶ月間の破局保護バフを付与
+  partner.giftProtectedUntil = appState.sim.currentMonth + 6;
+  playRareChime();
+
+  const giftTexts = [
+    "「こんな素敵なもの…本当にいいの？」と瞳を潤ませ、深く強く抱きついてきた。",
+    "欲しがっていたアクセサリーをサプライズ。二人の絆がより確固たるものになった。",
+    "隠れ家ホテルのディナーと記念の品を贈り、お互いが唯一無二の存在であることを確かめ合った。"
+  ];
+  partner.lastActionText = giftTexts[Math.floor(Math.random() * giftTexts.length)];
+
+  const mIdx = appState.sim.currentMonth;
+  const calMonth = (mIdx % 12) + 1;
+  updateLiveStats();
+  renderRealtimeMonthlyLog(mIdx, calMonth);
 }
 
 function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
@@ -876,7 +964,7 @@ function showClickMonthDetail(mIdx) {
 
 function closeClickDetail() { document.getElementById("clickMonthDetail")?.classList.add("hidden"); }
 
-// プレイヤーによる手動破局（別れるボタン）
+// プレイヤーによる手動破局（別れボタン）
 function manualBreakup(partnerId, e) {
   if (e) e.stopPropagation();
   initAudio();
@@ -974,7 +1062,6 @@ function adjustTwoYearStat(statKey, delta) {
       if (appState.twoYearTemp.budget <= 0) return;
       appState.twoYearTemp.budget = Math.max(0, appState.twoYearTemp.budget - 2);
     } else {
-      // min_looks, min_stamina, min_libido に完全対応
       const minVal = appState.twoYearTemp["min_" + statKey] || 1;
       if (appState.twoYearTemp[statKey] <= minVal) return;
       appState.twoYearTemp[statKey]--;

@@ -88,7 +88,10 @@ function startSimulation() {
 
   document.getElementById("step1b")?.classList.add("hidden");
   document.getElementById("step2")?.classList.remove("hidden");
-  document.getElementById("stickyController")?.classList.remove("hidden");
+  
+  // ヘッダーコントローラーを表示
+  document.getElementById("headerControls")?.classList.remove("hidden");
+
   updateLiveStats();
   window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -185,7 +188,7 @@ function triggerDivorceGameOver(mIdx, isSilent = false) {
 
   setTimeout(() => {
     document.getElementById("step2")?.classList.add("hidden");
-    document.getElementById("stickyController")?.classList.add("hidden");
+    document.getElementById("headerControls")?.classList.add("hidden");
     document.getElementById("step3")?.classList.remove("hidden");
     window.scrollTo({ top: 0, behavior: "smooth" });
     calculateAndRenderResult();
@@ -374,7 +377,7 @@ function finishSimulation() {
   appState.sim.activePartnerIds = [];
 
   document.getElementById("step2")?.classList.add("hidden");
-  document.getElementById("stickyController")?.classList.add("hidden");
+  document.getElementById("headerControls")?.classList.add("hidden");
   document.getElementById("step3")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 

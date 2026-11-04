@@ -596,7 +596,6 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
   const monthTitle = document.getElementById("monthTitleLog");
   if (monthTitle) monthTitle.innerText = seasons[calMonth];
 
-  // 年齢の前に名前を強調表示
   const simAgeEl = document.getElementById("simCurrentAge");
   if (simAgeEl) {
     const currentAge = getRealAge(mIdx);
@@ -626,14 +625,14 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
     const score = p.lastSexScore;
     let scoreBadge = "";
     if (score >= 120) {
-      scoreBadge = `<span class="limit-break-badge bg-gradient-to-r from-amber-400 via-pink-400 to-purple-400 text-slate-950 font-black px-1.5 py-0.5 rounded text-[9.5px] sm:text-[10px] shadow-lg flex-shrink-0">⚡${score}pt</span>`;
+      scoreBadge = `<span class="limit-break-badge bg-gradient-to-r from-amber-400 via-pink-400 to-purple-400 text-slate-950 font-black px-1.5 py-0.5 rounded text-[9.5px] shadow-lg flex-shrink-0">⚡${score}pt</span>`;
       if (!appState.sim.isSkipping) playLimitBreakChime();
     } else if (score >= 100) {
-      scoreBadge = `<span class="bg-amber-950 text-amber-300 border border-amber-600 font-bold px-1.5 py-0.5 rounded text-[9.5px] sm:text-[10px] flex-shrink-0">${score}pt</span>`;
+      scoreBadge = `<span class="bg-amber-950 text-amber-300 border border-amber-600 font-bold px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
     } else if (score >= 80) {
-      scoreBadge = `<span class="bg-pink-950 text-pink-300 border border-pink-700 font-bold px-1.5 py-0.5 rounded text-[9.5px] sm:text-[10px] flex-shrink-0">${score}pt</span>`;
+      scoreBadge = `<span class="bg-pink-950 text-pink-300 border border-pink-700 font-bold px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
     } else {
-      scoreBadge = `<span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[9.5px] sm:text-[10px] flex-shrink-0">${score}pt</span>`;
+      scoreBadge = `<span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
     }
 
     let catBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-indigo-950 text-indigo-300 rounded border border-indigo-700/60 font-bold">🏷️${p.tag}</span>`;
@@ -646,28 +645,29 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
     monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score, tag: p.tag });
     const avatarSrc = AvatarCacheManager.get(p.avatarId);
 
+    // 1行目: 名前・年齢・エリア（横幅を全面確保）
+    // 2行目: 左側に「タグ・相性・スコア」、右下に「別れる」ボタン
+    // 3行目: 逢瀬のアクションテキスト
     html += `
       <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs">
         <div class="avatar-frame mt-0.5"><img src="${avatarSrc}" alt="${p.name}"></div>
         <div class="flex-1 min-w-0 space-y-1">
-          <div class="flex items-center justify-between gap-1">
-            <div class="flex items-center gap-1.5 min-w-0 truncate">
-              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
-              <span class="font-bold text-slate-200 text-xs sm:text-[13px] truncate">${p.name}</span>
-              <span class="text-[10px] text-purple-300 truncate">(${p.age}歳 / ${p.area})</span>
-            </div>
-            <div class="flex items-center gap-1 flex-shrink-0 ml-1">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
+            <span class="font-bold text-slate-200 text-xs sm:text-[13px] truncate">${p.name}</span>
+            <span class="text-[10px] text-purple-300 truncate">(${p.age}歳 / ${p.area})</span>
+          </div>
+          <div class="flex items-center justify-between gap-1 pt-0.5">
+            <div class="flex items-center gap-1 flex-wrap">
+              ${catBadge}
+              ${chemBadge}
               ${scoreBadge}
-              <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-1.5 py-0.5 rounded text-[9.5px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5 flex-shrink-0">
-                <span>👋</span><span>別れる</span>
-              </button>
             </div>
+            <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-2 py-0.5 rounded text-[9.5px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5 flex-shrink-0">
+              <span>👋</span><span>別れる</span>
+            </button>
           </div>
-          <div class="flex items-center gap-1 flex-wrap">
-            ${catBadge}
-            ${chemBadge}
-          </div>
-          <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words">${actionText}</div>
+          <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words pt-0.5">${actionText}</div>
         </div>
       </div>
     `;
@@ -1050,8 +1050,6 @@ function calculateAndRenderResult() {
   if (longName) longName.innerHTML = `${longestP.name} (${longestP.endAge || longestP.startAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${longestP.tag} ｜ 相性 ${longestP.chemistry}</span>`;
   const longPeriod = document.getElementById("longestPartnerPeriod");
   if (longPeriod) longPeriod.innerText = `交際${longestP.durationMonths}ヶ月（約${(longestP.durationMonths/12).toFixed(1)}年）${isLongestActive ? " 【現在も継続中】" : ""}`;
-  const longChem = document.getElementById("longestPartnerChem");
-  if (longChem) longChem.innerText = `相性 ${longestP.chemistry}`;
   const longLine = document.getElementById("longestPartnerLineText");
   if (longLine) longLine.innerText = longestP.lastLine;
 
@@ -1062,8 +1060,6 @@ function calculateAndRenderResult() {
   if (highName) highName.innerHTML = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${highestScoreP.tag} ｜ 相性 ${highestScoreP.chemistry}</span>`;
   const highDetail = document.getElementById("highestScoreDetail");
   if (highDetail) highDetail.innerText = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt`;
-  const highChem = document.getElementById("highestScoreChem");
-  if (highChem) highChem.innerText = `相性 ${highestScoreP.chemistry}`;
 
   const resStatLooks = document.getElementById("resStatLooks");
   if (resStatLooks) resStatLooks.innerText = "Lv." + appState.stats.looks;

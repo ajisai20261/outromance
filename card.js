@@ -1,5 +1,5 @@
 /* ============================================================
-   card.js - OUTROMANCE 成績表カード生成 ＆ SNS連携
+   card.js - OUTROMANCE 成績表カード生成 ＆ SNS連携（5年制）
    ============================================================ */
 
 async function generateSquareCard() {
@@ -10,7 +10,6 @@ async function generateSquareCard() {
   if (!cvs) return;
   const ctx = cvs.getContext("2d");
 
-  // 背景グラデーション
   const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1080);
   bgGrad.addColorStop(0, "#07080d");
   bgGrad.addColorStop(0.5, "#121422");
@@ -18,30 +17,24 @@ async function generateSquareCard() {
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, 1080, 1080);
 
-  // 外枠ネオンライン
   ctx.strokeStyle = "rgba(157, 78, 221, 0.4)";
   ctx.lineWidth = 4;
   ctx.strokeRect(36, 36, 1008, 1008);
 
-  // ブランドロゴ
   ctx.fillStyle = "#64748b";
   ctx.font = "bold 16px 'Cinzel', serif";
   ctx.textAlign = "right";
   ctx.fillText("AJISAI GAME STUDIO PRESENTS", 1008, 76);
   ctx.textAlign = "left";
 
-  // タイトルロゴ階層調整
-  // 1. 小さめの冠
   ctx.fillStyle = "#c084fc";
   ctx.font = "bold 18px 'Noto Sans JP', sans-serif";
-  ctx.fillText("婚外10年シミュレーター", 72, 86);
+  ctx.fillText("婚外5年シミュレーター", 72, 86);
 
-  // 2. メインロゴ
   ctx.fillStyle = "#ffffff";
   ctx.font = "900 52px 'Noto Sans JP', sans-serif";
   ctx.fillText("アウトロマンス", 72, 144);
 
-  // 3. サブタイトル
   ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
   ctx.fillStyle = "#f472b6";
   ctx.fillText("〜既婚者たちの", 72, 182);
@@ -54,23 +47,18 @@ async function generateSquareCard() {
   ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
   ctx.fillText("歴史〜", 72 + preW + uraW, 182);
 
-  // 獲得称号
   const titleEl = document.getElementById("resTitleBadge");
   const title = titleEl ? titleEl.innerText : "『首都圏の彷徨い人』";
   ctx.fillStyle = "#fef08a";
   ctx.font = "900 50px 'Noto Sans JP', sans-serif";
   ctx.fillText(title, 72, 260);
 
-  // プロフィール情報（「観測者:」「プレイヤー:」を排除）
   ctx.fillStyle = "#cbd5e1";
   ctx.font = "20px 'Noto Sans JP', sans-serif";
-  const prefNameMap = { tokyo: "東京", kanagawa: "神奈川", saitama: "埼玉", chiba: "千葉" };
-  const prefName = prefNameMap[appState.user.pref] || "東京";
   const finalAge = typeof getRealAge === "function" ? getRealAge(appState.sim.currentMonth) : appState.sim.currentAge;
   const familyStatusStr = appState.sim.isDivorced ? "家庭崩壊・離婚" : "配偶者と同居中";
-  ctx.fillText(`${appState.user.name}（${appState.user.startAge}歳→${finalAge}歳 / ${prefName}） ${familyStatusStr}`, 72, 304);
+  ctx.fillText(`${appState.user.name}（${appState.user.startAge}歳→${finalAge}歳 / 東京） ${familyStatusStr}`, 72, 304);
 
-  // 主要スタッツ4項目
   const totalCountStr = document.getElementById("resTotalCount")?.innerText || `${appState.sim.partners.length}人`;
   const sexCountStr = document.getElementById("resSexCount")?.innerText || "0回";
   const totalHoursStr = document.getElementById("resTotalHours")?.innerText || "0時間";
@@ -101,11 +89,10 @@ async function generateSquareCard() {
     ctx.fillText(s.val, x + 24, y + 84);
   });
 
-  // アチーブメント
   const achs = [
     { name: "100人斬り", ok: appState.sim.partners.length >= 100 },
     { name: "五年の絆", ok: appState.sim.partners.some(p => p.durationMonths >= 60) },
-    { name: "密会120pt", ok: appState.sim.globalMaxSexScore >= 120 },
+    { name: "密会150pt", ok: appState.sim.globalMaxSexScore >= 150 },
     { name: "+20歳年上", ok: appState.sim.metOlder20Plus },
     { name: "-20歳年下", ok: appState.sim.metYounger20Plus }
   ];
@@ -124,14 +111,12 @@ async function generateSquareCard() {
     ctx.fillText((a.ok ? "★ " : "☆ ") + a.name, ax + 14, ay + 28);
   });
 
-  // パートナー情報
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
   const longestP = sortedByDuration[0] || { name: "なし", durationMonths: 0, area: "東京", avatarId: "F01", tag: "平日昼", endMonth: null };
   const highestScoreP = appState.sim.highestScorePartner || longestP;
 
   ctx.imageSmoothingEnabled = false;
 
-  // 最長パートナー枠
   ctx.fillStyle = "rgba(24, 18, 43, 0.85)";
   ctx.fillRect(72, 670, 440, 240);
   ctx.strokeStyle = "rgba(168, 85, 247, 0.45)";
@@ -153,7 +138,6 @@ async function generateSquareCard() {
   ctx.font = "italic 15px 'Noto Sans JP', sans-serif";
   wrapCanvasText(ctx, longestP.lastLine || "「……」", 92, 786, 400, 23);
 
-  // 最高スコアパートナー枠
   ctx.fillStyle = "rgba(30, 18, 25, 0.85)";
   ctx.fillRect(532, 670, 476, 240);
   ctx.strokeStyle = "rgba(244, 63, 94, 0.45)";
@@ -175,15 +159,13 @@ async function generateSquareCard() {
   ctx.font = "italic 15px 'Noto Sans JP', sans-serif";
   wrapCanvasText(ctx, "「ホテルのシーツを掴んだまま息が止まりそうになったあの夜は、一生忘れられない。」", 552, 786, 436, 23);
 
-  // フッター署名 ＆ URL
   ctx.fillStyle = "#64748b";
   ctx.font = "15px 'Noto Sans JP', sans-serif";
-  ctx.fillText("OUTROMANCE : 婚外10年シミュレーター 〜既婚者たちの裏歴史〜", 72, 980);
+  ctx.fillText("OUTROMANCE : 婚外5年シミュレーター 〜既婚者たちの裏歴史〜", 72, 980);
   ctx.textAlign = "right";
   ctx.fillText(window.location.origin + window.location.pathname, 1008, 980);
   ctx.textAlign = "left";
 
-  // モーダル表示＆ダウンロード
   const dataUrl = cvs.toDataURL("image/png");
   const saveImg = document.getElementById("generatedCardImage");
   if (saveImg) saveImg.src = dataUrl;
@@ -192,7 +174,7 @@ async function generateSquareCard() {
 
   try {
     const link = document.createElement("a");
-    link.download = `OUTROMANCE_${appState.user.name}_婚外10年成績表.png`;
+    link.download = `OUTROMANCE_${appState.user.name}_婚外5年成績表.png`;
     link.href = dataUrl;
     link.click();
   } catch(e) {}
@@ -236,17 +218,16 @@ function shareOnX() {
     outcomeLine = "結末：家庭を守り切り完全生還";
   }
 
-  // 140文字（280カウント）以内に最適化したテキスト
   const textBody = 
 `【アウトロマンス 〜既婚者たちの裏歴史〜】
-${name}の10年が終了。
+${name}の5年が終了。
 
 称号：${title}
 ${outcomeLine}
 累計交際：${count}（逢瀬${sexCount}）
 最高密会度：${score}pt
 
-▼10年後の裏歴史をシミュレート
+▼5年後の裏歴史をシミュレート
 ${url}
 #アウトロマンス #婚外恋愛 #フリーゲーム`;
 

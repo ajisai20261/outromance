@@ -180,7 +180,6 @@ function goToStep1B() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// Step 1-B: ステータス増減
 function adjustStat(statKey, delta) {
   initAudio();
   if (delta > 0) {
@@ -210,7 +209,6 @@ function adjustStat(statKey, delta) {
   renderStep1B();
 }
 
-// Step 1-B: 未配分ポイントの自動最適配分
 function autoAllocateRemainingPoints() {
   const isMale = (appState.user.gender === "male");
   while (appState.tempPoints > 0) {
@@ -235,7 +233,6 @@ function autoAllocateRemainingPoints() {
   }
 }
 
-// 2年節目: 未配分ポイントの自動配分
 function autoAllocateTwoYearPoints() {
   if (!appState.twoYearTemp) return;
   const isMale = (appState.user.gender === "male");
@@ -742,21 +739,16 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
     monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score, tag: p.tag });
     const avatarSrc = AvatarCacheManager.get(p.avatarId);
 
-    // 【レイアウト最適化】
-    // 1行目: 名前・属性 ＋ 相性・スコア（右上寄せ）
-    // 2行目: 3連アクションボタン（💓刺激 ｜ 🎁贈物 ｜ 👋別れ）
-    // 3行目: 逢瀬エピソード
     html += `
       <div class="p-2 sm:p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs">
         <div class="avatar-frame mt-0.5"><img src="${avatarSrc}" alt="${p.name}"></div>
         <div class="flex-1 min-w-0 space-y-1">
-          <!-- 上段: 名前・属性 ＆ 右側に相性・pt -->
+          <!-- 上段: 名前・年齢・エリア ＋ 相性・pt -->
           <div class="flex items-center justify-between gap-1 min-w-0">
             <div class="flex items-center gap-1.5 min-w-0 truncate">
               <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
               <span class="font-bold text-slate-200 text-xs sm:text-[13px] truncate">${p.name}</span>
               <span class="text-[10px] text-purple-300 truncate">(${p.age}歳 / ${p.area})</span>
-              ${catBadge}
             </div>
             <div class="flex items-center gap-1 flex-shrink-0">
               ${chemBadge}
@@ -764,17 +756,22 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
             </div>
           </div>
 
-          <!-- 中段: アクションボタングループ（💓刺激 ｜ 🎁贈物 ｜ 👋別れ） -->
-          <div class="flex items-center justify-end gap-1.5 pt-0.5">
-            <button type="button" onclick="giveStimulus('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：大人のおもちゃで密会度を急上昇" class="px-2 py-0.5 rounded text-[10px] border transition active:scale-95 flex items-center gap-0.5 ${budgetBtnClass}">
-              <span>💓</span><span>刺激</span>
-            </button>
-            <button type="button" onclick="giveGift('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：プレゼントで関係継続・破局防止" class="px-2 py-0.5 rounded text-[10px] border transition active:scale-95 flex items-center gap-0.5 ${budgetBtnClass}">
-              <span>🎁</span><span>贈物</span>
-            </button>
-            <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-2 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5 flex-shrink-0">
-              <span>👋</span><span>別れ</span>
-            </button>
+          <!-- 中段: 左側にタグ ＆ 右側にアクションボタングループ -->
+          <div class="flex items-center justify-between gap-1 pt-0.5">
+            <div class="flex items-center gap-1 flex-wrap min-w-0">
+              ${catBadge}
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button type="button" onclick="giveStimulus('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：大人のおもちゃで密会度を急上昇" class="px-1.5 py-0.5 rounded text-[9.5px] border transition active:scale-95 flex items-center gap-0.5 ${budgetBtnClass}">
+                <span>💓</span><span>刺激</span>
+              </button>
+              <button type="button" onclick="giveGift('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：プレゼントで関係継続・破局防止" class="px-1.5 py-0.5 rounded text-[9.5px] border transition active:scale-95 flex items-center gap-0.5 ${budgetBtnClass}">
+                <span>🎁</span><span>贈物</span>
+              </button>
+              <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-1.5 py-0.5 rounded text-[9.5px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5">
+                <span>👋</span><span>別れ</span>
+              </button>
+            </div>
           </div>
 
           <!-- 下段: 逢瀬エピソードテキスト -->
@@ -837,7 +834,6 @@ function giveGift(partnerId, e) {
   triggerVibrate(30);
   appState.stats.budget = Math.max(0, appState.stats.budget - 1);
 
-  // 6ヶ月間の破局保護バフを付与
   partner.giftProtectedUntil = appState.sim.currentMonth + 6;
   playRareChime();
 
@@ -964,7 +960,6 @@ function showClickMonthDetail(mIdx) {
 
 function closeClickDetail() { document.getElementById("clickMonthDetail")?.classList.add("hidden"); }
 
-// プレイヤーによる手動破局（別れボタン）
 function manualBreakup(partnerId, e) {
   if (e) e.stopPropagation();
   initAudio();
@@ -1000,7 +995,6 @@ function manualBreakup(partnerId, e) {
   updateLiveStats();
 }
 
-// 2年節目: モーダル描画
 function renderTwoYearModal() {
   const mIdx = appState.sim.currentMonth;
   const currentAge = getRealAge(mIdx);
@@ -1043,7 +1037,6 @@ function renderTwoYearModal() {
   }
 }
 
-// 2年節目: ステータス増減
 function adjustTwoYearStat(statKey, delta) {
   initAudio();
   if (delta > 0) {
@@ -1072,7 +1065,6 @@ function adjustTwoYearStat(statKey, delta) {
   renderTwoYearModal();
 }
 
-// 2年節目: 家庭ケア
 function buyFamilyCare() {
   if (!appState.twoYearTemp) return;
   if (appState.twoYearTemp.points <= 0) return;
@@ -1086,7 +1078,6 @@ function buyFamilyCare() {
   renderTwoYearModal();
 }
 
-// 2年節目: パートナー一覧＆振り返り
 function renderTwoYearChronicle(currentMonth) {
   const activeList = document.getElementById("twoYearActivePartnersList");
   const active = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));

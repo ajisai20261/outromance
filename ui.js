@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御
+   ui.js - OUTROMANCE UI描画・演出・音響制御（5年制・12ヶ月表示対応）
    ============================================================ */
 
 var isSoundOn = false;
@@ -10,12 +10,13 @@ var tapStartX = 0, tapStartY = 0;
 var isTapInitialized = false;
 var lastTapAdvanceTime = 0;
 
-// スピード制御（0.5x / 1.0x / 2.0x）
-var simSpeedMs = 3000;
+// スピード制御（1ヶ月 = 5.0秒 / 2.5秒 / 10.0秒）
+var simSpeedMs = 5000;
 var simTimer = null;
 
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
 function toggleSound() {
@@ -40,14 +41,14 @@ function toggleSound() {
 
 function toggleSpeed() {
   const btn = document.getElementById("speedToggleBtn");
-  if (simSpeedMs === 3000) {
-    simSpeedMs = 1500;
+  if (simSpeedMs === 5000) {
+    simSpeedMs = 2500;
     if (btn) btn.innerText = "2.0x";
-  } else if (simSpeedMs === 1500) {
-    simSpeedMs = 6000;
+  } else if (simSpeedMs === 2500) {
+    simSpeedMs = 10000;
     if (btn) btn.innerText = "0.5x";
   } else {
-    simSpeedMs = 3000;
+    simSpeedMs = 5000;
     if (btn) btn.innerText = "1.0x";
   }
   triggerVibrate(15);
@@ -154,13 +155,10 @@ function goToStep1A(e) {
 function onGenderChange() {
   const g = document.getElementById("userGender")?.value;
   const nameEl = document.getElementById("userName");
-  const descEl = document.getElementById("lblBudgetDesc");
   if (g === "female") {
     if (nameEl) nameEl.value = "マイ";
-    if (descEl) descEl.innerText = "女性は活動費の効果は控えめ（外見が絶大な効果）";
   } else {
     if (nameEl) nameEl.value = "ユウスケ";
-    if (descEl) descEl.innerText = "男性は出会い・継続に絶大な効果（活動費必須）";
   }
 }
 
@@ -168,184 +166,27 @@ function goToStep1B() {
   const nameVal = document.getElementById("userName")?.value.trim();
   appState.user.name = (nameVal && nameVal.length > 0) ? nameVal.slice(0, 5) : "名無し";
   appState.user.gender = document.getElementById("userGender")?.value || "male";
-  appState.user.pref = document.getElementById("userPref")?.value || "tokyo";
-  appState.user.startAge = parseInt(document.getElementById("userAge")?.value) || 40;
-  appState.user.birthMonth = parseInt(document.getElementById("userBirthMonth")?.value) || 4;
+  appState.user.pref = "tokyo";
+  appState.user.birthMonth = 1; // 1月固定（誕生日即加齢）
 
-  onGenderChange();
+  // 初期ステータス自動生成 & スタイル初期セット
   rerollStats();
+  applyStylePreset("balanced");
 
   document.getElementById("step1a")?.classList.add("hidden");
   document.getElementById("step1b")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function adjustStat(statKey, delta) {
-  initAudio();
-  if (delta > 0) {
-    if (appState.tempPoints <= 0) return;
-    if (statKey === "budget") {
-      if (appState.stats.budget >= 10) return;
-      appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-    } else {
-      if (appState.stats[statKey] >= 10) return;
-      appState.stats[statKey]++;
-    }
-    appState.tempPoints--;
-    if (isSoundOn) playTone(587.33, 0.08);
-  } else {
-    if (statKey === "budget") {
-      if (appState.stats.budget <= 0) return;
-      appState.stats.budget = Math.max(0, appState.stats.budget - 2);
-    } else {
-      const minBase = statKey === "looks" ? (appState.baseLooks || 1) : (statKey === "libido" ? (appState.baseLibido || 1) : (appState.baseStamina || 1));
-      if (appState.stats[statKey] <= minBase) return;
-      appState.stats[statKey]--;
-    }
-    appState.tempPoints++;
-    if (isSoundOn) playTone(440, 0.08);
-  }
-  resetStylePresetButtons();
-  renderStep1B();
-}
-
-function autoAllocateRemainingPoints() {
-  const isMale = (appState.user.gender === "male");
-  while (appState.tempPoints > 0) {
-    if (isMale && appState.stats.budget < 4 && appState.tempPoints >= 1) {
-      appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-      appState.tempPoints--;
-    } else if (!isMale && appState.stats.looks < 9) {
-      appState.stats.looks++;
-      appState.tempPoints--;
-    } else if (appState.stats.stamina < 9) {
-      appState.stats.stamina++;
-      appState.tempPoints--;
-    } else if (appState.stats.looks < 9) {
-      appState.stats.looks++;
-      appState.tempPoints--;
-    } else if (appState.stats.libido < 9) {
-      appState.stats.libido++;
-      appState.tempPoints--;
-    } else {
-      break;
-    }
-  }
-}
-
-function autoAllocateTwoYearPoints() {
-  if (!appState.twoYearTemp) return;
-  const isMale = (appState.user.gender === "male");
-  while (appState.twoYearTemp.points > 0) {
-    if (isMale && appState.twoYearTemp.budget < 4) {
-      appState.twoYearTemp.budget = Math.min(10, appState.twoYearTemp.budget + 2);
-      appState.twoYearTemp.points--;
-    } else if (appState.twoYearTemp.stamina < 8) {
-      appState.twoYearTemp.stamina++;
-      appState.twoYearTemp.points--;
-    } else if (appState.twoYearTemp.looks < 8) {
-      appState.twoYearTemp.looks++;
-      appState.twoYearTemp.points--;
-    } else if (appState.twoYearTemp.libido < 8) {
-      appState.twoYearTemp.libido++;
-      appState.twoYearTemp.points--;
-    } else {
-      break;
-    }
-  }
-}
-
-function resetStylePresetButtons() {
-  const pBtns = {
-    pure: document.getElementById("presetBtnPure"),
-    balanced: document.getElementById("presetBtnBalanced"),
-    carnage: document.getElementById("presetBtnCarnage")
-  };
-  Object.keys(pBtns).forEach(k => {
-    if (!pBtns[k]) return;
-    pBtns[k].className = "p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-90 scale-100";
-  });
-}
-
-function applyStylePreset(presetType) {
-  initAudio();
-  triggerVibrate(15);
-  if (isSoundOn) playTone(659.25, 0.1);
-
-  const pBtns = {
-    pure: document.getElementById("presetBtnPure"),
-    balanced: document.getElementById("presetBtnBalanced"),
-    carnage: document.getElementById("presetBtnCarnage")
-  };
-  Object.keys(pBtns).forEach(k => {
-    if (!pBtns[k]) return;
-    if (k === presetType) {
-      pBtns[k].className = "p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-purple-950/60 border-purple-500 ring-1 ring-purple-500/50 scale-[1.02]";
-    } else {
-      pBtns[k].className = "p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-80 scale-100";
-    }
-  });
-
-  const isMale = (appState.user.gender === "male");
-  const concSelect = document.getElementById("userMaxConcurrent");
-  const agePrefSelect = document.getElementById("targetAgePref");
-
-  appState.tempPoints = appState.stats.income + 1;
-  appState.stats.budget = 0;
-  appState.stats.looks = appState.baseLooks || 4;
-  appState.stats.libido = appState.baseLibido || 4;
-  appState.stats.stamina = appState.baseStamina || 4;
-
-  if (presetType === "pure") {
-    if (concSelect) concSelect.value = "1";
-    if (agePrefSelect) agePrefSelect.value = "same";
-    while (appState.tempPoints > 0) {
-      if (appState.stats.stamina < 9) { appState.stats.stamina++; appState.tempPoints--; }
-      else if (appState.stats.looks < 9) { appState.stats.looks++; appState.tempPoints--; }
-      else if (appState.stats.libido < 9) { appState.stats.libido++; appState.tempPoints--; }
-      else break;
-    }
-  } else if (presetType === "carnage") {
-    if (concSelect) concSelect.value = "4";
-    if (agePrefSelect) agePrefSelect.value = isMale ? "younger" : "same";
-    if (isMale) {
-      while (appState.tempPoints > 0 && appState.stats.budget < 10) {
-        appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-        appState.tempPoints--;
-      }
-      while (appState.tempPoints > 0) {
-        if (appState.stats.stamina < 9) { appState.stats.stamina++; appState.tempPoints--; }
-        else if (appState.stats.looks < 9) { appState.stats.looks++; appState.tempPoints--; }
-        else break;
-      }
-    } else {
-      while (appState.tempPoints > 0 && appState.stats.looks < 10) {
-        appState.stats.looks++;
-        appState.tempPoints--;
-      }
-      while (appState.tempPoints > 0) {
-        if (appState.stats.stamina < 9) { appState.stats.stamina++; appState.tempPoints--; }
-        else if (appState.stats.libido < 9) { appState.stats.libido++; appState.tempPoints--; }
-        else break;
-      }
-    }
-  } else {
-    if (concSelect) concSelect.value = "2";
-    if (agePrefSelect) agePrefSelect.value = "same";
-    if (isMale && appState.tempPoints >= 2) {
-      appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-      appState.tempPoints--;
-    }
-    autoAllocateRemainingPoints();
-  }
-
-  renderStep1B();
+function backToStep1A() {
+  document.getElementById("step1b")?.classList.add("hidden");
+  document.getElementById("step1a")?.classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function rerollStats() {
   const income = rollIncomeLevel();
   appState.stats.income = income;
-  appState.tempPoints = income + 1;
 
   const totalTarget = rollInitialStatsTotal();
   let remain = totalTarget - 9;
@@ -369,44 +210,82 @@ function rerollStats() {
   appState.baseLooks = appState.stats.looks;
   appState.baseLibido = appState.stats.libido;
   appState.baseStamina = appState.stats.stamina;
-
-  appState.stats.budget = 0;
   appState.stats.spouseAlert = 3;
-
-  resetStylePresetButtons();
-  renderStep1B();
-  if (isSoundOn) playTone(523.25, 0.12);
 }
 
-function renderStep1B() {
-  const rp = document.getElementById("remainPoints");
-  if (rp) rp.innerText = appState.tempPoints;
-  const vb = document.getElementById("valBudget");
-  if (vb) vb.innerText = "Lv." + appState.stats.budget;
-  const bb = document.getElementById("barBudget");
-  if (bb) bb.style.width = (appState.stats.budget * 10) + "%";
+function applyStylePreset(presetType) {
+  initAudio();
+  triggerVibrate(15);
+  if (isSoundOn) playTone(659.25, 0.1);
 
-  const vl = document.getElementById("valLooks");
-  if (vl) vl.innerText = appState.stats.looks + " / 10";
-  const bl = document.getElementById("barLooks");
-  if (bl) bl.style.width = (appState.stats.looks * 10) + "%";
+  const pBtns = {
+    pure: document.getElementById("presetBtnPure"),
+    balanced: document.getElementById("presetBtnBalanced"),
+    carnage: document.getElementById("presetBtnCarnage")
+  };
+  Object.keys(pBtns).forEach(k => {
+    if (!pBtns[k]) return;
+    if (k === presetType) {
+      pBtns[k].className = "p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-purple-950/60 border-purple-500 ring-1 ring-purple-500/50 scale-[1.02]";
+    } else {
+      pBtns[k].className = "p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-80 scale-100";
+    }
+  });
 
-  const vlib = document.getElementById("valLibido");
-  if (vlib) vlib.innerText = appState.stats.libido + " / 10";
-  const blib = document.getElementById("barLibido");
-  if (blib) blib.style.width = (appState.stats.libido * 10) + "%";
+  appState.user.selectedStyle = presetType;
+  const isMale = (appState.user.gender === "male");
+  let points = appState.stats.income + 1;
 
-  const vs = document.getElementById("valStamina");
-  if (vs) vs.innerText = appState.stats.stamina + " / 10";
-  const bs = document.getElementById("barStamina");
-  if (bs) bs.style.width = (appState.stats.stamina * 10) + "%";
+  appState.stats.looks = appState.baseLooks || 4;
+  appState.stats.libido = appState.baseLibido || 4;
+  appState.stats.stamina = appState.baseStamina || 4;
+  appState.stats.budget = 0;
 
-  const totalEl = document.getElementById("lblStatsTotal");
-  if (totalEl) totalEl.innerText = (appState.stats.looks + appState.stats.libido + appState.stats.stamina);
-  const incEl = document.getElementById("lblIncome");
-  if (incEl) incEl.innerText = "Lv." + appState.stats.income;
-  const alertEl = document.getElementById("lblSpouseAlert");
-  if (alertEl) alertEl.innerText = "Lv." + appState.stats.spouseAlert;
+  if (presetType === "pure") {
+    appState.stats.maxPartners = 1;
+    appState.stats.budget = isMale ? 2 : 0;
+    points -= isMale ? 1 : 0;
+    while (points > 0) {
+      if (appState.stats.stamina < 9) { appState.stats.stamina++; points--; }
+      else if (appState.stats.looks < 9) { appState.stats.looks++; points--; }
+      else if (appState.stats.libido < 9) { appState.stats.libido++; points--; }
+      else break;
+    }
+  } else if (presetType === "carnage") {
+    appState.stats.maxPartners = 4;
+    while (points > 0 && appState.stats.budget < 8) {
+      appState.stats.budget = Math.min(10, appState.stats.budget + 2);
+      points--;
+    }
+    while (points > 0) {
+      if (appState.stats.looks < 9) { appState.stats.looks++; points--; }
+      else if (appState.stats.stamina < 9) { appState.stats.stamina++; points--; }
+      else break;
+    }
+  } else {
+    // balanced
+    appState.stats.maxPartners = 2;
+    appState.stats.budget = 4;
+    points -= 2;
+    while (points > 0) {
+      if (appState.stats.stamina < 8) { appState.stats.stamina++; points--; }
+      else if (appState.stats.looks < 8) { appState.stats.looks++; points--; }
+      else if (appState.stats.libido < 8) { appState.stats.libido++; points--; }
+      else break;
+    }
+  }
+
+  // プレビュー表示反映
+  const pl = document.getElementById("prevStatLooks");
+  if (pl) pl.innerText = appState.stats.looks;
+  const ps = document.getElementById("prevStatStamina");
+  if (ps) ps.innerText = appState.stats.stamina;
+  const plib = document.getElementById("prevStatLibido");
+  if (plib) plib.innerText = appState.stats.libido;
+  const pb = document.getElementById("prevStatBudget");
+  if (pb) pb.innerText = "Lv." + appState.stats.budget;
+  const pInc = document.getElementById("lblPreviewIncome");
+  if (pInc) pInc.innerText = "本業年収: Lv." + appState.stats.income;
 }
 
 function updateLiveStats() {
@@ -465,51 +344,46 @@ function triggerScreenTapAdvance() {
   }
 }
 
-function refresh24MatrixGrid() {
-  const cycleIndex = Math.floor(appState.sim.currentMonth / 24);
-  const startYearNum = cycleIndex * 2 + 1;
-  const endYearNum = startYearNum + 1;
-  const userBirthMonth = appState.user.birthMonth || 4;
+// 12ヶ月マトリックス（1行表示 ＆ 大ドット約30px）
+function refresh12MatrixGrid() {
+  const currentYear = Math.floor(appState.sim.currentMonth / 12) + 1;
+  const startM = (currentYear - 1) * 12 + 1;
+  const endM = currentYear * 12;
 
   const titleEl = document.getElementById("matrixPhaseTitle");
-  if (titleEl) titleEl.innerText = `第${cycleIndex + 1}期：${startYearNum}〜${endYearNum}年目（${cycleIndex * 24 + 1}〜${(cycleIndex + 1) * 24}ヶ月）`;
-  const r1Lbl = document.getElementById("matrixRow1Label");
-  if (r1Lbl) r1Lbl.innerText = `${startYearNum}年目`;
-  const r2Lbl = document.getElementById("matrixRow2Label");
-  if (r2Lbl) r2Lbl.innerText = `${endYearNum}年目`;
+  if (titleEl) titleEl.innerText = `${currentYear}年目（${startM}〜${endM}ヶ月）`;
 
-  const r1 = document.getElementById("matrixGridRow1");
-  const r2 = document.getElementById("matrixGridRow2");
-  if (!r1 || !r2) return;
-  r1.innerHTML = "";
-  r2.innerHTML = "";
+  const row = document.getElementById("matrixGridRow");
+  if (!row) return;
+  row.innerHTML = "";
 
-  for (let i = 0; i < 24; i++) {
-    const absMonth = cycleIndex * 24 + i;
-    const calMonth = (i % 12) + 1;
+  for (let i = 0; i < 12; i++) {
+    const absMonth = (currentYear - 1) * 12 + i;
+    const calMonth = i + 1;
 
     const dot = document.createElement("div");
     dot.id = "grid-dot-" + i;
-    dot.className = "w-full aspect-square rounded-full transition-all duration-300 cursor-pointer hover:scale-125 flex items-center justify-center p-[2px] bg-slate-800 border border-slate-700/60";
+    // ドット直径を拡大（w-7.5 h-7.5〜w-8.5 h-8.5 / 約30px）
+    dot.className = "w-full aspect-square rounded-full transition-all duration-300 cursor-pointer hover:scale-115 flex items-center justify-center p-[2px] bg-slate-800 border border-slate-700/60";
     dot.onclick = (e) => { e.stopPropagation(); showClickMonthDetail(absMonth); };
 
     const centerCircle = document.createElement("div");
-    centerCircle.className = "w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-[9px] select-none";
-    const monthEmoji = (calMonth === userBirthMonth) ? "🎂" : (MONTH_EMOJIS[calMonth] || "🌸");
+    centerCircle.className = "w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-xs sm:text-[13px] select-none";
+    // 誕生月は1月固定なので1月は必ず🎂
+    const monthEmoji = (calMonth === 1) ? "🎂" : (MONTH_EMOJIS[calMonth] || "🌸");
     centerCircle.innerText = monthEmoji;
     dot.appendChild(centerCircle);
 
-    if (i < 12) r1.appendChild(dot);
-    else r2.appendChild(dot);
+    row.appendChild(dot);
   }
 }
 
 function updateMatrixDot(mIdx) {
-  const dotIndex = mIdx % 24;
+  const dotIndex = mIdx % 12;
   const dot = document.getElementById("grid-dot-" + dotIndex);
   if (!dot) return;
 
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 12; i++) {
     const d = document.getElementById("grid-dot-" + i);
     if (d) d.classList.remove("ring-pulse-rare");
   }
@@ -661,14 +535,14 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
   }
 }
 
+// パートナーカード（上段: 名前・相性・pt / 中段: タグ・3連ボタン / 下段: エピソード）
 function renderRealtimeMonthlyLog(mIdx, calMonth) {
   const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
-  const userBirthMonth = appState.user.birthMonth || 4;
   
   const seasonBadge = document.getElementById("seasonBadge");
   if (seasonBadge) {
-    if (calMonth === userBirthMonth) {
-      seasonBadge.innerText = `🎂 ${calMonth}月（誕生月）`;
+    if (calMonth === 1) {
+      seasonBadge.innerText = `🎂 1月（誕生月）`;
     } else {
       seasonBadge.innerText = `${MONTH_EMOJIS[calMonth] || "🌸"} ${calMonth}月`;
     }
@@ -719,10 +593,10 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
 
     const score = p.lastSexScore;
     let scoreBadge = "";
-    if (score >= 120) {
+    if (score >= 150) {
       scoreBadge = `<span class="limit-break-badge bg-gradient-to-r from-amber-400 via-pink-400 to-purple-400 text-slate-950 font-black px-1.5 py-0.5 rounded text-[9.5px] shadow-lg flex-shrink-0">⚡${score}pt</span>`;
       if (!appState.sim.isSkipping) playLimitBreakChime();
-    } else if (score >= 100) {
+    } else if (score >= 120) {
       scoreBadge = `<span class="bg-amber-950 text-amber-300 border border-amber-600 font-bold px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
     } else if (score >= 80) {
       scoreBadge = `<span class="bg-pink-950 text-pink-300 border border-pink-700 font-bold px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
@@ -784,7 +658,7 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
   appState.sim.monthlyHistory[mIdx] = { month: mIdx, calMonth, partners: monthLogRecord };
 }
 
-// 💓 刺激：大人のおもちゃ（密会スコア急上昇）
+// 💓 刺激：大人のおもちゃ
 function giveStimulus(partnerId, e) {
   if (e) e.stopPropagation();
   if (appState.stats.budget <= 0) return;
@@ -822,7 +696,7 @@ function giveStimulus(partnerId, e) {
   renderRealtimeMonthlyLog(mIdx, calMonth);
 }
 
-// 🎁 贈物：プレゼント（関係継続＆破局防止）
+// 🎁 贈物：プレゼント
 function giveGift(partnerId, e) {
   if (e) e.stopPropagation();
   if (appState.stats.budget <= 0) return;
@@ -852,46 +726,20 @@ function giveGift(partnerId, e) {
 
 function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
   let pool = [];
-  const userPref = appState.user.pref || "tokyo";
-  const userBirthMonth = appState.user.birthMonth || 4;
   const isRemoteDate = (partner.tag === "夜間遠征") ? (Math.random() < 0.30) : (Math.random() < 0.15);
 
   if (partner.durationMonths <= 2) {
-    if (userPref === "kanagawa") {
-      pool = [
-        "初アポ。たまプラの落ち着いたカフェで、人目を気にしつつ乾杯。",
-        "あざみ野の静かな住宅街の隠れ家和食。指輪を外した日焼け跡を見つめ合う。",
-        "初ホテル。二子玉川から田園都市線で少し移動し、誰にも言えない午後へ。",
-        "みなとみらいの海風を感じるバーで合流。「怪しい人じゃなくて安心した」と笑い合う。",
-        "武蔵小杉のカフェで短時間ランチ。お互いの家庭の詮索はしないルールで抱き合った."
-      ];
-    } else if (userPref === "saitama") {
-      pool = [
-        "初アポ。大宮駅東口の落ち着いた個室で安堵の笑顔。",
-        "浦和の閑静な和食ランチ。「知り合いに見つかりにくいね」と笑い合う。",
-        "初ホテル。湘南新宿ラインで新宿まで足を伸ばし、歌舞伎町を避けてホテルへ。",
-        "戸田の静かなホテルデイユース。平日の静けさの中で抱き合った."
-      ];
-    } else if (userPref === "chiba") {
-      pool = [
-        "初アポ。西船橋の個室ダイニングで秘密の乾杯。",
-        "幕張ベイエリアのテラス席で待ち合わせ。穏やかな笑顔に惹かれる。",
-        "初ホテル。東西線で都内方面へ移動し、人目を忍んでデイユースへ。",
-        "新浦安の静かなホテルラウンジから、そのまま人目のない客室へ."
-      ];
-    } else {
-      pool = [
-        "初アポ。三軒茶屋の路地裏個室バルで乾杯。渋谷を避けるのが二人の暗黙ルール。",
-        "二子玉川のテラス席で平日ランチ。そのまま隣駅の静かなデイユースへ。",
-        "初ホテル。神楽坂の静かな隠れ家ホテルで、お互いの家庭を詮索せず抱き合った。",
-        "恵比寿の目立たないバーから、タクシーで隠れ家ホテルへ直行。"
-      ];
-    }
-  } else if (month === userBirthMonth) {
+    pool = [
+      "初アポ。三軒茶屋の路地裏個室バルで乾杯。渋谷を避けるのが二人の暗黙ルール。",
+      "二子玉川のテラス席で平日ランチ。そのまま隣駅の静かなデイユースへ。",
+      "初ホテル。神楽坂の静かな隠れ家ホテルで、お互いの家庭を詮索せず抱き合った。",
+      "恵比寿の目立たないバーから、タクシーで隠れ家ホテルへ直行。"
+    ];
+  } else if (month === 1) {
     pool = [
       "「お誕生日おめでとう」とホテルで小さな包みを渡され、熱く深く抱き合った。",
-      "誕生日の夜。家族への言い訳を作り、わずか1時間の熱い逢瀬にすべてを捧げた。",
-      "誰にも言えない特別なバースデー。ホテルのワインを開け、二人きりで祝杯を交わす。"
+      "誰にも祝われない特別なバースデー。ワインを開け、二人きりで祝杯を交わす。",
+      "年の初めの誕生日の夜。家族への言い訳を作り、わずか1時間の熱い逢瀬にすべてを捧げた。"
     ];
   } else if (isRemoteDate) {
     pool = [
@@ -903,7 +751,6 @@ function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
     ];
   } else {
     switch (month) {
-      case 1: pool = ["年始の家族時間を終え、隠れ家で飢えたように抱き合った。", "「今年もよろしくね」とそっと指を絡めた。"]; break;
       case 2: pool = ["人目を盗んで小さなチョコを手渡され、甘い密会へ。", "「本命にはあげられないから」とホテルでチョコを渡された。"]; break;
       case 3: pool = ["年度末の繁忙期、仕事帰りに駆け込みでホテルへ。", "春風の冷たい夜、お互いの仕事の愚痴をホテルで癒やし合う。"]; break;
       case 4: pool = ["人通りの少ない通りで、息を潜めて夜桜散歩。", "隠れ家ホテルで春の午後を過ごした。"]; break;
@@ -930,8 +777,7 @@ function showClickMonthDetail(mIdx) {
   const age = getRealAge(mIdx);
   const yearNum = Math.floor(mIdx / 12) + 1;
   const m = (mIdx % 12) + 1;
-  const userBirthMonth = appState.user.birthMonth || 4;
-  const birthTag = (m === userBirthMonth) ? "🎂 誕生月の記憶" : "の記憶";
+  const birthTag = (m === 1) ? "🎂 誕生月の記憶" : "の記憶";
   document.getElementById("detailMonthHeader").innerText = `${age}歳（${yearNum}年目 ${m}月）${birthTag}`;
 
   if (!history || history.partners.length === 0) {
@@ -995,155 +841,155 @@ function manualBreakup(partnerId, e) {
   updateLiveStats();
 }
 
-function renderTwoYearModal() {
+// 1年ごとマイルストーンモーダル描画
+function renderYearlyMilestoneModal() {
   const mIdx = appState.sim.currentMonth;
   const currentAge = getRealAge(mIdx);
-  const yearIndex = (mIdx / 24) * 2;
+  const yearIndex = mIdx / 12;
+
   const titleEl = document.getElementById("twoYearTitle");
   if (titleEl) {
-    titleEl.innerHTML = `<span class="text-purple-300 font-black">${appState.user.name}</span> <span>${yearIndex}年目の節目：${currentAge}歳の現在</span>`;
+    titleEl.innerHTML = `<span class="text-purple-300 font-black">${appState.user.name}</span> <span>${yearIndex}年目の決算：${currentAge}歳の現在</span>`;
   }
+  const tagEl = document.getElementById("milestoneHeaderTag");
+  if (tagEl) tagEl.innerText = `${yearIndex}年目（${mIdx}ヶ月）の節目`;
 
-  const rp = document.getElementById("twoYearRemainPoints");
-  if (rp) rp.innerText = appState.twoYearTemp.points;
-  const vb = document.getElementById("twoYearValBudget");
-  if (vb) vb.innerText = "Lv." + appState.twoYearTemp.budget;
-  const bb = document.getElementById("twoYearBarBudget");
-  if (bb) bb.style.width = (appState.twoYearTemp.budget * 10) + "%";
-  const vl = document.getElementById("twoYearValLooks");
-  if (vl) vl.innerText = appState.twoYearTemp.looks;
-  const vs = document.getElementById("twoYearValStamina");
-  if (vs) vs.innerText = appState.twoYearTemp.stamina;
-  const vlib = document.getElementById("twoYearValLibido");
-  if (vlib) vlib.innerText = appState.twoYearTemp.libido;
+  // サマリー
+  const totalEl = document.getElementById("twoYearSummaryTotal");
+  if (totalEl) totalEl.innerText = `${appState.sim.partners.length}人`;
+  const sortedByDur = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
+  const longestEl = document.getElementById("twoYearSummaryLongest");
+  if (longestEl) longestEl.innerText = sortedByDur[0] ? `${sortedByDur[0].durationMonths}ヶ月` : "0ヶ月";
+  const scoreEl = document.getElementById("twoYearSummaryScore");
+  if (scoreEl) scoreEl.innerText = `${appState.sim.globalMaxSexScore} pt`;
+
+  // 継続中パートナー
+  renderActivePartnersListInMilestone();
+
+  // レポート
+  const incEl = document.getElementById("milestoneIncomeReport");
+  if (incEl) incEl.innerText = `年収: Lv.${appState.stats.income}`;
+  const statRep = document.getElementById("milestoneStatReport");
+  if (statRep) {
+    statRep.innerText = `✨外見: ${appState.stats.looks} ｜ ⚡体力: ${appState.stats.stamina} ｜ 🔥性欲: ${appState.stats.libido} ｜ 💳今期活動費: Lv.${appState.stats.budget}`;
+  }
   const alertEl = document.getElementById("modalAlertVal");
-  if (alertEl) alertEl.innerText = "Lv." + appState.twoYearTemp.spouseAlert;
+  if (alertEl) alertEl.innerText = `Lv.${appState.stats.spouseAlert}`;
+
+  const styleSel = document.getElementById("milestoneStyleSelect");
+  if (styleSel) styleSel.value = appState.user.selectedStyle || "balanced";
+  const agePrefSel = document.getElementById("milestoneAgePrefSelect");
+  if (agePrefSel) agePrefSel.value = appState.stats.targetAgePref || "same";
 
   const btnCare = document.getElementById("btnFamilyCare");
   if (btnCare) {
-    if (appState.twoYearTemp.spouseAlert <= 1) {
+    if (appState.stats.spouseAlert <= 1) {
       btnCare.disabled = true;
       btnCare.innerText = "警戒度 最小 (不要)";
       btnCare.className = "px-2.5 py-1 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs cursor-not-allowed";
-    } else if (appState.twoYearTemp.points <= 0) {
+    } else if (appState.stats.budget <= 0) {
       btnCare.disabled = true;
-      btnCare.innerText = "ポイント不足";
+      btnCare.innerText = "活動費不足";
       btnCare.className = "px-2.5 py-1 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs cursor-not-allowed";
     } else {
       btnCare.disabled = false;
-      btnCare.innerText = "ケア実行 (-1pt)";
+      btnCare.innerText = "ケア実行 (-1活動費)";
       btnCare.className = "px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95";
     }
   }
 }
 
-function adjustTwoYearStat(statKey, delta) {
-  initAudio();
-  if (delta > 0) {
-    if (appState.twoYearTemp.points <= 0) return;
-    if (statKey === "budget") {
-      if (appState.twoYearTemp.budget >= 10) return;
-      appState.twoYearTemp.budget = Math.min(10, appState.twoYearTemp.budget + 2);
-    } else {
-      if (appState.twoYearTemp[statKey] >= 10) return;
-      appState.twoYearTemp[statKey]++;
-    }
-    appState.twoYearTemp.points--;
-    if (isSoundOn) playTone(587.33, 0.08);
+function renderActivePartnersListInMilestone() {
+  const activeList = document.getElementById("twoYearActivePartnersList");
+  const active = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
+  if (!activeList) return;
+  if (active.length === 0) {
+    activeList.innerHTML = `<div class="text-[11px] text-slate-500 py-1">現在交際中のパートナーはいません。</div>`;
   } else {
-    if (statKey === "budget") {
-      if (appState.twoYearTemp.budget <= 0) return;
-      appState.twoYearTemp.budget = Math.max(0, appState.twoYearTemp.budget - 2);
-    } else {
-      const minVal = appState.twoYearTemp["min_" + statKey] || 1;
-      if (appState.twoYearTemp[statKey] <= minVal) return;
-      appState.twoYearTemp[statKey]--;
-    }
-    appState.twoYearTemp.points++;
-    if (isSoundOn) playTone(440, 0.08);
+    let h = "";
+    active.forEach(p => {
+      const avatarSrc = AvatarCacheManager.get(p.avatarId);
+      h += `
+        <div class="flex items-center justify-between p-1 rounded-lg bg-slate-900 border border-slate-800 gap-2">
+          <div class="flex items-center gap-2 min-w-0 flex-1">
+            <div class="avatar-frame-sm flex-shrink-0"><img src="${avatarSrc}" alt="${p.name}"></div>
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-white text-xs truncate flex items-center gap-1">
+                <span>${p.name}</span>
+                <span class="text-slate-400 text-[10px]">(${p.age}歳)</span>
+                <span class="text-[9px] text-indigo-300 font-normal px-1 rounded bg-indigo-950 border border-indigo-800/50 flex-shrink-0">🏷️${p.tag}</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <span class="text-purple-300 font-bold text-[10.5px]">${p.durationMonths}ヶ月</span>
+            <span class="px-1 py-0.5 rounded bg-pink-950/80 border border-pink-700/80 text-pink-300 text-[9px] font-bold">相性${p.chemistry}</span>
+          </div>
+        </div>
+      `;
+    });
+    activeList.innerHTML = h;
   }
-  renderTwoYearModal();
 }
 
 function buyFamilyCare() {
-  if (!appState.twoYearTemp) return;
-  if (appState.twoYearTemp.points <= 0) return;
-  if (appState.twoYearTemp.spouseAlert <= 1) return;
+  if (appState.stats.budget <= 0) return;
+  if (appState.stats.spouseAlert <= 1) return;
 
   initAudio();
-  appState.twoYearTemp.points--;
-  appState.twoYearTemp.spouseAlert = Math.max(1, appState.twoYearTemp.spouseAlert - 2);
+  appState.stats.budget = Math.max(0, appState.stats.budget - 1);
+  appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 2);
+
   if (isSoundOn) playTone(659.25, 0.12);
   triggerVibrate(20);
-  renderTwoYearModal();
+  renderYearlyMilestoneModal();
 }
 
-function renderTwoYearChronicle(currentMonth) {
-  const activeList = document.getElementById("twoYearActivePartnersList");
-  const active = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
-  if (activeList) {
-    if (active.length === 0) {
-      activeList.innerHTML = `<div class="text-[11px] text-slate-500 py-1">現在交際中のパートナーはいません。</div>`;
-    } else {
-      let h = "";
-      active.forEach(p => {
-        const avatarSrc = AvatarCacheManager.get(p.avatarId);
-        h += `
-          <div class="flex items-center justify-between p-1.5 sm:p-2 rounded-lg bg-slate-900 border border-slate-800 gap-2">
-            <div class="flex items-center gap-2 min-w-0 flex-1">
-              <div class="avatar-frame-sm flex-shrink-0"><img src="${avatarSrc}" alt="${p.name}"></div>
-              <div class="min-w-0 flex-1">
-                <div class="font-bold text-white text-xs truncate flex items-center gap-1">
-                  <span>${p.name}</span>
-                  <span class="text-slate-400 text-[10px]">(${p.age}歳)</span>
-                  <span class="text-[9px] text-indigo-300 font-normal px-1 rounded bg-indigo-950 border border-indigo-800/50 flex-shrink-0">🏷️${p.tag}</span>
-                </div>
-                <div class="text-slate-400 text-[10px] truncate">${p.job} / ${p.area}</div>
-              </div>
-            </div>
-            <div class="text-right flex-shrink-0 flex flex-col items-end gap-0.5">
-              <span class="text-purple-300 font-bold text-[10.5px]">${p.durationMonths}ヶ月</span>
-              <span class="px-1.5 py-0.5 rounded bg-pink-950/80 border border-pink-700/80 text-pink-300 text-[9px] font-bold whitespace-nowrap">相性${p.chemistry} ｜ ${p.maxSexScore}pt</span>
-            </div>
-          </div>
-        `;
-      });
-      activeList.innerHTML = h;
-    }
+function resumeNextYear() {
+  const styleSel = document.getElementById("milestoneStyleSelect");
+  if (styleSel) {
+    const newStyle = styleSel.value;
+    appState.user.selectedStyle = newStyle;
+    appState.stats.maxPartners = (newStyle === "pure") ? 1 : (newStyle === "carnage" ? 4 : 2);
+  }
+  const agePrefSel = document.getElementById("milestoneAgePrefSelect");
+  if (agePrefSel) {
+    appState.stats.targetAgePref = agePrefSel.value;
   }
 
-  const scrollBox = document.getElementById("twoYearChronicleScroll");
-  if (!scrollBox) return;
-  let scrollHtml = "";
-  const startM = Math.max(0, currentMonth - 24);
-  for (let m = startM; m < currentMonth; m++) {
-    const hist = appState.sim.monthlyHistory[m];
-    const age = getRealAge(m);
-    const yearNum = Math.floor(m / 12) + 1;
-    const calM = (m % 12) + 1;
-    if (hist && hist.partners.length > 0) {
-      scrollHtml += `<div class="border-b border-slate-900 pb-1 mb-1"><span class="font-bold text-slate-400">【${age}歳（${yearNum}年目 ${calM}月）】</span>`;
-      hist.partners.forEach(p => {
-        scrollHtml += `<div class="pl-2 text-slate-300">・${p.name}: ${p.action} (${p.score}pt)</div>`;
-      });
-      scrollHtml += `</div>`;
+  document.getElementById("twoYearModal")?.classList.add("hidden");
+  updateLiveStats();
+  refresh12MatrixGrid();
+  resumeSimulationInternal();
+}
+
+function retireFromTwoYear() {
+  clearTimeout(simTimer);
+  document.getElementById("twoYearModal")?.classList.add("hidden");
+  appState.sim.isRetired = true;
+  const mIdx = appState.sim.currentMonth;
+  appState.sim.partners.forEach(p => {
+    if (appState.sim.activePartnerIds.includes(p.id)) {
+      p.endMonth = mIdx;
+      p.endAge = p.age;
     }
-  }
-  scrollBox.innerHTML = scrollHtml || `<div class="text-slate-500">直近の記録はありません。</div>`;
+  });
+  appState.sim.activePartnerIds = [];
+  finishSimulation();
 }
 
 function generateLastLineText(partner, isPartnerMale, isStillActive) {
   if (isStillActive) {
     return isPartnerMale
-      ? "「10年経った今でも、あなたといる時間が一番落ち着くよ。これからもずっとよろしくね。」"
-      : "「10年経った今でも、あなたと過ごす温もりは少しも色褪せないよ。これからもずっと一緒にいようね。」";
+      ? "「5年経った今でも、あなたといる時間が一番落ち着くよ。これからもずっとよろしくね。」"
+      : "「5年経った今でも、あなたと過ごす温もりは少しも色褪せないよ。これからもずっと一緒にいようね。」";
   }
   if (partner.durationMonths >= 60) {
     return isPartnerMale
       ? "「5年もの長い間、俺だけを想い続けてくれてありがとう。お前は俺の裏の人生最高の誇りだよ。」"
       : "「5年以上もの長い月日、私の人生のすべてを彩ってくれて本当にありがとう。あなたに出会えた奇跡を一生忘れません。」";
   }
-  if (partner.maxSexScore >= 120) {
+  if (partner.maxSexScore >= 150) {
     return isPartnerMale
       ? "「お前と過ごしたベッドの熱気、生涯墓場まで持っていく最高の宝物だ。女として幸せにしてくれてありがとう。」"
       : "「あんなに激しく魂まで奪われたのは、後にも先にもあなただけでした。一生消えない甘い傷痕を残してくれてありがとう。」";
@@ -1199,35 +1045,27 @@ function calculateAndRenderResult() {
 
   let hasOlder20 = appState.sim.metOlder20Plus;
   let hasYounger20 = appState.sim.metYounger20Plus;
-  let hasOlder10 = false, hasYounger10 = false;
 
   appState.sim.partners.forEach(p => {
     const playerAgeAtMeet = getRealAge(p.startMonth);
     const diff = p.startAge - playerAgeAtMeet;
     if (diff >= 20) hasOlder20 = true;
     if (diff <= -20) hasYounger20 = true;
-    if (diff >= 10) hasOlder10 = true;
-    if (diff <= -10) hasYounger10 = true;
   });
 
   const ach100Kills = totalPartners >= 100;
   const ach5Years = appState.sim.partners.some(p => p.durationMonths >= 60);
-  const achScore120 = appState.sim.globalMaxSexScore >= 120;
-  const achGrandSlam = (!isDivorced && ach100Kills && ach5Years && achScore120 && hasOlder20 && hasYounger20);
-
-  const ach50Kills = totalPartners >= 50;
-  const ach3Years = appState.sim.partners.some(p => p.durationMonths >= 36);
-  const achScore100 = appState.sim.globalMaxSexScore >= 100;
-  const achDiff10 = (hasOlder10 || hasYounger10);
+  const achScore150 = appState.sim.globalMaxSexScore >= 150;
+  const achGrandSlam = (!isDivorced && ach100Kills && ach5Years && achScore150 && hasOlder20 && hasYounger20);
 
   updateAchievementCard("achieveCard100", ach100Kills, "bg-rose-950/40 border-rose-500/80 shadow-[0_0_10px_rgba(244,63,94,0.5)]");
   updateAchievementCard("achieveCard5Y", ach5Years, "bg-amber-950/40 border-amber-500/80 shadow-[0_0_10px_rgba(245,158,11,0.5)]");
-  updateAchievementCard("achieveCardScore120", achScore120, "bg-purple-950/40 border-purple-500/80 shadow-[0_0_10px_rgba(157,78,221,0.5)]");
+  updateAchievementCard("achieveCardScore120", achScore150, "bg-purple-950/40 border-purple-500/80 shadow-[0_0_10px_rgba(157,78,221,0.5)]");
   updateAchievementCard("achieveCardAgeOlder", hasOlder20, "bg-indigo-950/40 border-indigo-500/80 shadow-[0_0_10px_rgba(99,102,241,0.5)]");
   updateAchievementCard("achieveCardAgeYounger", hasYounger20, "bg-pink-950/40 border-pink-500/80 shadow-[0_0_10px_rgba(236,72,153,0.5)]");
   updateAchievementCard("achieveCardGrandSlam", achGrandSlam, "bg-gradient-to-r from-amber-900/50 via-purple-900/50 to-pink-900/50 border-amber-400 shadow-[0_0_16px_rgba(251,191,36,0.8)]");
 
-  const unlocked = [ach100Kills, ach5Years, achScore120, hasOlder20, hasYounger20, achGrandSlam].filter(Boolean).length;
+  const unlocked = [ach100Kills, ach5Years, achScore150, hasOlder20, hasYounger20, achGrandSlam].filter(Boolean).length;
   const achUnlocked = document.getElementById("achieveUnlockedCount");
   if (achUnlocked) achUnlocked.innerText = unlocked;
 
@@ -1235,51 +1073,38 @@ function calculateAndRenderResult() {
   if (isDivorced) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-950 text-rose-300 border border-rose-600 font-bold">🚨 離婚・家庭崩壊</span>';
   if (appState.sim.lawsuitCount > 0) badgesHtml += `<span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-950 text-amber-300 border border-amber-600 font-bold">⚖️ 慰謝料被請求 (${appState.sim.lawsuitCount}回)</span>`;
   if (ach100Kills) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-950 text-rose-300 border border-rose-600 font-bold">⚔️ 100人斬り達成</span>';
-  else if (ach50Kills) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-950/60 text-rose-300 border border-rose-800 font-bold">⚔️ 50人斬り達成</span>';
-
   if (ach5Years) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-950 text-amber-300 border border-amber-600 font-bold">💍 5年継続達成</span>';
-  else if (ach3Years) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-950/60 text-amber-300 border border-amber-800 font-bold">💍 3年継続達成</span>';
-
-  if (achScore120) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-purple-950 text-purple-300 border border-purple-500 font-bold">⚡ 密会120pt突破</span>';
-  else if (achScore100) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-purple-950/60 text-purple-300 border border-purple-800 font-bold">⚡ 密会100pt突破</span>';
-
+  if (achScore150) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-purple-950 text-purple-300 border border-purple-500 font-bold">⚡ 密会150pt突破</span>';
   if (hasOlder20) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-500 font-bold">🍷 +20歳年上愛</span>';
   if (hasYounger20) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-pink-950 text-pink-300 border border-pink-500 font-bold">🍓 -20歳年下愛</span>';
-  if (!hasOlder20 && !hasYounger20 && achDiff10) badgesHtml += '<span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-slate-300 border border-slate-700 font-bold">🧭 ±10歳差愛</span>';
 
   const badgeListEl = document.getElementById("resAchieveBadgeList");
   if (badgeListEl) badgeListEl.innerHTML = badgesHtml;
 
   let title = "『首都圏の彷徨い人』";
-  let desc = "首都圏の喧騒の中、家庭と日常の狭間で静かに駆け抜けた10年間。";
+  let desc = "首都圏の喧騒の中、家庭と日常の狭間で静かに駆け抜けた5年間。";
 
   if (isDivorced) {
     title = "『泥沼の家庭崩壊』";
     desc = "監視警戒を甘く見続けた代償としてすべてが露見。配偶者に離婚届を突きつけられ、日常そのものを喪失した。";
   } else if (achGrandSlam) {
     title = "『完全制覇・全能の覇皇』";
-    desc = "100人斬り、5年の純愛、スコア120超え、20歳上下両制覇。婚外のすべてを極め尽くした究極の伝説。";
+    desc = "100人斬り、5年の純愛、スコア150超え、20歳上下両制覇。婚外のすべてを極め尽くした究極の伝説。";
   } else if (ach100Kills && ach5Years) {
     title = "『多重純愛の矛盾王』";
-    desc = "100人以上の異性と逢瀬を重ねながら、特定の伴侶と5年以上愛を深めた驚異の二重生活者。";
+    desc = "100人以上の異性と逢瀬を重ねながら、特定の伴侶と5年間愛を深め抜いた驚異の二重生活者。";
   } else if (hasOlder20 && hasYounger20) {
     title = "『世代超越の覇王』";
     desc = "20歳以上年上の品格と、20歳以上年下の情熱。極限の年齢差を双方魅了し尽くした奇跡の存在。";
-  } else if (ach100Kills && achScore120) {
-    title = "『夜の絶対帝王』";
-    desc = "圧倒的な出逢いの母数と、理性を焼き尽くす極限の密会スコアを両立させた夜の支配者。";
-  } else if (ach5Years && achScore120) {
-    title = "『生涯唯一の絶頂伴侶』";
-    desc = "5年以上の歳月を共に重ね、心身ともにこれ以上ない絶頂共鳴へと至った至高の純白パートナー。";
   } else if (ach100Kills) {
     title = "『首都圏の婚外修羅』";
-    desc = "10年間で100人以上の異性と関係を紡ぎ、夜の首都圏を完全に支配した伝説のアチーブメント。";
+    desc = "5年間で100人以上の異性と関係を紡ぎ、夜の首都圏を完全に支配した伝説のアチーブメント。";
   } else if (ach5Years) {
-    title = "『五年の絆・純白伴侶』";
-    desc = "加齢や家庭の波を共に乗り越え、5年（60ヶ月）以上愛を深め抜いた至高の純愛。";
-  } else if (achScore120) {
+    title = "『奇跡の純白伴侶』";
+    desc = "加齢や家庭の波を共に乗り越え、5年間（60ヶ月）一度も別れずに愛を深め抜いた至高の純愛。";
+  } else if (achScore150) {
     title = "『歓喜の特異点』";
-    desc = "理性を完全に吹き飛ばす120pt超えの密会を達成し、官能の極致に到達した者。";
+    desc = "理性を完全に吹き飛ばす150pt超えの密会を達成し、官能の極致に到達した者。";
   } else if (appState.sim.isRetired) {
     title = "『静寂の帰還者』";
     desc = "泥沼に呑まれる前に自らアプリを消し、平穏な家庭の日常へと生還した賢明な選択者。";
@@ -1291,9 +1116,9 @@ function calculateAndRenderResult() {
   if (endingDesc) endingDesc.innerText = desc;
 
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-  const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null };
+  const longestP = sortedByDuration[0] || { name: "なし", startAge: 50, endAge: 50, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null };
   
-  const isLongestActive = (longestP.endMonth === null || longestP.endMonth >= 120);
+  const isLongestActive = (longestP.endMonth === null || longestP.endMonth >= 60);
   longestP.lastLine = generateLastLineText(longestP, isTargetPartnerMale, isLongestActive);
 
   const longImg = document.getElementById("longestPartnerImg");
@@ -1354,7 +1179,7 @@ function calculateAndRenderResult() {
     `;
   } else {
     epilogueHtml = `
-      <p>家庭と仕事の狭間、電車の乗り換えのわずかな隙間に息を潜めて愛を求めた10年間。</p>
+      <p>家庭と仕事の狭間、電車の乗り換えのわずかな隙間に息を潜めて愛を求めた5年間。</p>
       <p>甘美な逢瀬も、胸を締め付ける別れも、すべてを飲み込んであなたの人生の糧となった。誰にも知られない裏の歴史を胸に抱えたまま、今日も何食わぬ顔で日常を歩き続ける。</p>
     `;
   }

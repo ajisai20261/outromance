@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>アウトロマンス: 婚外10年シミュレーター 〜既婚者たちの裏歴史〜 | Ajisai Game Studio</title>
+  <title>アウトロマンス: 婚外5年シミュレーター 〜既婚者たちの裏歴史〜 | Ajisai Game Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <link rel="stylesheet" href="style.css">
@@ -25,7 +25,7 @@
   <div class="bg-ambient"></div>
   <div id="flashOverlay" class="fixed inset-0 pointer-events-none z-50 transition-colors"></div>
 
-  <!-- 常設ヘッダー（音響→BGM、進行操作ボタンを集約） -->
+  <!-- 常設ヘッダー -->
   <header class="relative z-30 w-full max-w-xl mx-auto px-3 sm:px-4 py-2 flex items-center justify-between border-b border-white/5 gap-2">
     <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
       <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 drop-shadow-[0_0_8px_rgba(157,78,221,0.5)]" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -55,9 +55,8 @@
       </div>
     </div>
 
-    <!-- ヘッダー右側：BGMと進行操作ボタン群 -->
+    <!-- ヘッダー右側：操作系 -->
     <div class="flex items-center gap-1 sm:gap-1.5">
-      <!-- 進行中のみ表示される操作系 -->
       <div id="headerControls" class="hidden flex items-center gap-1">
         <button id="pausePlayBtn" onclick="togglePauseSimulation()" title="一時停止/再開" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-[11px] transition active:scale-95">
           ⏸️
@@ -65,12 +64,11 @@
         <button id="speedToggleBtn" onclick="toggleSpeed()" title="速度変更" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-purple-300 font-bold text-[10.5px] transition active:scale-95">
           1.0x
         </button>
-        <button onclick="skipToEndOfTwoYears()" title="2年後へスキップ" class="px-2 py-1 rounded-lg bg-purple-950/80 hover:bg-purple-900 border border-purple-700 text-purple-200 text-[10px] font-semibold transition active:scale-95 whitespace-nowrap">
-          2年後⏩
+        <button onclick="skipToEndOfYear()" title="1年後へスキップ" class="px-2 py-1 rounded-lg bg-purple-950/80 hover:bg-purple-900 border border-purple-700 text-purple-200 text-[10px] font-semibold transition active:scale-95 whitespace-nowrap">
+          1年後⏩
         </button>
       </div>
 
-      <!-- BGM切替ボタン -->
       <button id="soundToggleBtn" onclick="toggleSound()" class="px-2.5 py-1 rounded-full text-[11px] bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 flex items-center gap-1 transition flex-shrink-0">
         <span id="soundIcon">🔇</span>
         <span id="soundText">BGM: OFF</span>
@@ -93,7 +91,7 @@
         <div class="text-xs text-slate-300 space-y-2.5 text-left leading-relaxed border-y border-slate-800 py-3.5">
           <p>・<strong class="text-pink-300 font-bold">本作は婚外恋愛（不倫）を扱ったシミュレーションゲームです。</strong></p>
           <p>・本作は<strong class="text-purple-300">すべてフィクション</strong>であり、実在の人物・団体・事件等とは一切関係ありません。</p>
-          <p>・マッチングアプリや出会い系サービスのように、<strong class="text-rose-300">実際に出会いを提供するゲームではありません</strong>。</p>
+          <p>・マッチングアプリのように、<strong class="text-rose-300">実際に出会いを提供するゲームではありません</strong>。</p>
           <p>・成人向けの直接的な性的描写はありませんが、テーマの性質上、<strong class="text-amber-300 font-bold">18歳未満の方のプレイはご遠慮ください</strong>。</p>
         </div>
         <button onclick="acceptDisclaimer()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
@@ -120,7 +118,7 @@
 
           <div id="pTitleCard" class="fade-seq pt-3 pb-2.5 my-2 border-y border-purple-500/40 bg-black/50 backdrop-blur-md rounded-2xl px-3 shadow-2xl">
             <div class="text-[11px] sm:text-xs font-bold tracking-[0.25em] text-purple-200 uppercase mb-1 drop-shadow-[0_0_6px_rgba(192,132,252,0.6)]">
-              婚外10年シミュレーター
+              婚外5年シミュレーター
             </div>
             <h1 class="text-3xl sm:text-4xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-100 to-indigo-300 drop-shadow-[0_0_20px_rgba(157,78,221,0.9)]">
               アウトロマンス
@@ -143,36 +141,21 @@
       </div>
     </section>
 
-    <!-- STEP 1-A: プレイヤー基本設定 -->
+    <!-- STEP 1-A: プレイヤー基本設定（名前・性別） -->
     <section id="step1a" class="hidden space-y-4 py-2">
       <div class="text-center space-y-1">
         <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-A</span>
-        <h2 class="text-lg font-bold text-white">あなたの属性と開始条件</h2>
-        <p class="text-xs text-slate-400">首都圏で婚外を始めるあなたの基本プロフィール</p>
+        <h2 class="text-lg font-bold text-white">あなたのお名前と性別</h2>
+        <p class="text-xs text-slate-400">東京首都圏で婚外を始めるあなたの基本情報</p>
       </div>
 
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3.5 shadow-xl">
-        <div class="grid grid-cols-2 gap-3">
-          <div class="space-y-1">
-            <label class="text-xs font-semibold text-slate-300">性別</label>
-            <select id="userGender" onchange="onGenderChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
-              <option value="male" selected>男性</option>
-              <option value="female">女性</option>
-            </select>
-          </div>
-          <div class="space-y-1">
-            <label class="text-xs font-semibold text-slate-300">居住エリア</label>
-            <select id="userPref" onchange="onPrefChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
-              <option value="tokyo" selected>東京</option>
-              <option value="kanagawa">神奈川</option>
-              <option value="saitama">埼玉</option>
-              <option value="chiba">千葉</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="prefDescBox" class="p-2.5 rounded-lg bg-slate-950/80 border border-purple-900/40 text-[11px] text-purple-200 leading-relaxed">
-          <span class="font-bold text-purple-300">【都心の魔境】</span> 出逢いのチャンスは最大だが人の目も多い
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">性別</label>
+          <select id="userGender" onchange="onGenderChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+            <option value="male" selected>男性</option>
+            <option value="female">女性</option>
+          </select>
         </div>
 
         <div class="space-y-1">
@@ -183,209 +166,104 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div class="space-y-1">
-            <label class="text-xs font-semibold text-slate-300">開始年齢</label>
-            <select id="userAge" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
-              <option value="35">35歳</option>
-              <option value="40" selected>40歳</option>
-              <option value="45">45歳</option>
-              <option value="50">50歳</option>
-              <option value="55">55歳</option>
-            </select>
-          </div>
-          <div class="space-y-1">
-            <label class="text-xs font-semibold text-slate-300">誕生月</label>
-            <select id="userBirthMonth" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
-              <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
-              <option value="4" selected>4月</option><option value="5">5月</option><option value="6">6月</option>
-              <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
-              <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
-            </select>
-          </div>
+        <div class="p-2.5 rounded-lg bg-slate-950/80 border border-purple-900/40 text-[11px] text-purple-200 leading-relaxed">
+          <span class="font-bold text-purple-300">【都心の魔境】</span> 舞台は東京。出逢いのチャンスは最大だが人の目も多い。
         </div>
       </div>
 
       <button onclick="goToStep1B()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
-        <span>能力値 ＆ 本業年収を決定する ✨</span>
-        <span>›</span>
+        <span>開始条件 ＆ 婚外スタイルの設定へ ›</span>
       </button>
     </section>
 
-    <!-- STEP 1-B: 能力値・リソース配分 -->
+    <!-- STEP 1-B: 開始条件 ＆ スタイル設定（年齢・狙う層を並列、その下にスタイル） -->
     <section id="step1b" class="hidden space-y-4 py-2">
-      <div class="flex items-center justify-between">
-        <div>
-          <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-B</span>
-          <h2 class="text-base sm:text-lg font-bold text-white">能力値と活動リソース配分</h2>
-        </div>
-        <button onclick="rerollStats()" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-purple-300 hover:bg-slate-700 flex items-center gap-1 transition">
-          <span>初期値再抽選 🔄</span>
-        </button>
+      <div class="text-center space-y-1">
+        <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-B</span>
+        <h2 class="text-base sm:text-lg font-bold text-white">婚外の開始条件とスタイル</h2>
+        <p class="text-xs text-slate-400">条件を選択すると、能力値・活動費が自動で最適配分されます</p>
       </div>
 
-      <!-- 婚外スタイル選択 -->
+      <!-- 上段：開始年齢 と 狙いたい年齢層（2カラム並列） -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 grid grid-cols-2 gap-3 shadow-xl">
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-200">婚外を始める年齢</label>
+          <select id="userAge" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="35">35歳</option>
+            <option value="40">40歳</option>
+            <option value="45">45歳</option>
+            <option value="50" selected>50歳</option>
+            <option value="55">55歳</option>
+          </select>
+          <span class="text-[9px] text-slate-400 block pt-0.5">※1月生まれ（即加齢進行）</span>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-200">狙いたい年齢層</label>
+          <select id="targetAgePref" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="younger">年下狙い (-20歳)</option>
+            <option value="same" selected>同年代 (±5歳)</option>
+            <option value="older">年上狙い (+20歳)</option>
+          </select>
+          <span class="text-[9px] text-slate-400 block pt-0.5">※±20歳差愛の実績あり</span>
+        </div>
+      </div>
+
+      <!-- その下：婚外スタイル選択（3択ボタン） -->
       <div class="space-y-1.5">
         <div class="text-[11px] font-bold text-purple-300">
-          <span>🎯 婚外スタイル選択（タップで推奨設定を自動セット）</span>
+          <span>🎯 婚外スタイル選択（タップで自動配分完了）</span>
         </div>
         <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
           <button type="button" onclick="applyStylePreset('pure')" id="presetBtnPure" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-90 scale-100">
             <div class="text-sm sm:text-base mb-0.5">💍</div>
             <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">純愛継続型</div>
-            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">1人と深く長く。<br>5年の絆狙い</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">1人集中・体力重視<br>5年の絆エンド狙い</div>
           </button>
-          <button type="button" onclick="applyStylePreset('balanced')" id="presetBtnBalanced" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-90 scale-100">
+          <button type="button" onclick="applyStylePreset('balanced')" id="presetBtnBalanced" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-purple-950/60 border-purple-500 ring-1 ring-purple-500/50 scale-[1.02]">
             <div class="text-sm sm:text-base mb-0.5">🍷</div>
             <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">分散余裕型</div>
-            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">2人並行の王道。<br>平穏と逢瀬両立</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">2人並行の王道<br>平穏と逢瀬の両立</div>
           </button>
           <button type="button" onclick="applyStylePreset('carnage')" id="presetBtnCarnage" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-pink-500 opacity-90 scale-100">
             <div class="text-sm sm:text-base mb-0.5">⚔️</div>
-            <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">100人斬り型</div>
-            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">4人・超高速回転。<br>夜の覇者狙い</div>
+            <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">修羅乱舞型</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">4人枠・活動費特化<br>100人斬り狙い</div>
           </button>
         </div>
       </div>
 
-      <!-- クイックスタート導線 -->
-      <div class="space-y-1.5 pt-0.5 pb-1">
-        <button onclick="startSimulation()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.35)] transition active:scale-95 flex items-center justify-center gap-2">
-          <span>この設定で10年の婚外へ旅立つ！ 🚀</span>
-        </button>
-        <div class="flex items-center gap-2 pt-1">
-          <div class="h-[1px] bg-slate-800 flex-1"></div>
-          <span class="text-[10px] text-purple-300/80 font-medium whitespace-nowrap">▼ こだわりたい方は下で自由に微調整できます</span>
-          <div class="h-[1px] bg-slate-800 flex-1"></div>
+      <!-- 自動決定ステータス表示プレビュー -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
+        <div class="flex justify-between items-center text-slate-400">
+          <span>初期スペック自動配分結果</span>
+          <span class="text-emerald-400 font-bold" id="lblPreviewIncome">本業年収: Lv.5</span>
+        </div>
+        <div class="grid grid-cols-4 gap-2 text-center text-[10.5px]">
+          <div class="bg-slate-950 p-1.5 rounded border border-slate-800"><span class="text-amber-300 block text-[9.5px]">✨外見</span><span id="prevStatLooks" class="font-bold text-white">5</span></div>
+          <div class="bg-slate-950 p-1.5 rounded border border-slate-800"><span class="text-cyan-400 block text-[9.5px]">⚡体力</span><span id="prevStatStamina" class="font-bold text-white">5</span></div>
+          <div class="bg-slate-950 p-1.5 rounded border border-slate-800"><span class="text-rose-400 block text-[9.5px]">🔥性欲</span><span id="prevStatLibido" class="font-bold text-white">5</span></div>
+          <div class="bg-slate-950 p-1.5 rounded border border-slate-800"><span class="text-pink-300 block text-[9.5px]">💳活動費</span><span id="prevStatBudget" class="font-bold text-white">Lv.2</span></div>
         </div>
       </div>
 
-      <div class="bg-purple-950/40 border border-purple-800/60 rounded-xl p-3 flex items-center justify-between">
-        <div>
-          <div class="text-[11px] text-purple-200">配分可能ポイント（本業年収Lv + 1pt）</div>
-          <div class="text-xs text-slate-400">本業年収水準を原資に自己投資や活動費へ配分</div>
-        </div>
-        <div class="text-right">
-          <span id="remainPoints" class="text-2xl font-black text-purple-300">5</span>
-          <span class="text-xs text-slate-400"> pt</span>
-        </div>
-      </div>
-
-      <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-3.5 space-y-2">
-        <div class="flex justify-between items-center">
-          <div>
-            <div class="text-xs font-bold text-white flex items-center gap-1.5">
-              <span>💳 婚外活動費（出会い・継続の必須費用）</span>
-            </div>
-            <div class="text-[10px] text-purple-300" id="lblBudgetDesc">男性は出会い・継続に絶大な効果（活動費必須）</div>
-          </div>
-          <span id="valBudget" class="text-base font-black text-pink-300">Lv.0</span>
-        </div>
-        <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-purple-900/50">
-          <div id="barBudget" class="stat-bar-fill h-full bg-gradient-to-r from-purple-500 to-pink-500 w-[0%]"></div>
-        </div>
-        <div class="flex justify-end gap-2 pt-1">
-          <button onclick="adjustStat('budget', -1)" class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-white font-bold hover:bg-slate-700 active:scale-95">−</button>
-          <button onclick="adjustStat('budget', 1)" class="w-8 h-8 rounded-lg bg-purple-700 border border-purple-600 text-white font-bold hover:bg-purple-600 active:scale-95">＋</button>
-        </div>
-      </div>
-
-      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-3">
-        <div class="flex justify-between items-center text-xs font-semibold text-slate-400">
-          <span>自己投資ステータス</span>
-          <span class="text-[10px] text-purple-300">基礎能力合計: <strong id="lblStatsTotal" class="text-white font-bold">14</strong> pt</span>
-        </div>
-
-        <div class="space-y-1">
-          <div class="flex justify-between text-xs">
-            <span class="text-amber-300 font-medium">✨ 外見・身だしなみ（出会い・継続。女性は影響大）</span>
-            <span id="valLooks" class="font-bold text-white">4 / 10</span>
-          </div>
-          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
-            <div id="barLooks" class="stat-bar-fill h-full bg-amber-400 w-[40%]"></div>
-          </div>
-          <div class="flex justify-end gap-2 pt-0.5">
-            <button onclick="adjustStat('looks', -1)" class="px-2 py-0.5 text-xs bg-slate-800 rounded border border-slate-700">−</button>
-            <button onclick="adjustStat('looks', 1)" class="px-2 py-0.5 text-xs bg-slate-700 rounded border border-slate-600 text-amber-300">＋</button>
-          </div>
-        </div>
-
-        <div class="space-y-1">
-          <div class="flex justify-between text-xs">
-            <span class="text-rose-400 font-medium">🔥 性欲・モチベーション（密会スコアに直結）</span>
-            <span id="valLibido" class="font-bold text-white">4 / 10</span>
-          </div>
-          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
-            <div id="barLibido" class="stat-bar-fill h-full bg-rose-500 w-[40%]"></div>
-          </div>
-          <div class="flex justify-end gap-2 pt-0.5">
-            <button onclick="adjustStat('libido', -1)" class="px-2 py-0.5 text-xs bg-slate-800 rounded border border-slate-700">−</button>
-            <button onclick="adjustStat('libido', 1)" class="px-2 py-0.5 text-xs bg-slate-700 rounded border border-slate-600 text-rose-300">＋</button>
-          </div>
-        </div>
-
-        <div class="space-y-1">
-          <div class="flex justify-between text-xs">
-            <span class="text-cyan-400 font-medium">⚡ 体力（トラブル抑止）</span>
-            <span id="valStamina" class="font-bold text-white">4 / 10</span>
-          </div>
-          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
-            <div id="barStamina" class="stat-bar-fill h-full bg-cyan-400 w-[40%]"></div>
-          </div>
-          <div class="flex justify-end gap-2 pt-0.5">
-            <button onclick="adjustStat('stamina', -1)" class="px-2 py-0.5 text-xs bg-slate-800 rounded border border-slate-700">−</button>
-            <button onclick="adjustStat('stamina', 1)" class="px-2 py-0.5 text-xs bg-slate-700 rounded border border-slate-600 text-cyan-300">＋</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 grid grid-cols-2 gap-3 text-xs">
-        <div>
-          <span class="text-slate-400">本業年収水準:</span>
-          <span id="lblIncome" class="font-bold text-emerald-400 ml-1">Lv.4</span>
-        </div>
-        <div>
-          <span class="text-slate-400">配偶者の監視警戒:</span>
-          <span id="lblSpouseAlert" class="font-bold text-amber-400 ml-1">Lv.3</span>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-1.5">
-          <label class="text-xs font-semibold text-slate-200">希望交際人数</label>
-          <select id="userMaxConcurrent" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-            <option value="1">1人</option>
-            <option value="2" selected>2人</option>
-            <option value="3">3人</option>
-            <option value="4">4人</option>
-          </select>
-        </div>
-
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-1.5">
-          <label class="text-xs font-semibold text-slate-200">ターゲット年代</label>
-          <select id="targetAgePref" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-            <option value="younger">年下狙い</option>
-            <option value="same" selected>同年代</option>
-            <option value="older">年上狙い</option>
-          </select>
-        </div>
-      </div>
-
-      <button onclick="startSimulation()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.3)] transition active:scale-95 flex items-center justify-center gap-2">
-        <span>この設定で10年の婚外へ旅立つ！ 🚀</span>
+      <button onclick="startSimulation()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.35)] transition active:scale-95 flex items-center justify-center gap-2">
+        <span>この設定で5年の婚外へ旅立つ！ 🚀</span>
       </button>
-      <p class="text-center text-[10px] text-slate-400">※未割り振りのポイントは最適なバランスで自動配分されます</p>
+      <div class="text-center">
+        <button onclick="backToStep1A()" class="text-[11px] text-slate-400 hover:text-white transition">‹ 名前・性別を変更する</button>
+      </div>
     </section>
 
     <!-- STEP 2: 進行画面 -->
     <section id="step2" class="hidden space-y-2.5 pb-10 select-none cursor-pointer">
       
-      <!-- ステータス集約枠（上段：プロフィール・交際数 / 下段：各能力値） -->
+      <!-- ステータス集約枠 -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-2 shadow-lg">
         <div class="flex items-center justify-between text-xs border-b border-slate-800/80 pb-2">
           <div class="min-w-0 pr-2">
             <span id="simCurrentAge" class="text-xs sm:text-[13px] font-bold text-white truncate block">
-              ユウスケ 40歳（婚外開始 1ヶ月）
+              ユウスケ 50歳（婚外開始 1ヶ月）
             </span>
           </div>
           <div class="flex items-center gap-2.5 flex-shrink-0 text-[11px]">
@@ -401,47 +279,38 @@
         </div>
 
         <div class="flex items-center justify-between text-center text-[10.5px] sm:text-[11px] px-1">
-          <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white ml-0.5">4</span></div>
+          <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white ml-0.5">5</span></div>
           <div class="text-slate-700">|</div>
-          <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="liveStatStamina" class="font-bold text-white ml-0.5">4</span></div>
+          <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="liveStatStamina" class="font-bold text-white ml-0.5">5</span></div>
           <div class="text-slate-700">|</div>
-          <div><span class="text-rose-400 font-medium">🔥性欲</span> <span id="liveStatLibido" class="font-bold text-white ml-0.5">4</span></div>
+          <div><span class="text-rose-400 font-medium">🔥性欲</span> <span id="liveStatLibido" class="font-bold text-white ml-0.5">5</span></div>
           <div class="text-slate-700">|</div>
-          <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="liveStatBudget" class="font-bold text-white ml-0.5">Lv.0</span></div>
+          <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="liveStatBudget" class="font-bold text-white ml-0.5">Lv.2</span></div>
           <div class="text-slate-700">|</div>
-          <div><span class="text-emerald-400 font-medium">💰年収</span> <span id="liveStatIncome" class="font-bold text-white ml-0.5">Lv.4</span></div>
+          <div><span class="text-emerald-400 font-medium">💰年収</span> <span id="liveStatIncome" class="font-bold text-white ml-0.5">Lv.5</span></div>
         </div>
       </div>
 
-      <!-- 24ヶ月マトリックス -->
+      <!-- 12ヶ月マトリックス（1行表示・大ドット） -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-1.5 shadow-xl">
         <div class="flex justify-between items-center text-[11px] px-1">
-          <span id="matrixPhaseTitle" class="font-bold text-purple-300">第1期：1〜2年目（1〜24ヶ月）</span>
-          <span class="text-slate-400 text-[10px]">全10年（計5期）</span>
+          <span id="matrixPhaseTitle" class="font-bold text-purple-300">1年目（1〜12ヶ月）</span>
+          <span class="text-slate-400 text-[10px]">全5年（計60ヶ月）</span>
         </div>
 
-        <div class="space-y-1.5 bg-slate-950 p-2 rounded-lg border border-slate-800/80">
-          <div class="flex items-center gap-2">
-            <span class="text-[9px] text-slate-500 w-7 flex-shrink-0" id="matrixRow1Label">1年目</span>
-            <div id="matrixGridRow1" class="grid grid-cols-12 gap-1 sm:gap-1.5 flex-1 items-center"></div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-[9px] text-slate-500 w-7 flex-shrink-0" id="matrixRow2Label">2年目</span>
-            <div id="matrixGridRow2" class="grid grid-cols-12 gap-1 sm:gap-1.5 flex-1 items-center"></div>
-          </div>
+        <div class="bg-slate-950 p-2 sm:p-2.5 rounded-lg border border-slate-800/80">
+          <div id="matrixGridRow" class="grid grid-cols-12 gap-1 sm:gap-1.5 items-center"></div>
         </div>
         <div class="flex justify-between text-[9px] text-slate-500 px-1">
           <span>※マスをタップすると当時の逢瀬ログを確認</span>
-          <span>1月〜12月（🎂＝誕生月）</span>
+          <span>1月〜12月（🎂＝1月誕生日）</span>
         </div>
       </div>
 
       <!-- マッチング通知トースト -->
       <div id="newPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-purple-950 via-pink-950 to-slate-900 border-2 border-pink-500 rounded-xl p-2.5 shadow-2xl">
         <div class="flex items-center gap-2.5">
-          <div class="avatar-frame-lg flex-shrink-0">
-            <img src="" alt="" id="toastPartnerImg">
-          </div>
+          <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="toastPartnerImg"></div>
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-1">
               <div class="space-y-0.5 min-w-0">
@@ -469,9 +338,7 @@
       <!-- 破局トースト -->
       <div id="breakupPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-slate-950 via-purple-950/60 to-slate-900 border-2 border-purple-400/80 rounded-xl p-2.5 shadow-2xl">
         <div class="flex items-center gap-2.5">
-          <div class="avatar-frame-lg flex-shrink-0 grayscale contrast-125">
-            <img src="" alt="" id="toastBreakupImg">
-          </div>
+          <div class="avatar-frame-lg flex-shrink-0 grayscale contrast-125"><img src="" alt="" id="toastBreakupImg"></div>
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-1">
               <div class="space-y-0.5 min-w-0">
@@ -508,8 +375,8 @@
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-2">
         <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-1.5">
           <div class="font-bold text-slate-200 flex items-center gap-1.5">
-            <span id="seasonBadge">🌸 4月</span>
-            <span id="monthTitleLog">夜桜の季節の逢瀬</span>
+            <span id="seasonBadge">🎍 1月</span>
+            <span id="monthTitleLog">新春の気配の逢瀬</span>
           </div>
           <span id="alertStateText" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">平穏</span>
         </div>
@@ -537,21 +404,21 @@
 
       <div id="clickMonthDetail" class="hidden bg-purple-950/70 border border-purple-700/80 rounded-xl p-3 text-xs space-y-1">
         <div class="flex justify-between font-bold text-purple-200">
-          <span id="detailMonthHeader">43歳 8月の記憶</span>
+          <span id="detailMonthHeader">50歳 1月の記憶</span>
           <button onclick="closeClickDetail()" class="text-slate-400 hover:text-white">✕</button>
         </div>
         <div id="detailMonthContent" class="text-slate-300 space-y-1.5 text-[11px]"></div>
       </div>
     </section>
 
-    <!-- STEP 3: 最終リザルト -->
+    <!-- STEP 3: 最終リザルト（5年完走） -->
     <section id="step3" class="hidden space-y-5 py-3 pb-12">
       <div class="text-center space-y-1 border-b border-purple-900/40 pb-3">
         <div class="text-xs text-slate-400 font-medium">
-          <span id="resPlayerNameHeader" class="text-white font-bold text-sm">ユウスケ</span> さんの10年間
+          <span id="resPlayerNameHeader" class="text-white font-bold text-sm">ユウスケ</span> さんの5年間
         </div>
         <div id="resAgeTrackHeader" class="text-sm sm:text-base font-bold text-purple-200 font-serif-jp tracking-wider">
-          40歳から50歳へ――駆け抜けた逢瀬の軌跡
+          50歳から55歳へ――駆け抜けた逢瀬の軌跡
         </div>
       </div>
 
@@ -568,24 +435,24 @@
 
       <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
         <div class="text-[11px] font-bold text-amber-300 flex items-center justify-between">
-          <span>🏆 10年アチーブメント（やり込み実績）</span>
+          <span>🏆 5年アチーブメント（やり込み実績）</span>
           <span class="text-[9px] text-slate-500">点灯数: <span id="achieveUnlockedCount" class="text-amber-400 font-bold">0</span> / 6</span>
         </div>
         <div class="grid grid-cols-3 gap-2">
           <div id="achieveCard100" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
             <div class="text-lg mb-0.5">⚔️</div>
             <div class="text-[10px] font-bold text-white">100人斬り</div>
-            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">累計交際100人</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">5年で累計100人</div>
           </div>
           <div id="achieveCard5Y" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
             <div class="text-lg mb-0.5">💍</div>
             <div class="text-[10px] font-bold text-white">五年の絆</div>
-            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">同一相手60ヶ月</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">同一相手60ヶ月完走</div>
           </div>
           <div id="achieveCardScore120" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
             <div class="text-lg mb-0.5">⚡</div>
             <div class="text-[10px] font-bold text-white">歓喜の特異点</div>
-            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">スコア120pt突破</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">密会150pt突破</div>
           </div>
           <div id="achieveCardAgeOlder" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
             <div class="text-lg mb-0.5">🍷</div>
@@ -600,7 +467,7 @@
           <div id="achieveCardGrandSlam" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
             <div class="text-lg mb-0.5">👑</div>
             <div class="text-[10px] font-bold text-white">全能の覇皇</div>
-            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">主要最上位を同時制覇</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">主要実績を同時制覇</div>
           </div>
         </div>
       </div>
@@ -609,13 +476,11 @@
       <div class="space-y-3">
         <div class="bg-gradient-to-b from-purple-950/40 to-slate-900/90 border border-purple-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
           <div class="flex items-center gap-3">
-            <div class="avatar-frame-lg flex-shrink-0">
-              <img src="" alt="" id="longestPartnerImg">
-            </div>
+            <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="longestPartnerImg"></div>
             <div class="flex-1 min-w-0 space-y-0.5">
               <span class="text-[10px] tracking-wider text-pink-400 font-bold uppercase block">👑 最長交際パートナーの記憶</span>
-              <h3 id="longestPartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">エリコ (46歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
-              <div id="longestPartnerPeriod" class="text-xs text-purple-300 pt-0.5">交際64ヶ月（5年4ヶ月）</div>
+              <h3 id="longestPartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">エリコ (56歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
+              <div id="longestPartnerPeriod" class="text-xs text-purple-300 pt-0.5">交際60ヶ月（5年間完走）</div>
             </div>
           </div>
           <div class="p-2 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-200 text-xs leading-relaxed italic" id="longestPartnerLineText">
@@ -625,13 +490,11 @@
 
         <div class="bg-gradient-to-b from-rose-950/30 to-slate-900/90 border border-rose-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
           <div class="flex items-center gap-3">
-            <div class="avatar-frame-lg flex-shrink-0">
-              <img src="" alt="" id="highestScorePartnerImg">
-            </div>
+            <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="highestScorePartnerImg"></div>
             <div class="flex-1 min-w-0 space-y-0.5">
               <span class="text-[10px] tracking-wider text-amber-400 font-bold uppercase block">🔥 歴代最高密会スコアの記憶</span>
-              <h3 id="highestScorePartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">サオリ (32歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
-              <div id="highestScoreDetail" class="text-xs text-amber-300 pt-0.5">最高スコア: 124 pt (限界突破)</div>
+              <h3 id="highestScorePartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">サオリ (42歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
+              <div id="highestScoreDetail" class="text-xs text-amber-300 pt-0.5">最高スコア: 154 pt (限界突破)</div>
             </div>
           </div>
           <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-300 text-xs leading-relaxed" id="highestScoreMemories">
@@ -662,13 +525,13 @@
       </div>
 
       <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-2 flex items-center justify-between text-center text-[11px]">
-        <div><span class="text-amber-300 font-medium">✨外見</span> <span id="resStatLooks" class="font-bold text-white">Lv.4</span></div>
+        <div><span class="text-amber-300 font-medium">✨外見</span> <span id="resStatLooks" class="font-bold text-white">Lv.5</span></div>
         <div class="text-slate-600">|</div>
-        <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="resStatStamina" class="font-bold text-white">Lv.4</span></div>
+        <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="resStatStamina" class="font-bold text-white">Lv.5</span></div>
         <div class="text-slate-600">|</div>
         <div><span class="text-rose-400 font-medium">🔥性欲</span> <span id="resStatLibido" class="font-bold text-white">Lv.5</span></div>
         <div class="text-slate-600">|</div>
-        <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="resStatBudget" class="font-bold text-white">Lv.0</span></div>
+        <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="resStatBudget" class="font-bold text-white">Lv.2</span></div>
       </div>
 
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
@@ -683,7 +546,7 @@
       </div>
 
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2 font-serif-jp text-xs leading-relaxed text-slate-300">
-        <div class="text-[10px] font-sans font-bold text-purple-400 uppercase tracking-widest">10-Year Epilogue</div>
+        <div class="text-[10px] font-sans font-bold text-purple-400 uppercase tracking-widest">5-Year Epilogue</div>
         <div id="epilogueText" class="space-y-2"></div>
       </div>
 
@@ -703,170 +566,91 @@
     </section>
   </main>
 
-  <!-- 2年ごとの節目モーダル -->
+  <!-- 年次マイルストーンモーダル（1年ごと決算 ＆ 方針再選択） -->
   <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md md:max-w-2xl w-full p-4 sm:p-6 space-y-3.5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
-      <div class="text-center space-y-1">
-        <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold" id="twoYearHeaderTag">24-Month Milestone</span>
-        <h3 class="text-base sm:text-lg font-bold text-white" id="twoYearTitle">2年目の節目：42歳の現在</h3>
+    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3.5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
+      <div class="text-center space-y-0.5">
+        <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold" id="milestoneHeaderTag">12-Month Milestone</span>
+        <h3 class="text-base sm:text-lg font-bold text-white" id="twoYearTitle">1年目の決算：51歳の現在</h3>
       </div>
 
-      <div class="md:grid md:grid-cols-2 md:gap-4 space-y-3.5 md:space-y-0">
-        
-        <!-- 左カラム -->
-        <div class="space-y-3.5">
-          <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
-            <div class="text-[11px] font-bold text-amber-300">📊 これまでの到達サマリー</div>
-            <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
-              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <span class="text-[9px] text-slate-400 block">累計交際</span>
-                <span id="twoYearSummaryTotal" class="font-bold text-pink-400">0人</span>
-              </div>
-              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <span class="text-[9px] text-slate-400 block">最長期間</span>
-                <span id="twoYearSummaryLongest" class="font-bold text-purple-300">0ヶ月</span>
-              </div>
-              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <span class="text-[9px] text-slate-400 block">最高密会度</span>
-                <span id="twoYearSummaryScore" class="font-bold text-amber-300">0 pt</span>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-              <div class="bg-slate-900 p-1.5 rounded border border-slate-800 flex justify-between items-center">
-                <span class="text-slate-400 text-[10px]">最年少:</span>
-                <span id="twoYearSummaryYoungest" class="font-bold text-emerald-300 truncate ml-1">―</span>
-              </div>
-              <div class="bg-slate-900 p-1.5 rounded border border-slate-800 flex justify-between items-center">
-                <span class="text-slate-400 text-[10px]">最年長:</span>
-                <span id="twoYearSummaryOldest" class="font-bold text-cyan-300 truncate ml-1">―</span>
-              </div>
-            </div>
+      <!-- 1年間の戦果サマリー -->
+      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
+        <div class="text-[11px] font-bold text-amber-300">📊 直近1年間の戦果</div>
+        <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
+          <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+            <span class="text-[9px] text-slate-400 block">累計交際</span>
+            <span id="twoYearSummaryTotal" class="font-bold text-pink-400">0人</span>
           </div>
-
-          <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-1.5">
-            <div class="text-xs font-bold text-purple-300">💖 現在継続中のパートナー</div>
-            <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs max-h-36 overflow-y-auto"></div>
+          <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+            <span class="text-[9px] text-slate-400 block">最長期間</span>
+            <span id="twoYearSummaryLongest" class="font-bold text-purple-300">0ヶ月</span>
           </div>
-
-          <div id="twoYearAgeDropDetail" class="bg-rose-950/40 border border-rose-800/60 rounded-xl p-3 space-y-1 text-xs">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-rose-300">📉 加齢による変化</span>
-              <span id="twoYearTotalDropText" class="text-[10px] px-2 py-0.5 rounded bg-rose-900 text-rose-200 font-bold">-2 pt</span>
-            </div>
-            <div class="text-[11px] text-slate-200 pt-1">
-              ✨外見: <span id="dropDetailLooks" class="font-bold">5 → 4</span> ｜ ⚡体力: <span id="dropDetailStamina" class="font-bold">10 → 10</span> ｜ 🔥性欲: <span id="dropDetailLibido" class="font-bold">4 → 3</span>
-            </div>
+          <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+            <span class="text-[9px] text-slate-400 block">最高密会度</span>
+            <span id="twoYearSummaryScore" class="font-bold text-amber-300">0 pt</span>
           </div>
         </div>
-
-        <!-- 右カラム -->
-        <div class="space-y-3.5">
-          <div class="bg-slate-950/80 border border-emerald-900/60 rounded-xl p-3 flex justify-between items-center text-xs">
-            <div>
-              <span class="text-slate-400 block text-[10px]">本業年収水準の推移</span>
-              <span id="incomeChangeReport" class="font-bold text-emerald-400 text-sm">Lv.4 → Lv.5</span>
-            </div>
-          </div>
-
-          <div class="bg-purple-950/40 border border-purple-800/50 rounded-xl p-3 flex justify-between items-center">
-            <div>
-              <div class="text-xs font-bold text-purple-200">再配分可能ポイント</div>
-            </div>
-            <div class="text-right">
-              <span id="twoYearRemainPoints" class="text-xl font-black text-purple-300">5</span>
-              <span class="text-xs text-slate-400"> pt</span>
-            </div>
-          </div>
-
-          <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-3 flex justify-between items-center text-xs">
-            <div>
-              <div class="font-bold text-emerald-300">🏡 家庭ケア</div>
-              <div class="text-[10px] text-slate-400">配偶者警戒: <span id="modalAlertVal" class="font-bold text-amber-400">Lv.3</span> (-2Lv)</div>
-            </div>
-            <button type="button" onclick="buyFamilyCare()" id="btnFamilyCare" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95">
-              ケア実行 (-1pt)
-            </button>
-          </div>
-
-          <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-500/40 rounded-xl p-3 space-y-1">
-            <div class="flex justify-between items-center text-xs">
-              <span class="font-bold text-white">💳 婚外活動費（2年ごとにリセット）</span>
-              <span id="twoYearValBudget" class="font-black text-pink-300">Lv.0</span>
-            </div>
-            <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-purple-900/50">
-              <div id="twoYearBarBudget" class="stat-bar-fill h-full bg-gradient-to-r from-purple-500 to-pink-500 w-[0%]"></div>
-            </div>
-            <div class="flex justify-end gap-2 pt-0.5">
-              <button onclick="adjustTwoYearStat('budget', -1)" class="px-2.5 py-0.5 text-xs bg-slate-800 rounded border border-slate-700 text-white font-bold">−</button>
-              <button onclick="adjustTwoYearStat('budget', 1)" class="px-2.5 py-0.5 text-xs bg-purple-700 rounded border border-purple-600 text-white font-bold">＋</button>
-            </div>
-          </div>
-
-          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
-            <div class="font-semibold text-slate-400">アンチエイジング再投資</div>
-            <div class="grid grid-cols-3 gap-2 text-center">
-              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <span class="text-amber-300 block text-[10px]">✨外見</span>
-                <span id="twoYearValLooks" class="font-bold text-white">4</span>
-                <div class="flex justify-center gap-1 mt-1">
-                  <button onclick="adjustTwoYearStat('looks', -1)" class="px-1.5 text-[10px] bg-slate-800 rounded">⁻</button>
-                  <button onclick="adjustTwoYearStat('looks', 1)" class="px-1.5 text-[10px] bg-slate-700 rounded text-amber-300">⁺</button>
-                </div>
-              </div>
-              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <span class="text-cyan-400 block text-[10px]">⚡体力</span>
-                <span id="twoYearValStamina" class="font-bold text-white">4</span>
-                <div class="flex justify-center gap-1 mt-1">
-                  <button onclick="adjustTwoYearStat('stamina', -1)" class="px-1.5 text-[10px] bg-slate-800 rounded">⁻</button>
-                  <button onclick="adjustTwoYearStat('stamina', 1)" class="px-1.5 text-[10px] bg-slate-700 rounded text-cyan-300">⁺</button>
-                </div>
-              </div>
-              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <span class="text-rose-400 block text-[10px]">🔥性欲</span>
-                <span id="twoYearValLibido" class="font-bold text-white">5</span>
-                <div class="flex justify-center gap-1 mt-1">
-                  <button onclick="adjustTwoYearStat('libido', -1)" class="px-1.5 text-[10px] bg-slate-800 rounded">⁻</button>
-                  <button onclick="adjustTwoYearStat('libido', 1)" class="px-1.5 text-[10px] bg-slate-700 rounded text-rose-300">⁺</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      <div class="space-y-3 pt-2 border-t border-slate-800">
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-            <span class="text-slate-300">同時交際上限</span>
-            <select id="twoYearMaxPartners" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-              <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option><option value="4">4人</option>
-            </select>
-          </div>
-          <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-            <span class="text-slate-300">ターゲット年代</span>
-            <select id="twoYearTargetAgePref" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-              <option value="younger">年下狙い</option><option value="same">同年代</option><option value="older">年上狙い</option>
-            </select>
-          </div>
-        </div>
+      <!-- 継続中パートナー -->
+      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-1.5">
+        <div class="text-xs font-bold text-purple-300">💖 現在継続中のパートナー</div>
+        <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs max-h-28 overflow-y-auto"></div>
+      </div>
 
-        <button onclick="resumeNextTwoYears()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
-          <span>この設定で次の2年間を進める ›</span>
+      <!-- 加齢と自動アンチエイジング結果 -->
+      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5 text-xs">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-slate-300">📉 加齢減衰と自己投資結果</span>
+          <span class="text-emerald-400 font-bold" id="milestoneIncomeReport">年収: Lv.5</span>
+        </div>
+        <div class="text-[11px] text-slate-300" id="milestoneStatReport">
+          ✨外見: 5 ｜ ⚡体力: 5 ｜ 🔥性欲: 5 ｜ 💳今期活動費: Lv.2
+        </div>
+      </div>
+
+      <!-- 家庭ケア（トグル） -->
+      <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-3 flex justify-between items-center text-xs">
+        <div>
+          <div class="font-bold text-emerald-300">🏡 家庭ケア（警戒度 -2Lv）</div>
+          <div class="text-[10px] text-slate-400">配偶者警戒: <span id="modalAlertVal" class="font-bold text-amber-400">Lv.3</span></div>
+        </div>
+        <button type="button" onclick="buyFamilyCare()" id="btnFamilyCare" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95">
+          ケア実行 (-1活動費)
         </button>
+      </div>
 
-        <details class="text-xs text-slate-300 group">
-          <summary class="cursor-pointer font-bold text-purple-300 hover:text-purple-200 flex justify-between py-1">
-            <span>直近24ヶ月の月別クロニクル振り返り</span>
-            <span class="group-open:rotate-180 transition-transform">▼</span>
-          </summary>
-          <div class="pt-2">
-            <div id="twoYearChronicleScroll" class="max-h-32 overflow-y-auto space-y-1 p-2 bg-slate-950 rounded-lg border border-slate-800 text-[10px] leading-relaxed"></div>
+      <!-- 次期の方針再設定（スタイル ＆ 年齢層） -->
+      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
+        <div class="font-bold text-purple-300">🎯 次期の婚外方針を見直す</div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <span class="text-[10px] text-slate-400 block mb-1">婚外スタイル</span>
+            <select id="milestoneStyleSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+              <option value="pure">💍 純愛継続型 (1人)</option>
+              <option value="balanced" selected>🍷 分散余裕型 (2人)</option>
+              <option value="carnage">⚔️ 修羅乱舞型 (4人)</option>
+            </select>
           </div>
-        </details>
+          <div>
+            <span class="text-[10px] text-slate-400 block mb-1">狙う年齢層</span>
+            <select id="milestoneAgePrefSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+              <option value="younger">年下狙い (-20歳)</option>
+              <option value="same" selected>同年代 (±5歳)</option>
+              <option value="older">年上狙い (+20歳)</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-        <button onclick="retireFromTwoYear()" class="w-full py-2.5 rounded-xl text-xs font-bold text-rose-300 hover:text-white border border-rose-800/80 hover:border-rose-600 bg-rose-950/40 hover:bg-rose-900/60 shadow-md transition active:scale-95 flex items-center justify-center gap-1.5">
-          <span>🚪 ここで婚外活動を終える（自主引退）</span>
+      <!-- 進行ボタン -->
+      <div class="space-y-2 pt-1 border-t border-slate-800">
+        <button onclick="resumeNextYear()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+          <span>この方針で次の1年を進める ›</span>
+        </button>
+        <button onclick="retireFromTwoYear()" class="w-full py-2 rounded-xl text-xs font-bold text-rose-300 hover:text-white border border-rose-800/80 bg-rose-950/30 transition active:scale-95">
+          🚪 ここで婚外活動を終える（自主引退）
         </button>
       </div>
     </div>
@@ -877,7 +661,7 @@
     <div class="bg-slate-900 border border-purple-500/40 rounded-2xl max-w-sm w-full p-4 space-y-3 text-center shadow-2xl">
       <div class="text-xs font-bold text-purple-300">画像を長押しして「写真に追加」</div>
       <div class="rounded-xl overflow-hidden border border-slate-800 shadow-lg">
-        <img id="generatedCardImage" class="w-full h-auto block" alt="10年成績表カード">
+        <img id="generatedCardImage" class="w-full h-auto block" alt="5年成績表カード">
       </div>
       <button onclick="closeImageModal()" class="w-full py-2 rounded-xl text-xs bg-slate-800 text-slate-300 hover:bg-slate-700">
         閉じる

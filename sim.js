@@ -1,170 +1,36 @@
 /* ============================================================
-   sim.js - OUTROMANCE コアシミュレーション・計算ロジック
+   sim.js - OUTROMANCE コアシミュレーション（5年制・1年ごとマイルストーン）
    ============================================================ */
 
-// グローバル重複防止セーフティ
 window.appState = window.appState || {
-  user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 40, birthMonth: 4 },
-  stats: { looks: 4, libido: 4, stamina: 4, budget: 0, income: 4, childBurden: 5, spouseAffection: 5, spouseAlert: 3, targetAgePref: "same", maxPartners: 2 },
-  tempPoints: 5,
+  user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 50, birthMonth: 1, selectedStyle: "balanced" },
+  stats: { looks: 5, libido: 5, stamina: 5, budget: 4, income: 5, childBurden: 5, spouseAffection: 5, spouseAlert: 3, targetAgePref: "same", maxPartners: 2 },
+  tempPoints: 0,
   sim: {
-    currentMonth: 0, currentAge: 40, isPaused: false, isSkipping: false,
+    currentMonth: 0, currentAge: 50, isPaused: false, isSkipping: false,
     partners: [], activePartnerIds: [], totalPartnerCounter: 0,
     monthlyHistory: [], isRetired: false, isDivorced: false, lastMilestoneMonth: -1,
     globalMaxSexScore: 0, highestScorePartner: null,
     metOlder20Plus: false, metYounger20Plus: false,
     crisisCountIn2Years: 0, breakupCountIn2Years: 0, lawsuitCount: 0
-  },
-  twoYearTemp: { points: 5, looks: 4, libido: 4, stamina: 4, budget: 0, spouseAlert: 3 }
+  }
 };
 var appState = window.appState;
 
+// 誕生月が1月固定のため、開始月（1月）と加齢が完全に一致
 function getRealAge(mIdx) {
-  const b = appState.user.birthMonth || 4;
-  const startAge = appState.user.startAge || 40;
-  if (b === 1) return startAge + Math.floor(mIdx / 12);
-  return mIdx < b - 1 ? startAge : startAge + 1 + Math.floor((mIdx - (b - 1)) / 12);
+  const startAge = appState.user.startAge || 50;
+  return startAge + Math.floor(mIdx / 12);
 }
 
-// 本業年収水準: Lv.4〜6（中間〜高め帯）
 function rollIncomeLevel() {
   const r = (Math.random() + Math.random()) / 2;
   return Math.min(6, Math.max(4, Math.round(4 + r * 2)));
 }
 
-// 基礎能力値合計: 13〜16pt（下振れをカットした安定帯）
 function rollInitialStatsTotal() {
   const r = (Math.random() + Math.random()) / 2;
   return Math.min(16, Math.max(13, Math.round(13 + r * 3)));
-}
-
-function adjustStat(type, delta) {
-  if (delta > 0) {
-    if (appState.tempPoints <= 0) return;
-    if (type === "budget") {
-      if (appState.stats.budget >= 10) return;
-      appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-      appState.tempPoints -= 1;
-    } else {
-      if (appState.stats[type] >= 10) return;
-      appState.stats[type] += 1;
-      appState.tempPoints -= 1;
-    }
-  } else {
-    if (type === "budget") {
-      if (appState.stats.budget <= 0) return;
-      appState.stats.budget = Math.max(0, appState.stats.budget - 2);
-      appState.tempPoints += 1;
-    } else {
-      if (appState.stats[type] <= 1) return;
-      appState.stats[type] -= 1;
-      appState.tempPoints += 1;
-    }
-  }
-  if (typeof renderStep1B === "function") renderStep1B();
-  if (typeof triggerVibrate === "function") triggerVibrate(12);
-}
-
-function autoAllocateRemainingPoints() {
-  if (appState.tempPoints <= 0) return;
-  const isMale = (appState.user.gender === "male");
-  const order = isMale ? ["budget", "stamina", "looks", "libido"] : ["stamina", "looks", "libido", "budget"];
-  let loopCount = 0;
-  while (appState.tempPoints > 0 && loopCount < 30) {
-    let allocatedThisRound = false;
-    for (const stat of order) {
-      if (appState.tempPoints <= 0) break;
-      if (stat === "budget") {
-        if (appState.stats.budget < 10) {
-          appState.stats.budget = Math.min(10, appState.stats.budget + 2);
-          appState.tempPoints--;
-          allocatedThisRound = true;
-        }
-      } else {
-        if (appState.stats[stat] < 10) {
-          appState.stats[stat]++;
-          appState.tempPoints--;
-          allocatedThisRound = true;
-        }
-      }
-    }
-    if (!allocatedThisRound) break;
-    loopCount++;
-  }
-}
-
-function autoAllocateTwoYearPoints() {
-  if (appState.twoYearTemp.points <= 0) return;
-  const isMale = (appState.user.gender === "male");
-  const order = isMale ? ["budget", "stamina", "looks", "libido"] : ["stamina", "looks", "libido", "budget"];
-  let loopCount = 0;
-  while (appState.twoYearTemp.points > 0 && loopCount < 30) {
-    let allocatedThisRound = false;
-    for (const stat of order) {
-      if (appState.twoYearTemp.points <= 0) break;
-      if (stat === "budget") {
-        if (appState.twoYearTemp.budget < 10) {
-          appState.twoYearTemp.budget = Math.min(10, appState.twoYearTemp.budget + 2);
-          appState.twoYearTemp.points--;
-          allocatedThisRound = true;
-        }
-      } else {
-        if (appState.twoYearTemp[stat] < 10) {
-          appState.twoYearTemp[stat]++;
-          appState.twoYearTemp.points--;
-          allocatedThisRound = true;
-        }
-      }
-    }
-    if (!allocatedThisRound) break;
-    loopCount++;
-  }
-}
-
-function buyFamilyCare() {
-  if (appState.twoYearTemp.points <= 0) return;
-  if (appState.twoYearTemp.spouseAlert <= 1) return;
-
-  appState.twoYearTemp.points -= 1;
-  appState.twoYearTemp.spouseAlert = Math.max(1, appState.twoYearTemp.spouseAlert - 2);
-
-  if (typeof triggerVibrate === "function") triggerVibrate(20);
-  if (typeof playRareChime === "function") playRareChime();
-  if (typeof renderTwoYearModal === "function") renderTwoYearModal();
-
-  const btn = document.getElementById("btnFamilyCare");
-  if (btn) {
-    btn.classList.add("ring-2", "ring-white");
-    setTimeout(() => btn.classList.remove("ring-2", "ring-white"), 300);
-  }
-}
-
-function adjustTwoYearStat(type, delta) {
-  if (delta > 0) {
-    if (appState.twoYearTemp.points <= 0) return;
-    if (type === "budget") {
-      if (appState.twoYearTemp.budget >= 10) return;
-      appState.twoYearTemp.budget = Math.min(10, appState.twoYearTemp.budget + 2);
-      appState.twoYearTemp.points -= 1;
-    } else {
-      if (appState.twoYearTemp[type] >= 10) return;
-      appState.twoYearTemp[type] += 1;
-      appState.twoYearTemp.points -= 1;
-    }
-  } else {
-    if (type === "budget") {
-      if (appState.twoYearTemp.budget <= 0) return;
-      appState.twoYearTemp.budget = Math.max(0, appState.twoYearTemp.budget - 2);
-      appState.twoYearTemp.points += 1;
-    } else {
-      const minVal = appState.twoYearTemp["min_" + type] || 1;
-      if (appState.twoYearTemp[type] <= minVal) return;
-      appState.twoYearTemp[type] -= 1;
-      appState.twoYearTemp.points += 1;
-    }
-  }
-  if (typeof renderTwoYearModal === "function") renderTwoYearModal();
-  if (typeof triggerVibrate === "function") triggerVibrate(12);
 }
 
 function calculateSexScore(partner, month, isCrisis, prefBonus = 0) {
@@ -179,7 +45,7 @@ function calculateSexScore(partner, month, isCrisis, prefBonus = 0) {
   const masteryBonus = Math.min(14, Math.floor(partner.durationMonths / 12) * 3.5);
 
   let eventBonus = 0;
-  if (month === 12 || month === 2 || month === 4 || month === 8 || month === appState.user.birthMonth) {
+  if (month === 12 || month === 2 || month === 4 || month === 8 || month === 1) {
     eventBonus = 10 + Math.floor(Math.random() * 8);
   }
   const thrillBonus = isCrisis ? 15 : 0;
@@ -193,10 +59,9 @@ function createSynthesizedPartner(startMonth, playerAge) {
   const jobPool = isTargetMale ? MALE_JOBS_POOL : FEMALE_JOBS_POOL;
   const job = jobPool[Math.floor(Math.random() * jobPool.length)];
 
-  const prefKey = appState.user.pref;
-  const areaList = AREAS_NO_STATION[prefKey] || AREAS_NO_STATION.tokyo;
-  const prefNameMap = { tokyo: "東京", kanagawa: "神奈川", saitama: "埼玉", chiba: "千葉" };
-  const area = `${prefNameMap[prefKey] || "東京"}・${areaList[Math.floor(Math.random() * areaList.length)]}`;
+  const prefKey = "tokyo";
+  const areaList = AREAS_NO_STATION.tokyo;
+  const area = `東京・${areaList[Math.floor(Math.random() * areaList.length)]}`;
 
   let partnerAge = playerAge;
   const targetPref = appState.stats.targetAgePref;
@@ -294,7 +159,7 @@ function simulateOneMonth(isSilent = false) {
     appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 1);
   }
 
-  const prefProp = PREF_PROPERTIES[appState.user.pref] || PREF_PROPERTIES.tokyo;
+  const prefProp = PREF_PROPERTIES.tokyo;
 
   const activeCount = activePartners.length;
   let staminaProtection = (stamina - 4) * 0.018;
@@ -318,7 +183,6 @@ function simulateOneMonth(isSilent = false) {
   const isUserMale = (appState.user.gender === "male");
 
   activePartners.forEach(p => {
-    // ターン進行時に前月の手動アクションテキストをクリア
     p.lastActionText = null;
     p.durationMonths++;
     p.datesCount++;
@@ -344,7 +208,6 @@ function simulateOneMonth(isSilent = false) {
     let lawsuitRate = 0.0033;
     if (p.tag === "冷えきり") lawsuitRate = 0.008;
     if (p.tag === "秘密厳守") lawsuitRate = 0.0;
-
     if (stamina >= 7) lawsuitRate *= 0.5;
 
     if (Math.random() < lawsuitRate) {
@@ -398,7 +261,6 @@ function simulateOneMonth(isSilent = false) {
       if (appState.stats.libido <= 3) breakRate *= 1.8;
     }
 
-    // 🎁 贈物による継続保護（有効期間中は破局率 80% カット）
     if (p.giftProtectedUntil && p.giftProtectedUntil >= mIdx) {
       breakRate *= 0.2;
     }
@@ -444,7 +306,6 @@ function simulateOneMonth(isSilent = false) {
 
     if (appState.stats.targetAgePref === "younger") meetBase *= 0.65;
     if (appState.stats.targetAgePref === "older") meetBase *= 1.25;
-
     if (appState.stats.spouseAlert === 4) meetBase *= 0.5;
 
     meetBase += (prefProp.meetBonus || 0);
@@ -511,36 +372,4 @@ function simulateOneMonth(isSilent = false) {
   if (actCountEl) actCountEl.innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
   const totPartEl = document.getElementById("simTotalPartners");
   if (totPartEl) totPartEl.innerText = `${appState.sim.totalPartnerCounter}人`;
-}
-
-function manualBreakup(partnerId, event) {
-  if (event) event.stopPropagation();
-  const p = appState.sim.partners.find(item => item.id === partnerId);
-  if (!p) return;
-
-  const mIdx = appState.sim.currentMonth;
-  p.endMonth = mIdx;
-  p.endAge = p.age;
-  appState.sim.activePartnerIds = appState.sim.activePartnerIds.filter(pid => pid !== partnerId);
-  appState.sim.breakupCountIn2Years++;
-
-  let isTroubled = false;
-  if (p.tag === "年下独身" && appState.stats.stamina < 7 && Math.random() < 0.50) {
-    appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
-    isTroubled = true;
-  }
-
-  if (typeof showBreakupPartnerToast === "function") {
-    showBreakupPartnerToast(p, appState.user.gender === "male", true, isTroubled);
-  }
-  if (typeof playBreakupChime === "function") playBreakupChime();
-  if (typeof triggerVibrate === "function") triggerVibrate([50, 40]);
-
-  const calMonth = (mIdx % 12) + 1;
-  if (typeof updateMatrixDot === "function") updateMatrixDot(mIdx);
-  if (typeof renderRealtimeMonthlyLog === "function") renderRealtimeMonthlyLog(mIdx, calMonth);
-
-  const maxAllowed = appState.stats.maxPartners || 2;
-  const actCountEl = document.getElementById("simActiveCount");
-  if (actCountEl) actCountEl.innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
 }

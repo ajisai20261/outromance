@@ -9,6 +9,7 @@ var prologueAutoTimer = null;
 var tapStartX = 0, tapStartY = 0;
 var isTapInitialized = false;
 var lastTapAdvanceTime = 0;
+var currentHistorySortType = "duration";
 
 // スピード制御（1ヶ月 = 5.0秒 / 2.5秒 / 10.0秒）
 var simSpeedMs = 5000;
@@ -176,7 +177,6 @@ function goToStep1B() {
   appState.user.pref = "tokyo";
   appState.user.birthMonth = 1;
 
-  // 初期ステータス自動生成 & スタイル初期セット
   rerollStats();
   applyStylePreset("balanced");
   onStartAgeChange();
@@ -304,8 +304,6 @@ function updateLiveStats() {
   if (libEl) libEl.innerText = `${appState.stats.libido}`;
   const budEl = document.getElementById("liveStatBudget");
   if (budEl) budEl.innerText = `Lv.${appState.stats.budget}`;
-  const incEl = document.getElementById("liveStatIncome");
-  if (incEl) incEl.innerText = `Lv.${appState.stats.income}`;
   const alertEl = document.getElementById("largeSpouseAlertVal");
   if (alertEl) alertEl.innerText = `Lv.${appState.stats.spouseAlert}/5`;
 
@@ -318,6 +316,38 @@ function updateLiveStats() {
   if (totalCountEl) {
     totalCountEl.innerText = `${appState.sim.partners.length}人`;
   }
+
+  // 進行画面の家庭ケアボタン状態（活動費2以上 ＆ 警戒度2以上で活性化）
+  const btnCare = document.getElementById("btnLiveFamilyCare");
+  if (btnCare) {
+    const canCare = (appState.stats.budget >= 2 && appState.stats.spouseAlert > 1);
+    btnCare.disabled = !canCare;
+    if (!canCare) {
+      btnCare.className = "px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-600 font-bold text-[10px] cursor-not-allowed opacity-50 flex items-center gap-1";
+    } else {
+      btnCare.className = "px-2 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 text-emerald-300 font-bold text-[10px] transition active:scale-95 flex items-center gap-1 cursor-pointer";
+    }
+  }
+}
+
+// 進行画面での家庭ケア（活動費 -2消費：警戒度 -2Lv）
+function buyLiveFamilyCare(e) {
+  if (e) e.stopPropagation();
+  if (appState.stats.budget < 2) return;
+  if (appState.stats.spouseAlert <= 1) return;
+
+  initAudio();
+  appState.stats.budget = Math.max(0, appState.stats.budget - 2);
+  appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 2);
+
+  if (isSoundOn) playTone(659.25, 0.12);
+  triggerVibrate(20);
+
+  const sitEl = document.getElementById("spouseSituationLog");
+  if (sitEl) sitEl.innerText = "週末に家族サービスを奮発。パートナーの機嫌が目に見えて和らいだ。";
+
+  updateLiveStats();
+  renderAlertAndFlash(false, true);
 }
 
 function initScreenTapHandler() {
@@ -351,7 +381,6 @@ function triggerScreenTapAdvance() {
   }
 }
 
-// 12ヶ月マトリックス（1行表示 ＆ 大ドット約30px）
 function refresh12MatrixGrid() {
   const currentYear = Math.floor(appState.sim.currentMonth / 12) + 1;
   const startM = (currentYear - 1) * 12 + 1;
@@ -536,7 +565,9 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
     if (largeVal) {
       largeVal.className = "text-[10.5px] font-black text-amber-400";
     }
-    if (sitEl) sitEl.innerText = "平穏な週末。特に怪しまれる様子はない。";
+    if (sitEl && sitEl.innerText.indexOf("家族サービス") === -1) {
+      sitEl.innerText = "平穏な週末。特に怪しまれる様子はない。";
+    }
   }
 }
 
@@ -849,7 +880,6 @@ function onMilestoneStyleChange() {
   const newStyle = styleSel.value;
   appState.user.selectedStyle = newStyle;
 
-  // 選択スタイルに応じて次期スペックを再計算
   if (newStyle === "carnage") {
     appState.stats.maxPartners = 4;
     appState.stats.budget = Math.min(10, appState.stats.income);
@@ -869,7 +899,7 @@ function onMilestoneStyleChange() {
   }
 }
 
-// 1年ごとマイルストーンモーダル描画（連打スキップ防止ガード付き）
+// 1年ごとマイルストーンモーダル描画（全件表示・家庭ケア削除・連打ガード付き）
 function renderYearlyMilestoneModal() {
   const mIdx = appState.sim.currentMonth;
   const currentAge = getRealAge(mIdx);
@@ -891,37 +921,18 @@ function renderYearlyMilestoneModal() {
   const scoreEl = document.getElementById("twoYearSummaryScore");
   if (scoreEl) scoreEl.innerText = `${appState.sim.globalMaxSexScore} pt`;
 
+  // 継続中パートナー全員をスクロールなしで全件表示
   renderActivePartnersListInMilestone();
 
   const incEl = document.getElementById("milestoneIncomeReport");
   if (incEl) incEl.innerText = `年収: Lv.${appState.stats.income}`;
-  const alertEl = document.getElementById("modalAlertVal");
-  if (alertEl) alertEl.innerText = `Lv.${appState.stats.spouseAlert}`;
 
   const styleSel = document.getElementById("milestoneStyleSelect");
   if (styleSel) styleSel.value = appState.user.selectedStyle || "balanced";
   const agePrefSel = document.getElementById("milestoneAgePrefSelect");
   if (agePrefSel) agePrefSel.value = appState.stats.targetAgePref || "same";
 
-  // スタイルに応じた再配分レポートを描画
   onMilestoneStyleChange();
-
-  const btnCare = document.getElementById("btnFamilyCare");
-  if (btnCare) {
-    if (appState.stats.spouseAlert <= 1) {
-      btnCare.disabled = true;
-      btnCare.innerText = "警戒度 最小 (不要)";
-      btnCare.className = "px-2.5 py-1 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs cursor-not-allowed";
-    } else if (appState.stats.budget <= 0) {
-      btnCare.disabled = true;
-      btnCare.innerText = "活動費不足";
-      btnCare.className = "px-2.5 py-1 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs cursor-not-allowed";
-    } else {
-      btnCare.disabled = false;
-      btnCare.innerText = "ケア実行 (-1活動費)";
-      btnCare.className = "px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95";
-    }
-  }
 
   // 【連打スキップ防止ガード】モーダル出現後0.6秒間は進行ボタンをロック
   const btnResume = document.getElementById("btnResumeNextYear");
@@ -966,19 +977,6 @@ function renderActivePartnersListInMilestone() {
     });
     activeList.innerHTML = h;
   }
-}
-
-function buyFamilyCare() {
-  if (appState.stats.budget <= 0) return;
-  if (appState.stats.spouseAlert <= 1) return;
-
-  initAudio();
-  appState.stats.budget = Math.max(0, appState.stats.budget - 1);
-  appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 2);
-
-  if (isSoundOn) playTone(659.25, 0.12);
-  triggerVibrate(20);
-  renderYearlyMilestoneModal();
 }
 
 function resumeNextYear() {
@@ -1040,6 +1038,61 @@ function generateLastLineText(partner, isPartnerMale, isStillActive) {
     : "「ごめんね、今は母親に戻らなきゃいけないの。今まで本当にありがとう。」";
 }
 
+// 交際履歴の並び替え
+function sortPartnersHistory(type) {
+  currentHistorySortType = type;
+  const btnDur = document.getElementById("sortBtnDuration");
+  const btnAge = document.getElementById("sortBtnAge");
+  const btnScore = document.getElementById("sortBtnScore");
+
+  [btnDur, btnAge, btnScore].forEach(b => {
+    if (b) b.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 transition";
+  });
+
+  if (type === "duration" && btnDur) {
+    btnDur.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-purple-900 text-purple-200 border border-purple-500 transition";
+  } else if (type === "age" && btnAge) {
+    btnAge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-purple-900 text-purple-200 border border-purple-500 transition";
+  } else if (type === "score" && btnScore) {
+    btnScore.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-purple-900 text-purple-200 border border-purple-500 transition";
+  }
+
+  renderAllPartnersList(type);
+}
+
+function renderAllPartnersList(sortType = "duration") {
+  let sorted = [...appState.sim.partners];
+  if (sortType === "duration") {
+    sorted.sort((a, b) => b.durationMonths - a.durationMonths);
+  } else if (sortType === "age") {
+    sorted.sort((a, b) => b.startAge - a.startAge);
+  } else if (sortType === "score") {
+    sorted.sort((a, b) => (b.maxSexScore || 0) - (a.maxSexScore || 0));
+  }
+
+  let allHtml = "";
+  sorted.forEach((p, idx) => {
+    const avatarSrc = AvatarCacheManager.get(p.avatarId);
+    allHtml += `
+      <div class="p-2.5 rounded bg-slate-950/50 border border-slate-850 flex justify-between items-center text-xs">
+        <div class="flex items-center gap-2">
+          <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
+          <div>
+            <div class="font-bold text-white">${idx + 1}. ${p.name} (${p.startAge}歳) <span class="text-indigo-300 text-[10px]">🏷️${p.tag}</span></div>
+            <div class="text-slate-400 text-[10px]">${p.job} / ${p.area}</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="px-1.5 py-0.5 rounded bg-pink-950 text-pink-300 border border-pink-700 text-[10px] font-bold">相性 ${p.chemistry}</span>
+          <div class="text-amber-300 font-bold text-[11px] mt-0.5">${p.maxSexScore}pt (${p.durationMonths}ヶ月)</div>
+        </div>
+      </div>
+    `;
+  });
+  const allList = document.getElementById("allPartnersList");
+  if (allList) allList.innerHTML = allHtml;
+}
+
 function calculateAndRenderResult() {
   const isTargetPartnerMale = (appState.user.gender === "female");
   const totalPartners = appState.sim.partners.length;
@@ -1049,7 +1102,6 @@ function calculateAndRenderResult() {
 
   document.getElementById("headerControls")?.classList.add("hidden");
 
-  // プレイヤー名拡大
   const resName = document.getElementById("resPlayerNameHeader");
   if (resName) resName.innerText = appState.user.name;
 
@@ -1173,27 +1225,8 @@ function calculateAndRenderResult() {
   const highDetail = document.getElementById("highestScoreDetail");
   if (highDetail) highDetail.innerText = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt`;
 
-  let allHtml = "";
-  appState.sim.partners.forEach((p, idx) => {
-    const avatarSrc = AvatarCacheManager.get(p.avatarId);
-    allHtml += `
-      <div class="p-2.5 rounded bg-slate-950/50 border border-slate-850 flex justify-between items-center text-xs">
-        <div class="flex items-center gap-2">
-          <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
-          <div>
-            <div class="font-bold text-white">${idx + 1}. ${p.name} (${p.startAge}歳) <span class="text-indigo-300 text-[10px]">🏷️${p.tag}</span></div>
-            <div class="text-slate-400 text-[10px]">${p.job} / ${p.area}</div>
-          </div>
-        </div>
-        <div class="text-right">
-          <span class="px-1.5 py-0.5 rounded bg-pink-950 text-pink-300 border border-pink-700 text-[10px] font-bold">相性 ${p.chemistry}</span>
-          <div class="text-amber-300 font-bold text-[11px] mt-0.5">${p.maxSexScore}pt (${p.durationMonths}ヶ月)</div>
-        </div>
-      </div>
-    `;
-  });
-  const allList = document.getElementById("allPartnersList");
-  if (allList) allList.innerHTML = allHtml;
+  renderAllPartnersList(currentHistorySortType);
+
   const toggleBtn = document.getElementById("toggleAllPartnersBtn");
   if (toggleBtn) toggleBtn.innerText = `すべての交際履歴（全${totalPartners}人）を確認する ▼`;
 

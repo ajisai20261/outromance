@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（5年制・12ヶ月表示対応）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（5年制完全版）
    ============================================================ */
 
 var isSoundOn = false;
@@ -162,16 +162,24 @@ function onGenderChange() {
   }
 }
 
+function onStartAgeChange() {
+  const age = document.getElementById("userAge")?.value || "40";
+  const name = appState.user.name || "ユウスケ";
+  const badge = document.getElementById("step1bUserBadge");
+  if (badge) badge.innerText = `${name}（${age}歳スタート）`;
+}
+
 function goToStep1B() {
   const nameVal = document.getElementById("userName")?.value.trim();
   appState.user.name = (nameVal && nameVal.length > 0) ? nameVal.slice(0, 5) : "名無し";
   appState.user.gender = document.getElementById("userGender")?.value || "male";
   appState.user.pref = "tokyo";
-  appState.user.birthMonth = 1; // 1月固定（誕生日即加齢）
+  appState.user.birthMonth = 1;
 
   // 初期ステータス自動生成 & スタイル初期セット
   rerollStats();
   applyStylePreset("balanced");
+  onStartAgeChange();
 
   document.getElementById("step1a")?.classList.add("hidden");
   document.getElementById("step1b")?.classList.remove("hidden");
@@ -275,7 +283,6 @@ function applyStylePreset(presetType) {
     }
   }
 
-  // プレビュー表示反映
   const pl = document.getElementById("prevStatLooks");
   if (pl) pl.innerText = appState.stats.looks;
   const ps = document.getElementById("prevStatStamina");
@@ -363,13 +370,11 @@ function refresh12MatrixGrid() {
 
     const dot = document.createElement("div");
     dot.id = "grid-dot-" + i;
-    // ドット直径を拡大（w-7.5 h-7.5〜w-8.5 h-8.5 / 約30px）
     dot.className = "w-full aspect-square rounded-full transition-all duration-300 cursor-pointer hover:scale-115 flex items-center justify-center p-[2px] bg-slate-800 border border-slate-700/60";
     dot.onclick = (e) => { e.stopPropagation(); showClickMonthDetail(absMonth); };
 
     const centerCircle = document.createElement("div");
     centerCircle.className = "w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-xs sm:text-[13px] select-none";
-    // 誕生月は1月固定なので1月は必ず🎂
     const monthEmoji = (calMonth === 1) ? "🎂" : (MONTH_EMOJIS[calMonth] || "🌸");
     centerCircle.innerText = monthEmoji;
     dot.appendChild(centerCircle);
@@ -535,7 +540,6 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
   }
 }
 
-// パートナーカード（上段: 名前・相性・pt / 中段: タグ・3連ボタン / 下段: エピソード）
 function renderRealtimeMonthlyLog(mIdx, calMonth) {
   const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
   
@@ -617,7 +621,6 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
       <div class="p-2 sm:p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs">
         <div class="avatar-frame mt-0.5"><img src="${avatarSrc}" alt="${p.name}"></div>
         <div class="flex-1 min-w-0 space-y-1">
-          <!-- 上段: 名前・年齢・エリア ＋ 相性・pt -->
           <div class="flex items-center justify-between gap-1 min-w-0">
             <div class="flex items-center gap-1.5 min-w-0 truncate">
               <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
@@ -630,7 +633,6 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
             </div>
           </div>
 
-          <!-- 中段: 左側にタグ ＆ 右側にアクションボタングループ -->
           <div class="flex items-center justify-between gap-1 pt-0.5">
             <div class="flex items-center gap-1 flex-wrap min-w-0">
               ${catBadge}
@@ -648,7 +650,6 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
             </div>
           </div>
 
-          <!-- 下段: 逢瀬エピソードテキスト -->
           <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words pt-0.5 border-t border-slate-800/60">${actionText}</div>
         </div>
       </div>
@@ -841,7 +842,34 @@ function manualBreakup(partnerId, e) {
   updateLiveStats();
 }
 
-// 1年ごとマイルストーンモーダル描画
+// 決算時：スタイル選択変更に伴うリアルタイム再配分プレビュー
+function onMilestoneStyleChange() {
+  const styleSel = document.getElementById("milestoneStyleSelect");
+  if (!styleSel) return;
+  const newStyle = styleSel.value;
+  appState.user.selectedStyle = newStyle;
+
+  // 選択スタイルに応じて次期スペックを再計算
+  if (newStyle === "carnage") {
+    appState.stats.maxPartners = 4;
+    appState.stats.budget = Math.min(10, appState.stats.income);
+  } else if (newStyle === "pure") {
+    appState.stats.maxPartners = 1;
+    appState.stats.budget = 2;
+    if (appState.stats.stamina < 9) appState.stats.stamina++;
+  } else {
+    // balanced
+    appState.stats.maxPartners = 2;
+    appState.stats.budget = Math.max(2, appState.stats.income - 1);
+  }
+
+  const statRep = document.getElementById("milestoneStatReport");
+  if (statRep) {
+    statRep.innerText = `✨外見: ${appState.stats.looks} ｜ ⚡体力: ${appState.stats.stamina} ｜ 🔥性欲: ${appState.stats.libido} ｜ 💳今期活動費: Lv.${appState.stats.budget}`;
+  }
+}
+
+// 1年ごとマイルストーンモーダル描画（連打スキップ防止ガード付き）
 function renderYearlyMilestoneModal() {
   const mIdx = appState.sim.currentMonth;
   const currentAge = getRealAge(mIdx);
@@ -863,16 +891,10 @@ function renderYearlyMilestoneModal() {
   const scoreEl = document.getElementById("twoYearSummaryScore");
   if (scoreEl) scoreEl.innerText = `${appState.sim.globalMaxSexScore} pt`;
 
-  // 継続中パートナー
   renderActivePartnersListInMilestone();
 
-  // レポート
   const incEl = document.getElementById("milestoneIncomeReport");
   if (incEl) incEl.innerText = `年収: Lv.${appState.stats.income}`;
-  const statRep = document.getElementById("milestoneStatReport");
-  if (statRep) {
-    statRep.innerText = `✨外見: ${appState.stats.looks} ｜ ⚡体力: ${appState.stats.stamina} ｜ 🔥性欲: ${appState.stats.libido} ｜ 💳今期活動費: Lv.${appState.stats.budget}`;
-  }
   const alertEl = document.getElementById("modalAlertVal");
   if (alertEl) alertEl.innerText = `Lv.${appState.stats.spouseAlert}`;
 
@@ -880,6 +902,9 @@ function renderYearlyMilestoneModal() {
   if (styleSel) styleSel.value = appState.user.selectedStyle || "balanced";
   const agePrefSel = document.getElementById("milestoneAgePrefSelect");
   if (agePrefSel) agePrefSel.value = appState.stats.targetAgePref || "same";
+
+  // スタイルに応じた再配分レポートを描画
+  onMilestoneStyleChange();
 
   const btnCare = document.getElementById("btnFamilyCare");
   if (btnCare) {
@@ -896,6 +921,17 @@ function renderYearlyMilestoneModal() {
       btnCare.innerText = "ケア実行 (-1活動費)";
       btnCare.className = "px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95";
     }
+  }
+
+  // 【連打スキップ防止ガード】モーダル出現後0.6秒間は進行ボタンをロック
+  const btnResume = document.getElementById("btnResumeNextYear");
+  if (btnResume) {
+    btnResume.disabled = true;
+    btnResume.classList.add("opacity-50", "pointer-events-none");
+    setTimeout(() => {
+      btnResume.disabled = false;
+      btnResume.classList.remove("opacity-50", "pointer-events-none");
+    }, 600);
   }
 }
 
@@ -1013,6 +1049,7 @@ function calculateAndRenderResult() {
 
   document.getElementById("headerControls")?.classList.add("hidden");
 
+  // プレイヤー名拡大
   const resName = document.getElementById("resPlayerNameHeader");
   if (resName) resName.innerText = appState.user.name;
 
@@ -1032,16 +1069,14 @@ function calculateAndRenderResult() {
     totalDates += p.datesCount;
     totalSex += (p.chemistry === "S" ? p.datesCount * 2 : p.datesCount);
   });
-  const totalHours = totalDates * 3.5;
+  const totalHours = Math.round(totalDates * 3.5);
 
   const resTotalCount = document.getElementById("resTotalCount");
   if (resTotalCount) resTotalCount.innerText = `${totalPartners}人`;
   const resSexCount = document.getElementById("resSexCount");
   if (resSexCount) resSexCount.innerText = `${totalSex}回`;
   const resTotalHours = document.getElementById("resTotalHours");
-  if (resTotalHours) resTotalHours.innerText = `${Math.round(totalHours)}時間`;
-  const resFinalIncome = document.getElementById("resFinalIncome");
-  if (resFinalIncome) resFinalIncome.innerText = `Lv.${appState.stats.income}`;
+  if (resTotalHours) resTotalHours.innerText = `${totalHours}時間`;
 
   let hasOlder20 = appState.sim.metOlder20Plus;
   let hasYounger20 = appState.sim.metYounger20Plus;
@@ -1116,7 +1151,7 @@ function calculateAndRenderResult() {
   if (endingDesc) endingDesc.innerText = desc;
 
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-  const longestP = sortedByDuration[0] || { name: "なし", startAge: 50, endAge: 50, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null };
+  const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null };
   
   const isLongestActive = (longestP.endMonth === null || longestP.endMonth >= 60);
   longestP.lastLine = generateLastLineText(longestP, isTargetPartnerMale, isLongestActive);
@@ -1137,15 +1172,6 @@ function calculateAndRenderResult() {
   if (highName) highName.innerHTML = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${highestScoreP.tag} ｜ 相性 ${highestScoreP.chemistry}</span>`;
   const highDetail = document.getElementById("highestScoreDetail");
   if (highDetail) highDetail.innerText = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt`;
-
-  const resStatLooks = document.getElementById("resStatLooks");
-  if (resStatLooks) resStatLooks.innerText = "Lv." + appState.stats.looks;
-  const resStatStam = document.getElementById("resStatStamina");
-  if (resStatStam) resStatStam.innerText = "Lv." + appState.stats.stamina;
-  const resStatLib = document.getElementById("resStatLibido");
-  if (resStatLib) resStatLib.innerText = "Lv." + appState.stats.libido;
-  const resStatBud = document.getElementById("resStatBudget");
-  if (resStatBud) resStatBud.innerText = "Lv." + appState.stats.budget;
 
   let allHtml = "";
   appState.sim.partners.forEach((p, idx) => {

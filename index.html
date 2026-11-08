@@ -141,74 +141,82 @@
       </div>
     </section>
 
-    <!-- STEP 1-A: プレイヤー基本設定（名前・性別） -->
+    <!-- STEP 1-A: プレイヤー基本設定（名前・性別を横並び1行） -->
     <section id="step1a" class="hidden space-y-4 py-2">
       <div class="text-center space-y-1">
         <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-A</span>
-        <h2 class="text-lg font-bold text-white">あなたのお名前と性別</h2>
+        <h2 class="text-lg font-bold text-white">あなたの性別とお名前</h2>
         <p class="text-xs text-slate-400">東京首都圏で婚外を始めるあなたの基本情報</p>
       </div>
 
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3.5 shadow-xl">
-        <div class="space-y-1">
-          <label class="text-xs font-semibold text-slate-300">性別</label>
-          <select id="userGender" onchange="onGenderChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
-            <option value="male" selected>男性</option>
-            <option value="female">女性</option>
-          </select>
-        </div>
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="grid grid-cols-2 gap-3 items-center">
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">性別</label>
+            <select id="userGender" onchange="onGenderChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              <option value="male" selected>男性</option>
+              <option value="female">女性</option>
+            </select>
+          </div>
 
-        <div class="space-y-1">
-          <label class="text-xs font-semibold text-slate-300">あなたのお名前（5文字以内）</label>
-          <input type="text" id="userName" value="ユウスケ" maxlength="5" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
-          <p class="text-[10px] text-amber-300/80 leading-relaxed pt-0.5">
-            ※SNSシェア機能があるため本名での入力はお控えください（5文字まで）。
-          </p>
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">お名前（5文字以内）</label>
+            <input type="text" id="userName" value="ユウスケ" maxlength="5" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          </div>
         </div>
+        <p class="text-[10px] text-amber-300/80 leading-relaxed pt-2">
+          ※SNSシェア機能があるため本名での入力はお控えください（5文字まで）。
+        </p>
       </div>
 
       <button onclick="goToStep1B()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
-        <span>開始条件 ＆ 婚外スタイルの設定へ ›</span>
+        <span>婚外スタイルの決定へ ›</span>
       </button>
     </section>
 
     <!-- STEP 1-B: 開始条件 ＆ スタイル設定 -->
     <section id="step1b" class="hidden space-y-4 py-2">
-      <div class="text-center space-y-1">
+      <!-- ユーザー認識バー -->
+      <div class="bg-purple-950/50 border border-purple-500/40 rounded-xl px-4 py-2 flex items-center justify-between shadow-lg">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-purple-300 font-semibold">プレイヤー:</span>
+          <span id="step1bUserBadge" class="text-sm font-black text-white">ユウスケ（40歳スタート）</span>
+        </div>
+        <span class="text-[10px] text-purple-300/80">東京・都心の魔境</span>
+      </div>
+
+      <div class="text-center space-y-0.5">
         <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-B</span>
         <h2 class="text-base sm:text-lg font-bold text-white">婚外の開始条件とスタイル</h2>
-        <p class="text-xs text-slate-400">条件を選択すると、能力値・活動費が自動で最適配分されます</p>
       </div>
 
       <!-- 上段：開始年齢 と 狙いたい年齢層（横並び） -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 grid grid-cols-2 gap-3 shadow-xl">
         <div class="space-y-1">
           <label class="text-xs font-semibold text-slate-200">婚外を始める年齢</label>
-          <select id="userAge" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+          <select id="userAge" onchange="onStartAgeChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
             <option value="35">35歳</option>
             <option value="40" selected>40歳</option>
             <option value="45">45歳</option>
             <option value="50">50歳</option>
             <option value="55">55歳</option>
           </select>
-          <span class="text-[9px] text-slate-400 block pt-0.5">※1月生まれ（即加齢進行）</span>
         </div>
 
         <div class="space-y-1">
           <label class="text-xs font-semibold text-slate-200">狙いたい年齢層</label>
           <select id="targetAgePref" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-            <option value="younger">年下狙い (-20歳)</option>
-            <option value="same" selected>同年代 (±5歳)</option>
-            <option value="older">年上狙い (+20歳)</option>
+            <option value="same" selected>同年代</option>
+            <option value="older">年上</option>
+            <option value="younger">年下</option>
           </select>
-          <span class="text-[9px] text-slate-400 block pt-0.5">※±20歳差愛の実績あり</span>
         </div>
       </div>
 
       <!-- その下：婚外スタイル選択 -->
       <div class="space-y-1.5">
         <div class="text-[11px] font-bold text-purple-300">
-          <span>🎯 婚外スタイル選択（タップで自動配分完了）</span>
+          <span>🎯 婚外スタイル選択（タップで自動配分）</span>
         </div>
         <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
           <button type="button" onclick="applyStylePreset('pure')" id="presetBtnPure" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-90 scale-100">
@@ -247,7 +255,7 @@
         <span>この設定で5年の婚外へ旅立つ！ 🚀</span>
       </button>
       <div class="text-center">
-        <button onclick="backToStep1A()" class="text-[11px] text-slate-400 hover:text-white transition">‹ 名前・性別を変更する</button>
+        <button onclick="backToStep1A()" class="text-xs text-slate-400 hover:text-white transition">‹ 戻る</button>
       </div>
     </section>
 
@@ -408,50 +416,78 @@
     </section>
 
     <!-- STEP 3: 最終リザルト（5年完走） -->
-    <section id="step3" class="hidden space-y-5 py-3 pb-12">
-      <div class="text-center space-y-1 border-b border-purple-900/40 pb-3">
-        <div class="text-xs text-slate-400 font-medium">
-          <span id="resPlayerNameHeader" class="text-white font-bold text-sm">ユウスケ</span> さんの5年間
-        </div>
-        <div id="resAgeTrackHeader" class="text-sm sm:text-base font-bold text-purple-200 font-serif-jp tracking-wider">
+    <section id="step3" class="hidden space-y-4 py-3 pb-12">
+      <!-- ユーザー名拡大 ＆ 称号表示 -->
+      <div class="text-center space-y-1.5 border-b border-purple-900/40 pb-3">
+        <div id="resAgeTrackHeader" class="text-xs sm:text-sm font-bold text-purple-300 font-serif-jp tracking-wider">
           40歳から45歳へ――駆け抜けた逢瀬の軌跡
         </div>
-      </div>
-
-      <div class="text-center space-y-2">
-        <div class="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest bg-gradient-to-r from-purple-900 to-pink-900 border border-purple-500/50 text-purple-200">
-          婚外称号
-        </div>
-        <h2 id="resTitleBadge" class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 drop-shadow-[0_0_12px_rgba(244,63,94,0.4)]">
-          『奇跡の純白伴侶』
-        </h2>
-        <div id="resAchieveBadgeList" class="flex flex-wrap items-center justify-center gap-1.5 pt-1"></div>
-        <p id="resEndingDesc" class="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed pt-1"></p>
-      </div>
-
-      <!-- 4項目主要スタッツ（累計交際人数・回数・時間・年収） -->
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 grid grid-cols-2 gap-3 text-center">
-        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
-          <div class="text-[10px] text-slate-400">累計交際人数</div>
-          <div id="resTotalCount" class="text-xl font-black text-pink-400">8人</div>
-        </div>
-        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
-          <div class="text-[10px] text-slate-400">肌を重ねた回数</div>
-          <div id="resSexCount" class="text-xl font-black text-rose-400">142回</div>
-        </div>
-        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
-          <div class="text-[10px] text-slate-400">密会・正味時間</div>
-          <div id="resTotalHours" class="text-xl font-black text-cyan-400">680時間</div>
-          <div class="text-[9px] text-slate-500">（約28.3日分）</div>
-        </div>
-        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
-          <div class="text-[10px] text-slate-400">最終本業年収</div>
-          <div id="resFinalIncome" class="text-xl font-black text-emerald-400">Lv.6</div>
-          <div class="text-[9px] text-slate-500">（家庭と仕事の両立）</div>
+        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-wide">
+          <span id="resPlayerNameHeader">ユウスケ</span> <span class="text-sm sm:text-base font-normal text-slate-300">さんの5年間</span>
+        </h1>
+        <div class="pt-1">
+          <div class="text-xs text-amber-300 font-semibold tracking-wider">
+            称号：<span id="resTitleBadge" class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 drop-shadow-[0_0_12px_rgba(244,63,94,0.4)]">『首都圏の彷徨い人』</span>
+          </div>
+          <div id="resAchieveBadgeList" class="flex flex-wrap items-center justify-center gap-1.5 pt-1.5"></div>
+          <p id="resEndingDesc" class="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed pt-1"></p>
         </div>
       </div>
 
-      <!-- 5年アチーブメント（主要スタッツの下に配置） -->
+      <!-- 主要記録（3項目横並び1行・年収削除） -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 grid grid-cols-3 gap-2 text-center shadow-lg">
+        <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/60">
+          <div class="text-[9.5px] text-slate-400">累計交際人数</div>
+          <div id="resTotalCount" class="text-lg sm:text-xl font-black text-pink-400 mt-0.5">8人</div>
+        </div>
+        <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/60">
+          <div class="text-[9.5px] text-slate-400">肌を重ねた回数</div>
+          <div id="resSexCount" class="text-lg sm:text-xl font-black text-rose-400 mt-0.5">142回</div>
+        </div>
+        <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/60">
+          <div class="text-[9.5px] text-slate-400">密会時間</div>
+          <div id="resTotalHours" class="text-lg sm:text-xl font-black text-cyan-400 mt-0.5">403時間</div>
+        </div>
+      </div>
+
+      <!-- 5-Year Epilogue（パートナー記憶カードの上に配置） -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2 font-serif-jp text-xs leading-relaxed text-slate-300">
+        <div class="text-[10px] font-sans font-bold text-purple-400 uppercase tracking-widest">5-Year Epilogue</div>
+        <div id="epilogueText" class="space-y-2"></div>
+      </div>
+
+      <!-- パートナー記憶カード -->
+      <div class="space-y-3">
+        <div class="bg-gradient-to-b from-purple-950/40 to-slate-900/90 border border-purple-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="longestPartnerImg"></div>
+            <div class="flex-1 min-w-0 space-y-0.5">
+              <span class="text-[10px] tracking-wider text-pink-400 font-bold uppercase block">👑 最長交際パートナーの記憶</span>
+              <h3 id="longestPartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">エリコ (46歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
+              <div id="longestPartnerPeriod" class="text-xs text-purple-300 pt-0.5">交際60ヶ月（5年間完走）</div>
+            </div>
+          </div>
+          <div class="p-2 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-200 text-xs leading-relaxed italic" id="longestPartnerLineText">
+            「生まれ変わったら一番に見つけてね……本当に幸せだったよ。」
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-b from-rose-950/30 to-slate-900/90 border border-rose-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="highestScorePartnerImg"></div>
+            <div class="flex-1 min-w-0 space-y-0.5">
+              <span class="text-[10px] tracking-wider text-amber-400 font-bold uppercase block">🔥 歴代最高密会スコアの記憶</span>
+              <h3 id="highestScorePartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">サオリ (32歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
+              <div id="highestScoreDetail" class="text-xs text-amber-300 pt-0.5">最高スコア: 154 pt (限界突破)</div>
+            </div>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-300 text-xs leading-relaxed" id="highestScoreMemories">
+            「ホテルのシーツを掴んだまま息が止まりそうになったあの夜は、一生忘れられない。」
+          </div>
+        </div>
+      </div>
+
+      <!-- 5年アチーブメント（最高密会度パートナーの下に配置） -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
         <div class="text-[11px] font-bold text-amber-300 flex items-center justify-between">
           <span>🏆 5年アチーブメント（やり込み実績）</span>
@@ -491,43 +527,6 @@
         </div>
       </div>
 
-      <!-- 5-Year Epilogue（パートナー記憶カードの上に移動） -->
-      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2 font-serif-jp text-xs leading-relaxed text-slate-300">
-        <div class="text-[10px] font-sans font-bold text-purple-400 uppercase tracking-widest">5-Year Epilogue</div>
-        <div id="epilogueText" class="space-y-2"></div>
-      </div>
-
-      <!-- パートナー記憶カード（エピローグの下に配置） -->
-      <div class="space-y-3">
-        <div class="bg-gradient-to-b from-purple-950/40 to-slate-900/90 border border-purple-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
-          <div class="flex items-center gap-3">
-            <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="longestPartnerImg"></div>
-            <div class="flex-1 min-w-0 space-y-0.5">
-              <span class="text-[10px] tracking-wider text-pink-400 font-bold uppercase block">👑 最長交際パートナーの記憶</span>
-              <h3 id="longestPartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">エリコ (46歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
-              <div id="longestPartnerPeriod" class="text-xs text-purple-300 pt-0.5">交際60ヶ月（5年間完走）</div>
-            </div>
-          </div>
-          <div class="p-2 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-200 text-xs leading-relaxed italic" id="longestPartnerLineText">
-            「生まれ変わったら一番に見つけてね……本当に幸せだったよ。」
-          </div>
-        </div>
-
-        <div class="bg-gradient-to-b from-rose-950/30 to-slate-900/90 border border-rose-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
-          <div class="flex items-center gap-3">
-            <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="highestScorePartnerImg"></div>
-            <div class="flex-1 min-w-0 space-y-0.5">
-              <span class="text-[10px] tracking-wider text-amber-400 font-bold uppercase block">🔥 歴代最高密会スコアの記憶</span>
-              <h3 id="highestScorePartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">サオリ (32歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
-              <div id="highestScoreDetail" class="text-xs text-amber-300 pt-0.5">最高スコア: 154 pt (限界突破)</div>
-            </div>
-          </div>
-          <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-300 text-xs leading-relaxed" id="highestScoreMemories">
-            「ホテルのシーツを掴んだまま息が止まりそうになったあの夜は、一生忘れられない。」
-          </div>
-        </div>
-      </div>
-
       <!-- 全交際履歴アコーディオン -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div id="allHistoryWrapper" class="hidden space-y-2">
@@ -556,7 +555,7 @@
     </section>
   </main>
 
-  <!-- 年次マイルストーンモーダル（1年ごと決算 ＆ 方針再選択） -->
+  <!-- 年次マイルストーンモーダル（1年ごと決算 ＆ スタイル変更で動的再計算） -->
   <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3.5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
       <div class="text-center space-y-0.5">
@@ -587,6 +586,30 @@
         <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs max-h-28 overflow-y-auto"></div>
       </div>
 
+      <!-- 次期の婚外方針再設定（スタイル変更で下の再配分が動的再計算される） -->
+      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
+        <div class="font-bold text-purple-300">🎯 次期の婚外方針を見直す</div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <span class="text-[10px] text-slate-400 block mb-1">婚外スタイル</span>
+            <select id="milestoneStyleSelect" onchange="onMilestoneStyleChange()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+              <option value="pure">💍 純愛継続型 (1人)</option>
+              <option value="balanced" selected>🍷 分散余裕型 (2人)</option>
+              <option value="carnage">⚔️ 修羅乱舞型 (4人)</option>
+            </select>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 block mb-1">狙う年齢層</span>
+            <select id="milestoneAgePrefSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+              <option value="same" selected>同年代</option>
+              <option value="older">年上</option>
+              <option value="younger">年下</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 加齢減衰と自動再投資結果（スタイル選択に応じて動的に変化） -->
       <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5 text-xs">
         <div class="flex justify-between items-center">
           <span class="font-bold text-slate-300">📉 加齢減衰と自己投資結果</span>
@@ -597,6 +620,7 @@
         </div>
       </div>
 
+      <!-- 家庭ケア -->
       <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-3 flex justify-between items-center text-xs">
         <div>
           <div class="font-bold text-emerald-300">🏡 家庭ケア（警戒度 -2Lv）</div>
@@ -607,30 +631,9 @@
         </button>
       </div>
 
-      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
-        <div class="font-bold text-purple-300">🎯 次期の婚外方針を見直す</div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <span class="text-[10px] text-slate-400 block mb-1">婚外スタイル</span>
-            <select id="milestoneStyleSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
-              <option value="pure">💍 純愛継続型 (1人)</option>
-              <option value="balanced" selected>🍷 分散余裕型 (2人)</option>
-              <option value="carnage">⚔️ 修羅乱舞型 (4人)</option>
-            </select>
-          </div>
-          <div>
-            <span class="text-[10px] text-slate-400 block mb-1">狙う年齢層</span>
-            <select id="milestoneAgePrefSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
-              <option value="younger">年下狙い (-20歳)</option>
-              <option value="same" selected>同年代 (±5歳)</option>
-              <option value="older">年上狙い (+20歳)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
+      <!-- 進行ボタン（タップ誤爆防止ディレイ組み込み） -->
       <div class="space-y-2 pt-1 border-t border-slate-800">
-        <button onclick="resumeNextYear()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+        <button id="btnResumeNextYear" onclick="resumeNextYear()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
           <span>この方針で次の1年を進める ›</span>
         </button>
         <button onclick="retireFromTwoYear()" class="w-full py-2 rounded-xl text-xs font-bold text-rose-300 hover:text-white border border-rose-800/80 bg-rose-950/30 transition active:scale-95">

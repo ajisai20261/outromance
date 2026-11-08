@@ -1,6 +1,44 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（軽量スリム版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（完全版）
    ============================================================ */
+
+/* --- AvatarCacheManager ブリッジ（avatars.js の実データを直接バインド） --- */
+window.AvatarCacheManager = window.AvatarCacheManager || {
+  get: function(id) {
+    if (!id) return "";
+    if (id.startsWith("F") && window.FEMALE_AVATARS_DATA) {
+      return window.FEMALE_AVATARS_DATA[id] || "";
+    }
+    if (id.startsWith("M") && window.MALE_AVATARS_DATA) {
+      return window.MALE_AVATARS_DATA[id] || "";
+    }
+    return "";
+  },
+  getMeta: function(id) {
+    if (window.AVATARS_METADATA && window.AVATARS_METADATA[id]) {
+      return window.AVATARS_METADATA[id];
+    }
+    return { name: id, label: "", cat: "", quote: "「はじめまして。落ち着いた大人の関係になれたら嬉しいです。」" };
+  }
+};
+
+// アバター画像安全取得（未取得時のフォールバック保護）
+function getSafeAvatarSrc(avatarId, name, color) {
+  try {
+    if (typeof AvatarCacheManager !== "undefined" && AvatarCacheManager.get) {
+      let src = AvatarCacheManager.get(avatarId);
+      if (!src && avatarId) {
+        const altId = avatarId.replace(/0(?=\d)/, '');
+        src = AvatarCacheManager.get(altId);
+      }
+      if (src && src.length > 20) return src;
+    }
+  } catch(e) {}
+  
+  const char = (name && name.length > 0) ? name[0] : "♥";
+  const bg = color || "#8b5cf6";
+  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="${encodeURIComponent(bg)}"/><text x="24" y="31" font-size="22" font-weight="bold" fill="%23ffffff" text-anchor="middle" font-family="sans-serif">${encodeURIComponent(char)}</text></svg>`;
+}
 
 var isSoundOn = false;
 var audioCtx = null;
@@ -311,13 +349,9 @@ function updateLiveStats() {
   const maxP = appState.stats.maxPartners || 2;
   const activeCount = appState.sim.activePartnerIds.length;
   const activeCountEl = document.getElementById("simActiveCount");
-  if (activeCountEl) {
-    activeCountEl.innerText = `${activeCount}/${maxP}人`;
-  }
+  if (activeCountEl) activeCountEl.innerText = `${activeCount}/${maxP}人`;
   const totalCountEl = document.getElementById("simTotalPartners");
-  if (totalCountEl) {
-    totalCountEl.innerText = `${appState.sim.partners.length}人`;
-  }
+  if (totalCountEl) totalCountEl.innerText = `${appState.sim.partners.length}人`;
 
   const btnBoost = document.getElementById("btnBoostMatching");
   if (btnBoost) {
@@ -388,7 +422,7 @@ function showBoostToast(matchedList) {
   if (container) {
     let avatarsHtml = "";
     matchedList.forEach(p => {
-      const avatarSrc = AvatarCacheManager.get(p.avatarId);
+      const avatarSrc = getSafeAvatarSrc(p.avatarId, p.name, p.color);
       avatarsHtml += `
         <div class="flex flex-col items-center space-y-1">
           <div class="avatar-frame ring-2 ring-amber-400 shadow-md">
@@ -519,7 +553,7 @@ function updateMatrixDot(mIdx) {
 function showNewPartnerToast(p, isDouble = false) {
   const toast = document.getElementById("newPartnerToast");
   if (!toast) return;
-  document.getElementById("toastPartnerImg").src = AvatarCacheManager.get(p.avatarId);
+  document.getElementById("toastPartnerImg").src = getSafeAvatarSrc(p.avatarId, p.name, p.color);
   document.getElementById("toastPartnerName").innerText = `${p.name} (${p.startAge}歳)`;
   document.getElementById("toastPartnerAreaJob").innerText = `${p.area} ｜ ${p.job}`;
   document.getElementById("toastPartnerChem").innerText = `相性 ${p.chemistry}`;
@@ -532,7 +566,9 @@ function showNewPartnerToast(p, isDouble = false) {
   else if (p.category === "youth") badges += ' <span class="px-1.5 py-0.2 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 font-bold">若手</span>';
   badgeEl.innerHTML = badges;
 
-  document.getElementById("toastPartnerQuote").innerText = p.quote || "「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」";
+  const meta = (typeof AvatarCacheManager !== "undefined") ? AvatarCacheManager.getMeta(p.avatarId) : { quote: "" };
+  document.getElementById("toastPartnerQuote").innerText = meta.quote || p.quote || "「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」";
+
   toast.classList.remove("hidden");
   setTimeout(() => { toast.classList.remove("scale-95", "opacity-0"); toast.classList.add("scale-100", "opacity-100"); }, 10);
   setTimeout(() => {
@@ -545,7 +581,7 @@ function showNewPartnerToast(p, isDouble = false) {
 function showBreakupPartnerToast(p, isUserMale, isManual = false, isTroubled = false) {
   const toast = document.getElementById("breakupPartnerToast");
   if (!toast) return;
-  document.getElementById("toastBreakupImg").src = AvatarCacheManager.get(p.avatarId);
+  document.getElementById("toastBreakupImg").src = getSafeAvatarSrc(p.avatarId, p.name, p.color);
   document.getElementById("toastBreakupName").innerText = `${p.name} (${p.age}歳)`;
   document.getElementById("toastBreakupPeriod").innerText = `${p.durationMonths}ヶ月で関係解消`;
 
@@ -600,9 +636,7 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
       alertBadge.innerText = "🚨 離婚危機";
       alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500 font-black animate-ping";
     }
-    if (largeBadge) {
-      largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/80 border border-rose-500 animate-pulse flex-shrink-0";
-    }
+    if (largeBadge) largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/80 border border-rose-500 animate-pulse flex-shrink-0";
     if (largeVal) largeVal.className = "text-[10.5px] font-black text-rose-300";
     if (sitEl) sitEl.innerText = "家庭内は完全な臨戦態勢。スマホの着信音ひとつで怒号が飛ぶ。";
   } else if (isCrisis || alertLv === 4) {
@@ -619,9 +653,7 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
       alertBadge.innerText = "⚠️ 身バレ危機";
       alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700 animate-pulse";
     }
-    if (largeBadge) {
-      largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/60 border border-rose-600 flex-shrink-0";
-    }
+    if (largeBadge) largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/60 border border-rose-600 flex-shrink-0";
     if (largeVal) largeVal.className = "text-[10.5px] font-black text-rose-400";
     const spouseEvents = [
       "休日の夕方、スマホの通知を凝視され冷や汗が流れた。",
@@ -635,9 +667,7 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
       alertBadge.innerText = (activeCount > 2) ? "多忙密会" : "平穏";
       alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40";
     }
-    if (largeBadge) {
-      largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 flex-shrink-0";
-    }
+    if (largeBadge) largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 flex-shrink-0";
     if (largeVal) largeVal.className = "text-[10.5px] font-black text-amber-400";
     if (sitEl && sitEl.innerText.indexOf("家族サービス") === -1) {
       sitEl.innerText = "平穏な週末。特に怪しまれる様子はない。";
@@ -725,12 +755,7 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
 
       monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score, tag: p.tag });
       
-      let avatarSrc = "";
-      try {
-        if (typeof AvatarCacheManager !== "undefined" && AvatarCacheManager.get) {
-          avatarSrc = AvatarCacheManager.get(p.avatarId);
-        }
-      } catch(e) {}
+      const avatarSrc = getSafeAvatarSrc(p.avatarId, p.name, p.color);
 
       html += `
         <div class="p-2 sm:p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs shadow-md">
@@ -845,7 +870,7 @@ function showClickMonthDetail(mIdx) {
   } else {
     let txt = "";
     history.partners.forEach(p => {
-      const avatarSrc = AvatarCacheManager.get(p.avatarId);
+      const avatarSrc = getSafeAvatarSrc(p.avatarId, p.name, p.color);
       txt += `
         <div class="flex items-center gap-2 border-b border-purple-900/50 pb-1.5">
           <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
@@ -977,7 +1002,7 @@ function renderActivePartnersListInMilestone() {
   } else {
     let h = "";
     active.forEach(p => {
-      const avatarSrc = AvatarCacheManager.get(p.avatarId);
+      const avatarSrc = getSafeAvatarSrc(p.avatarId, p.name, p.color);
       h += `
         <div class="flex items-center justify-between p-1 rounded-lg bg-slate-900 border border-slate-800 gap-2">
           <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -1067,7 +1092,7 @@ function renderAllPartnersList(sortType = "duration") {
 
   let allHtml = "";
   sorted.forEach((p, idx) => {
-    const avatarSrc = AvatarCacheManager.get(p.avatarId);
+    const avatarSrc = getSafeAvatarSrc(p.avatarId, p.name, p.color);
     allHtml += `
       <div class="p-2.5 rounded bg-slate-950/50 border border-slate-850 flex justify-between items-center text-xs">
         <div class="flex items-center gap-2">
@@ -1212,7 +1237,7 @@ function calculateAndRenderResult() {
     : "「今までありがとう。日常に戻るね。」";
 
   const longImg = document.getElementById("longestPartnerImg");
-  if (longImg) longImg.src = AvatarCacheManager.get(longestP.avatarId);
+  if (longImg) longImg.src = getSafeAvatarSrc(longestP.avatarId, longestP.name, longestP.color);
   const longName = document.getElementById("longestPartnerNameAge");
   if (longName) longName.innerHTML = `${longestP.name} (${longestP.endAge || longestP.startAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${longestP.tag} ｜ 相性 ${longestP.chemistry}</span>`;
   const longPeriod = document.getElementById("longestPartnerPeriod");
@@ -1222,7 +1247,7 @@ function calculateAndRenderResult() {
 
   const highestScoreP = appState.sim.highestScorePartner || longestP;
   const highImg = document.getElementById("highestScorePartnerImg");
-  if (highImg) highImg.src = AvatarCacheManager.get(highestScoreP.avatarId);
+  if (highImg) highImg.src = getSafeAvatarSrc(highestScoreP.avatarId, highestScoreP.name, highestScoreP.color);
   const highName = document.getElementById("highestScorePartnerNameAge");
   if (highName) highName.innerHTML = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${highestScoreP.tag} ｜ 相性 ${highestScoreP.chemistry}</span>`;
   const highDetail = document.getElementById("highestScoreDetail");

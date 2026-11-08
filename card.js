@@ -1,5 +1,5 @@
 /* ============================================================
-   card.js - OUTROMANCE 成績表カード生成 ＆ SNS連携（5年制）
+   card.js - OUTROMANCE 成績表カード生成 ＆ SNS連携（最新3項目対応）
    ============================================================ */
 
 async function generateSquareCard() {
@@ -10,6 +10,7 @@ async function generateSquareCard() {
   if (!cvs) return;
   const ctx = cvs.getContext("2d");
 
+  // 背景グラデーション
   const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1080);
   bgGrad.addColorStop(0, "#07080d");
   bgGrad.addColorStop(0.5, "#121422");
@@ -17,10 +18,12 @@ async function generateSquareCard() {
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, 1080, 1080);
 
+  // 外枠
   ctx.strokeStyle = "rgba(157, 78, 221, 0.4)";
   ctx.lineWidth = 4;
   ctx.strokeRect(36, 36, 1008, 1008);
 
+  // ヘッダー情報
   ctx.fillStyle = "#64748b";
   ctx.font = "bold 16px 'Cinzel', serif";
   ctx.textAlign = "right";
@@ -47,59 +50,71 @@ async function generateSquareCard() {
   ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
   ctx.fillText("歴史〜", 72 + preW + uraW, 182);
 
+  // 称号表示
   const titleEl = document.getElementById("resTitleBadge");
   const title = titleEl ? titleEl.innerText : "『首都圏の彷徨い人』";
   ctx.fillStyle = "#fef08a";
-  ctx.font = "900 50px 'Noto Sans JP', sans-serif";
+  ctx.font = "900 48px 'Noto Sans JP', sans-serif";
   ctx.fillText(title, 72, 260);
 
+  // プレイヤー情報
   ctx.fillStyle = "#cbd5e1";
   ctx.font = "20px 'Noto Sans JP', sans-serif";
   const finalAge = typeof getRealAge === "function" ? getRealAge(appState.sim.currentMonth) : appState.sim.currentAge;
   const familyStatusStr = appState.sim.isDivorced ? "家庭崩壊・離婚" : "配偶者と同居中";
   ctx.fillText(`${appState.user.name}（${appState.user.startAge}歳→${finalAge}歳 / 東京） ${familyStatusStr}`, 72, 304);
 
+  // 主要記録（年収を削除し、横3枠で綺麗に配置）
   const totalCountStr = document.getElementById("resTotalCount")?.innerText || `${appState.sim.partners.length}人`;
   const sexCountStr = document.getElementById("resSexCount")?.innerText || "0回";
   const totalHoursStr = document.getElementById("resTotalHours")?.innerText || "0時間";
-  const finalIncomeStr = document.getElementById("resFinalIncome")?.innerText || `Lv.${appState.stats.income}`;
 
   const stats = [
     { label: "累計交際人数", val: totalCountStr, col: "#f472b6" },
     { label: "肌を重ねた回数", val: sexCountStr, col: "#fb7185" },
-    { label: "密会・正味時間", val: totalHoursStr, col: "#38bdf8" },
-    { label: "最終本業年収", val: finalIncomeStr, col: "#4ade80" }
+    { label: "密会時間", val: totalHoursStr, col: "#38bdf8" }
   ];
 
+  const cardW = 296;
+  const cardGap = 24;
   stats.forEach((s, i) => {
-    const x = 72 + (i % 2) * 480;
-    const y = 345 + Math.floor(i / 2) * 125;
+    const x = 72 + i * (cardW + cardGap);
+    const y = 350;
     ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
-    ctx.fillRect(x, y, 440, 105);
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    ctx.fillRect(x, y, cardW, 110);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
     ctx.lineWidth = 2;
-    ctx.strokeRect(x, y, 440, 105);
+    ctx.strokeRect(x, y, cardW, 110);
 
     ctx.fillStyle = "#94a3b8";
     ctx.font = "16px 'Noto Sans JP', sans-serif";
-    ctx.fillText(s.label, x + 24, y + 34);
+    ctx.fillText(s.label, x + 20, y + 36);
 
     ctx.fillStyle = s.col;
     ctx.font = "900 38px 'Noto Sans JP', sans-serif";
-    ctx.fillText(s.val, x + 24, y + 84);
+    ctx.fillText(s.val, x + 20, y + 86);
+  });
+
+  // アチーブメントバッジ群（5枠横並び）
+  let hasOlder20 = appState.sim.metOlder20Plus;
+  let hasYounger20 = appState.sim.metYounger20Plus;
+  appState.sim.partners.forEach(p => {
+    const pAge = typeof getRealAge === "function" ? getRealAge(p.startMonth) : appState.user.startAge;
+    if (p.startAge - pAge >= 20) hasOlder20 = true;
+    if (p.startAge - pAge <= -20) hasYounger20 = true;
   });
 
   const achs = [
     { name: "100人斬り", ok: appState.sim.partners.length >= 100 },
     { name: "五年の絆", ok: appState.sim.partners.some(p => p.durationMonths >= 60) },
     { name: "密会150pt", ok: appState.sim.globalMaxSexScore >= 150 },
-    { name: "+20歳年上", ok: appState.sim.metOlder20Plus },
-    { name: "-20歳年下", ok: appState.sim.metYounger20Plus }
+    { name: "+20歳年上", ok: hasOlder20 },
+    { name: "-20歳年下", ok: hasYounger20 }
   ];
 
   achs.forEach((a, i) => {
     const ax = 72 + i * 190;
-    const ay = 600;
+    const ay = 585;
     ctx.fillStyle = a.ok ? "rgba(245, 158, 11, 0.15)" : "rgba(30, 41, 59, 0.4)";
     ctx.fillRect(ax, ay, 175, 45);
     ctx.strokeStyle = a.ok ? "#f59e0b" : "rgba(255, 255, 255, 0.1)";
@@ -111,54 +126,58 @@ async function generateSquareCard() {
     ctx.fillText((a.ok ? "★ " : "☆ ") + a.name, ax + 14, ay + 28);
   });
 
+  // パートナー枠（最長交際 ＆ 最高密会度）
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
   const longestP = sortedByDuration[0] || { name: "なし", durationMonths: 0, area: "東京", avatarId: "F01", tag: "平日昼", endMonth: null };
   const highestScoreP = appState.sim.highestScorePartner || longestP;
 
   ctx.imageSmoothingEnabled = false;
 
+  // 最長交際
   ctx.fillStyle = "rgba(24, 18, 43, 0.85)";
-  ctx.fillRect(72, 670, 440, 240);
+  ctx.fillRect(72, 660, 440, 245);
   ctx.strokeStyle = "rgba(168, 85, 247, 0.45)";
-  ctx.strokeRect(72, 670, 440, 240);
+  ctx.strokeRect(72, 660, 440, 245);
 
   const longestImg = new Image();
   longestImg.src = AvatarCacheManager.get(longestP.avatarId);
-  ctx.drawImage(longestImg, 92, 692, 56, 56);
+  ctx.drawImage(longestImg, 92, 682, 56, 56);
 
   ctx.fillStyle = "#f472b6";
   ctx.font = "bold 15px 'Noto Sans JP', sans-serif";
-  ctx.fillText(`👑 最長交際パートナー 🏷️${longestP.tag}`, 160, 712);
+  ctx.fillText(`👑 最長交際パートナー 🏷️${longestP.tag}`, 160, 702);
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
-  ctx.fillText(`${longestP.name} (${longestP.durationMonths}ヶ月)`, 160, 742);
+  ctx.fillText(`${longestP.name} (${longestP.durationMonths}ヶ月)`, 160, 732);
 
   ctx.fillStyle = "#a7f3d0";
   ctx.font = "italic 15px 'Noto Sans JP', sans-serif";
-  wrapCanvasText(ctx, longestP.lastLine || "「……」", 92, 786, 400, 23);
+  wrapCanvasText(ctx, longestP.lastLine || "「……」", 92, 776, 400, 23);
 
+  // 最高スコア
   ctx.fillStyle = "rgba(30, 18, 25, 0.85)";
-  ctx.fillRect(532, 670, 476, 240);
+  ctx.fillRect(532, 660, 476, 245);
   ctx.strokeStyle = "rgba(244, 63, 94, 0.45)";
-  ctx.strokeRect(532, 670, 476, 240);
+  ctx.strokeRect(532, 660, 476, 245);
 
   const highestImg = new Image();
   highestImg.src = AvatarCacheManager.get(highestScoreP.avatarId);
-  ctx.drawImage(highestImg, 552, 692, 56, 56);
+  ctx.drawImage(highestImg, 552, 682, 56, 56);
 
   ctx.fillStyle = "#fbbf24";
   ctx.font = "bold 15px 'Noto Sans JP', sans-serif";
-  ctx.fillText(`🔥 歴代最高密会スコア 🏷️${highestScoreP.tag}`, 620, 712);
+  ctx.fillText(`🔥 歴代最高密会スコア 🏷️${highestScoreP.tag}`, 620, 702);
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
-  ctx.fillText(`${highestScoreP.name} (${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt)`, 620, 742);
+  ctx.fillText(`${highestScoreP.name} (${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt)`, 620, 732);
 
   ctx.fillStyle = "#cbd5e1";
   ctx.font = "italic 15px 'Noto Sans JP', sans-serif";
-  wrapCanvasText(ctx, "「ホテルのシーツを掴んだまま息が止まりそうになったあの夜は、一生忘れられない。」", 552, 786, 436, 23);
+  wrapCanvasText(ctx, "「ホテルのシーツを掴んだまま息が止まりそうになったあの夜は、一生忘れられない。」", 552, 776, 436, 23);
 
+  // フッター
   ctx.fillStyle = "#64748b";
   ctx.font = "15px 'Noto Sans JP', sans-serif";
   ctx.fillText("OUTROMANCE : 婚外5年シミュレーター 〜既婚者たちの裏歴史〜", 72, 980);

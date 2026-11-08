@@ -308,25 +308,108 @@ function updateLiveStats() {
   if (alertEl) alertEl.innerText = `Lv.${appState.stats.spouseAlert}/5`;
 
   const maxP = appState.stats.maxPartners || 2;
+  const activeCount = appState.sim.activePartnerIds.length;
   const activeCountEl = document.getElementById("simActiveCount");
   if (activeCountEl) {
-    activeCountEl.innerText = `${appState.sim.activePartnerIds.length}/${maxP}人`;
+    activeCountEl.innerText = `${activeCount}/${maxP}人`;
   }
   const totalCountEl = document.getElementById("simTotalPartners");
   if (totalCountEl) {
     totalCountEl.innerText = `${appState.sim.partners.length}人`;
   }
 
+  // 🆙ブーストボタンの状態制御（活動費2以上 ＆ 空き枠あり<4 で活性化）
+  const btnBoost = document.getElementById("btnBoostMatching");
+  if (btnBoost) {
+    const canBoost = (appState.stats.budget >= 2 && activeCount < 4);
+    btnBoost.disabled = !canBoost;
+    if (!canBoost) {
+      btnBoost.className = "px-2.5 py-0.5 rounded-full font-bold text-[10.5px] bg-slate-900 border border-slate-800 text-slate-600 cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none";
+    } else {
+      btnBoost.className = "px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 cursor-pointer";
+    }
+  }
+
+  // 🏡家庭ケアボタンの状態制御（活動費2以上 ＆ 警戒度2以上で活性化）
   const btnCare = document.getElementById("btnLiveFamilyCare");
   if (btnCare) {
     const canCare = (appState.stats.budget >= 2 && appState.stats.spouseAlert > 1);
     btnCare.disabled = !canCare;
     if (!canCare) {
-      btnCare.className = "px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-600 font-bold text-[10px] cursor-not-allowed opacity-50 flex items-center gap-1";
+      btnCare.className = "px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-600 font-bold text-[10px] cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none";
     } else {
       btnCare.className = "px-2 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 text-emerald-300 font-bold text-[10px] transition active:scale-95 flex items-center gap-1 cursor-pointer";
     }
   }
+}
+
+// 🆙ブースト機能：活動費2消費で空き枠（最大4人まで）を一挙に全席マッチング
+function triggerBoostMatching(e) {
+  if (e) e.stopPropagation();
+  if (appState.stats.budget < 2) return;
+  if (appState.sim.activePartnerIds.length >= 4) return;
+
+  initAudio();
+  triggerVibrate([50, 60, 50, 60, 80]);
+  appState.stats.budget = Math.max(0, appState.stats.budget - 2);
+
+  const emptySlots = 4 - appState.sim.activePartnerIds.length;
+  const currentRealAge = getRealAge(appState.sim.currentMonth);
+  const matchedList = [];
+
+  for (let i = 0; i < emptySlots; i++) {
+    const newP = createSynthesizedPartner(appState.sim.currentMonth, currentRealAge);
+    appState.sim.partners.push(newP);
+    appState.sim.activePartnerIds.push(newP.id);
+    appState.sim.totalPartnerCounter++;
+    matchedList.push(newP);
+
+    if (newP.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
+    if (newP.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
+  }
+
+  playLimitBreakChime();
+  showBoostToast(matchedList);
+
+  updateLiveStats();
+  const calMonth = (appState.sim.currentMonth % 12) + 1;
+  renderRealtimeMonthlyLog(appState.sim.currentMonth, calMonth);
+  updateMatrixDot(appState.sim.currentMonth);
+}
+
+// ブースト一括マッチングトースト表示
+function showBoostToast(matchedList) {
+  const toast = document.getElementById("boostToast");
+  if (!toast) return;
+
+  const countEl = document.getElementById("boostToastCount");
+  if (countEl) countEl.innerText = `${matchedList.length}人マッチング成立！`;
+
+  const container = document.getElementById("boostAvatarsContainer");
+  if (container) {
+    let avatarsHtml = "";
+    matchedList.forEach(p => {
+      const avatarSrc = AvatarCacheManager.get(p.avatarId);
+      avatarsHtml += `
+        <div class="flex flex-col items-center space-y-1">
+          <div class="avatar-frame ring-2 ring-amber-400 shadow-md">
+            <img src="${avatarSrc}" alt="${p.name}">
+          </div>
+          <span class="text-[9.5px] font-bold text-white truncate max-w-[56px] text-center">${p.name}</span>
+          <span class="px-1 py-0.2 rounded text-[8.5px] font-black bg-pink-950 border border-pink-500 text-pink-200">相性${p.chemistry}</span>
+        </div>
+      `;
+    });
+    container.innerHTML = avatarsHtml;
+  }
+
+  toast.classList.remove("hidden");
+  setTimeout(() => { toast.classList.remove("scale-95", "opacity-0"); toast.classList.add("scale-100", "opacity-100"); }, 10);
+  setTimeout(() => {
+    toast.classList.remove("scale-100", "opacity-100");
+    toast.classList.add("scale-95", "opacity-0");
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 3800);
 }
 
 // 進行画面での家庭ケア（活動費 -2消費：警戒度 -2Lv）
@@ -570,6 +653,7 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
   }
 }
 
+// パートナー枠の描画（立体的なボタンUIに刷新）
 function renderRealtimeMonthlyLog(mIdx, calMonth) {
   const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
   
@@ -617,9 +701,17 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
   const usedTexts = new Set();
   const monthLogRecord = [];
   const hasBudget = (appState.stats.budget > 0);
-  const budgetBtnClass = hasBudget
-    ? "bg-slate-800 hover:bg-purple-900/80 border-slate-700 hover:border-purple-500 text-purple-200 cursor-pointer"
-    : "bg-slate-900/40 border-slate-800 text-slate-600 cursor-not-allowed opacity-50";
+
+  // 立体ボタンUIスタイルクラスの定義
+  const stimBtnClass = hasBudget
+    ? "bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold shadow-[0_2px_4px_rgba(219,39,119,0.4)] border border-pink-400/60 active:translate-y-0.5 cursor-pointer"
+    : "bg-slate-900 border border-slate-800 text-slate-600 shadow-none cursor-not-allowed opacity-50";
+
+  const giftBtnClass = hasBudget
+    ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold shadow-[0_2px_4px_rgba(124,58,237,0.4)] border border-purple-400/60 active:translate-y-0.5 cursor-pointer"
+    : "bg-slate-900 border border-slate-800 text-slate-600 shadow-none cursor-not-allowed opacity-50";
+
+  const breakBtnClass = "bg-gradient-to-r from-slate-800 to-slate-900 hover:from-rose-900 hover:to-rose-800 text-slate-200 hover:text-white font-bold shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-slate-700 hover:border-rose-500 active:translate-y-0.5 cursor-pointer";
 
   currentPartners.forEach(p => {
     const actionText = p.lastActionText || generateMonthlyActionText(p, calMonth, usedTexts);
@@ -638,9 +730,9 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
       scoreBadge = `<span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
     }
 
-    let catBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-indigo-950 text-indigo-300 rounded border border-indigo-700/60 font-bold">🏷️${p.tag}</span>`;
-    if (p.category === "senior") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-purple-900 text-purple-200 rounded border border-purple-500/30 font-bold">シニア</span>';
-    if (p.category === "youth") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 font-bold">若手</span>';
+    let catBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-indigo-950/80 text-indigo-300 rounded border border-indigo-700/60 font-medium">🏷️${p.tag}</span>`;
+    if (p.category === "senior") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-purple-950/80 text-purple-300 rounded border border-purple-600/40 font-medium">シニア</span>';
+    if (p.category === "youth") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-emerald-950/80 text-emerald-300 rounded border border-emerald-600/40 font-medium">若手</span>';
 
     let chemBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-pink-950/80 text-pink-300 rounded border border-pink-600/60 font-black">相性 ${p.chemistry}</span>`;
 
@@ -648,9 +740,10 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
     const avatarSrc = AvatarCacheManager.get(p.avatarId);
 
     html += `
-      <div class="p-2 sm:p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs">
+      <div class="p-2 sm:p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs shadow-md">
         <div class="avatar-frame mt-0.5"><img src="${avatarSrc}" alt="${p.name}"></div>
-        <div class="flex-1 min-w-0 space-y-1">
+        <div class="flex-1 min-w-0 space-y-1.5">
+          <!-- 上段: 名前・属性 ＆ 相性・スコア -->
           <div class="flex items-center justify-between gap-1 min-w-0">
             <div class="flex items-center gap-1.5 min-w-0 truncate">
               <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
@@ -663,24 +756,26 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
             </div>
           </div>
 
+          <!-- 中段: 左側タグ ＆ 右側アクションボタングループ（明確なボタンデザイン） -->
           <div class="flex items-center justify-between gap-1 pt-0.5">
             <div class="flex items-center gap-1 flex-wrap min-w-0">
               ${catBadge}
             </div>
-            <div class="flex items-center gap-1 flex-shrink-0">
-              <button type="button" onclick="giveStimulus('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：大人のおもちゃで密会度を急上昇" class="px-1.5 py-0.5 rounded text-[9.5px] border transition active:scale-95 flex items-center gap-0.5 ${budgetBtnClass}">
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <button type="button" onclick="giveStimulus('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：大人のおもちゃで密会度を急上昇" class="px-2 py-0.5 rounded-lg text-[10px] transition ${stimBtnClass} flex items-center gap-0.5">
                 <span>💓</span><span>刺激</span>
               </button>
-              <button type="button" onclick="giveGift('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：プレゼントで関係継続・破局防止" class="px-1.5 py-0.5 rounded text-[9.5px] border transition active:scale-95 flex items-center gap-0.5 ${budgetBtnClass}">
+              <button type="button" onclick="giveGift('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：プレゼントで関係継続・破局防止" class="px-2 py-0.5 rounded-lg text-[10px] transition ${giftBtnClass} flex items-center gap-0.5">
                 <span>🎁</span><span>贈物</span>
               </button>
-              <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-1.5 py-0.5 rounded text-[9.5px] bg-slate-800 hover:bg-rose-900/80 border border-slate-700 hover:border-rose-600 text-slate-300 hover:text-rose-200 transition active:scale-95 flex items-center gap-0.5">
+              <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-2 py-0.5 rounded-lg text-[10px] transition ${breakBtnClass} flex items-center gap-0.5">
                 <span>👋</span><span>別れ</span>
               </button>
             </div>
           </div>
 
-          <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words pt-0.5 border-t border-slate-800/60">${actionText}</div>
+          <!-- 下段: 逢瀬エピソードテキスト -->
+          <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words pt-1 border-t border-slate-800/60">${actionText}</div>
         </div>
       </div>
     `;
@@ -1165,7 +1260,7 @@ function calculateAndRenderResult() {
   const badgeListEl = document.getElementById("resAchieveBadgeList");
   if (badgeListEl) badgeListEl.innerHTML = badgesHtml;
 
-  // 称号・エンディング判定（年下・年上の単独判定を追加）
+  // 称号・エンディング判定（単独達成パターン追加）
   let title = "『首都圏の彷徨い人』";
   let desc = "首都圏の喧騒の中、家庭と日常の狭間で静かに駆け抜けた5年間。";
 

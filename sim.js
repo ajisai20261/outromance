@@ -1,5 +1,5 @@
 /* ============================================================
-   sim.js - OUTROMANCE コアシミュレーション（5年制・年齢距離減衰・スペック連動）
+   sim.js - OUTROMANCE コアシミュレーション（年齢上限下限解放・遭遇率適正化 完全版）
    ============================================================ */
 
 window.appState = window.appState || {
@@ -17,7 +17,7 @@ window.appState = window.appState || {
 };
 var appState = window.appState;
 
-// 誕生月が1月固定のため、開始月（1月）と加齢が完全に一致
+// 1月固定開始のため、開始月（1月）と加齢が一致
 function getRealAge(mIdx) {
   const startAge = appState.user.startAge || 40;
   return startAge + Math.floor(mIdx / 12);
@@ -52,51 +52,60 @@ function calculateSexScore(partner, month, isCrisis, prefBonus = 0) {
   return Math.max(10, Math.round(base + libidoBonus + masteryBonus + eventBonus + thrillBonus + prefBonus));
 }
 
-// 年齢抽選ロジック：±3歳は高確率均等、以降は指数減衰。外見(looks)と活動費(budget)が高いほど極端な年齢差が出現しやすい
+// 年齢抽選ロジック：最大差キャップ撤廃（下限18歳〜上限85歳、離れるほど確率急減）
 function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
   const userGender = appState.user.gender;
   const looks = appState.stats.looks || 5;
   const budget = appState.stats.budget || 2;
 
-  // 減衰許容度（スペックが高いほど極端な年齢差を引き込みやすい）
-  let spreadPower = 1.0;
+  // スペックによる外側拡張ボーナス（0〜12）
+  let spreadBonus = 0;
   if (userGender === "male") {
-    spreadPower += (budget - 2) * 0.15 + (looks - 4) * 0.10;
+    spreadBonus = (budget - 2) * 1.5 + (looks - 4) * 1.0;
   } else {
-    spreadPower += (looks - 4) * 0.22 + (budget - 2) * 0.05;
+    spreadBonus = (looks - 4) * 2.0 + (budget - 2) * 0.8;
   }
-  spreadPower = Math.max(0.6, Math.min(2.2, spreadPower));
+  spreadBonus = Math.max(0, Math.min(12, spreadBonus));
 
-  // ±3歳以内の判定（基本45%〜スペックで最大65%が近距離に収縮）
-  const isNear = (Math.random() < (0.42 / spreadPower));
-
+  // --- 1. 同年代狙い (same) ---
+  // 85%は ±3歳以内、残り15%でも最大 ±6歳までに厳格クランプ
   if (targetPref === "same") {
-    if (isNear) {
+    if (Math.random() < 0.85) {
       const delta = Math.floor(Math.random() * 7) - 3; // -3 〜 +3
       return Math.max(18, Math.min(85, playerAge + delta));
+    } else {
+      const sign = Math.random() < 0.5 ? 1 : -1;
+      const delta = 4 + Math.floor(Math.random() * 3); // ±4 〜 ±6
+      return Math.max(18, Math.min(85, playerAge + sign * delta));
     }
-    // ±4歳以上の減衰抽選
-    const sign = Math.random() < 0.5 ? 1 : -1;
-    const rawGap = 4 + Math.floor(Math.pow(Math.random(), 1.8 / spreadPower) * 22);
-    return Math.max(18, Math.min(85, playerAge + sign * rawGap));
-  } else if (targetPref === "younger") {
-    if (isNear) {
-      const delta = Math.floor(Math.random() * 4); // 0 〜 -3
-      return Math.max(18, playerAge - delta);
-    }
-    // 年下方向への減衰抽選（スペックが高いと20歳以上下も出現）
-    const rawGap = 4 + Math.floor(Math.pow(Math.random(), 1.6 / spreadPower) * 24);
-    return Math.max(18, playerAge - rawGap);
-  } else {
-    // older
-    if (isNear) {
-      const delta = Math.floor(Math.random() * 4); // 0 〜 +3
-      return Math.min(85, playerAge + delta);
-    }
-    // 年上方向への減衰抽選（スペックが高いと20歳以上上も出現）
-    const rawGap = 4 + Math.floor(Math.pow(Math.random(), 1.6 / spreadPower) * 24);
-    return Math.min(85, playerAge + rawGap);
   }
+
+  // --- 年齢差の幾何減衰関数（離れるほど急速に確率が低下） ---
+  function rollDecayedGap() {
+    let gap = 3; // 最低でも3歳差からスタート
+    // スペックが高いほど遠くまで伸びやすくなる（継続率 0.62 〜 0.74）
+    const continueRate = 0.62 + (spreadBonus / 12) * 0.12;
+    
+    // 確率判定が成功するたびに1〜2歳ずつ差が広がる（失敗した時点でストップ）
+    while (Math.random() < continueRate && gap < 70) {
+      gap += 1 + Math.floor(Math.random() * 2);
+    }
+    return gap;
+  }
+
+  // --- 2. 年下狙い (younger) ---
+  if (targetPref === "younger") {
+    const gap = rollDecayedGap();
+    return Math.max(18, playerAge - gap); // 下限18歳
+  }
+
+  // --- 3. 年上狙い (older) ---
+  if (targetPref === "older") {
+    const gap = rollDecayedGap();
+    return Math.min(85, playerAge + gap); // 上限85歳
+  }
+
+  return playerAge;
 }
 
 function createSynthesizedPartner(startMonth, playerAge) {
@@ -106,7 +115,6 @@ function createSynthesizedPartner(startMonth, playerAge) {
   const jobPool = isTargetMale ? MALE_JOBS_POOL : FEMALE_JOBS_POOL;
   const job = jobPool[Math.floor(Math.random() * jobPool.length)];
 
-  const prefKey = "tokyo";
   const areaList = AREAS_NO_STATION.tokyo;
   const area = `東京・${areaList[Math.floor(Math.random() * areaList.length)]}`;
 
@@ -133,14 +141,14 @@ function createSynthesizedPartner(startMonth, playerAge) {
   const rChem = Math.random();
   let chemistry = "B";
   if (partnerAge >= 60) {
-    if (rChem < 0.03) chemistry = "S";
-    else if (rChem < 0.15) chemistry = "A";
-    else if (rChem < 0.60) chemistry = "B";
+    if (rChem < 0.04) chemistry = "S";
+    else if (rChem < 0.18) chemistry = "A";
+    else if (rChem < 0.65) chemistry = "B";
     else chemistry = "C";
   } else {
-    if (rChem < 0.12) chemistry = "S";
-    else if (rChem < 0.35) chemistry = "A";
-    else if (rChem < 0.78) chemistry = "B";
+    if (rChem < 0.14) chemistry = "S";
+    else if (rChem < 0.38) chemistry = "A";
+    else if (rChem < 0.80) chemistry = "B";
     else chemistry = "C";
   }
 
@@ -179,12 +187,12 @@ function simulateOneMonth(isSilent = false) {
   let isCrisisHappened = false;
 
   const stamina = appState.stats.stamina || 4;
-  let alertUpChance = (stamina >= 7) ? 0.05 : (stamina <= 3 ? 0.18 : 0.10);
+  let alertUpChance = (stamina >= 7) ? 0.04 : (stamina <= 3 ? 0.15 : 0.08);
 
   if (activePartners.length >= 3 && Math.random() < alertUpChance) {
     appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
   }
-  if (stamina <= 3 && activePartners.length >= 2 && Math.random() < 0.12) {
+  if (stamina <= 3 && activePartners.length >= 2 && Math.random() < 0.10) {
     appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
   }
 
@@ -197,8 +205,8 @@ function simulateOneMonth(isSilent = false) {
 
   const activeCount = activePartners.length;
   let staminaProtection = (stamina - 4) * 0.018;
-  let riskRate = (appState.stats.spouseAlert * 0.03) + (activeCount * 0.02) + (prefProp.crisisBonus || 0) - staminaProtection;
-  riskRate = Math.max(0.005, Math.min(0.45, riskRate));
+  let riskRate = (appState.stats.spouseAlert * 0.028) + (activeCount * 0.018) + (prefProp.crisisBonus || 0) - staminaProtection;
+  riskRate = Math.max(0.005, Math.min(0.40, riskRate));
 
   if (Math.random() < riskRate && activeCount > 0) {
     isCrisisHappened = true;
@@ -213,7 +221,7 @@ function simulateOneMonth(isSilent = false) {
     return;
   }
 
-  const concurrentPenalty = { 1: 0.6, 2: 1.0, 3: 1.8, 4: 2.6 }[appState.stats.maxPartners] || 1.0;
+  const concurrentPenalty = { 1: 0.6, 2: 1.0, 3: 1.5, 4: 2.1 }[appState.stats.maxPartners] || 1.0;
   const isUserMale = (appState.user.gender === "male");
 
   activePartners.forEach(p => {
@@ -237,10 +245,11 @@ function simulateOneMonth(isSilent = false) {
     }
   });
 
+  // 慰謝料被請求（配偶者バレ）判定
   let lawsuitPartner = null;
   for (const p of activePartners) {
-    let lawsuitRate = 0.0033;
-    if (p.tag === "冷えきり") lawsuitRate = 0.008;
+    let lawsuitRate = 0.003;
+    if (p.tag === "冷えきり") lawsuitRate = 0.006;
     if (p.tag === "秘密厳守") lawsuitRate = 0.0;
     if (stamina >= 7) lawsuitRate *= 0.5;
 
@@ -268,41 +277,43 @@ function simulateOneMonth(isSilent = false) {
     activePartners = activePartners.filter(p => p.id !== lawsuitPartner.id);
   }
 
+  // 自然破局判定（交際初期は破局率を緩和）
   let breakCandidate = null;
   let highestBreakRoll = 0;
 
   activePartners.forEach(p => {
-    let breakRate = 0.07;
-    if (p.chemistry === "S") breakRate = (appState.stats.libido >= 6) ? 0.015 : 0.03;
-    else if (p.chemistry === "A") breakRate = 0.04;
-    else if (p.chemistry === "C") breakRate = (appState.stats.libido >= 6) ? 0.32 : 0.22;
+    let breakRate = 0.05;
+    if (p.chemistry === "S") breakRate = (appState.stats.libido >= 6) ? 0.012 : 0.025;
+    else if (p.chemistry === "A") breakRate = 0.035;
+    else if (p.chemistry === "C") breakRate = (appState.stats.libido >= 6) ? 0.22 : 0.16;
 
     if (isUserMale) {
-      if (appState.stats.budget >= 6) breakRate *= 0.65;
-      if (appState.stats.budget <= 2) breakRate *= 1.4;
+      if (appState.stats.budget >= 6) breakRate *= 0.7;
+      if (appState.stats.budget <= 2) breakRate *= 1.3;
     } else {
-      if (appState.stats.looks >= 7) breakRate *= 0.6;
-      if (appState.stats.looks <= 3) breakRate *= 1.4;
+      if (appState.stats.looks >= 7) breakRate *= 0.65;
+      if (appState.stats.looks <= 3) breakRate *= 1.35;
     }
 
-    if (p.age >= currentRealAge + 10) breakRate *= 0.75;
-    if (p.age <= currentRealAge - 10) breakRate *= 1.35;
+    if (p.age >= currentRealAge + 10) breakRate *= 0.8;
+    if (p.age <= currentRealAge - 10) breakRate *= 1.25;
     breakRate *= concurrentPenalty;
 
-    if (p.tag === "夜間遠征" && appState.stats.budget <= 2) breakRate *= 1.5;
+    if (p.tag === "夜間遠征" && appState.stats.budget <= 2) breakRate *= 1.4;
     if (p.tag === "割り切り") {
-      breakRate *= 0.8;
-      if (appState.stats.libido <= 3) breakRate *= 1.8;
+      breakRate *= 0.85;
+      if (appState.stats.libido <= 3) breakRate *= 1.6;
     }
 
     if (p.giftProtectedUntil && p.giftProtectedUntil >= mIdx) {
-      breakRate *= 0.2;
+      breakRate *= 0.15;
     }
 
     breakRate += (prefProp.breakBonus || 0);
     breakRate = Math.max(0.005, breakRate);
 
-    if (p.durationMonths >= 2) {
+    // 交際3ヶ月未満は保護
+    if (p.durationMonths >= 3) {
       const roll = Math.random();
       if (roll < breakRate && roll > highestBreakRoll) {
         highestBreakRoll = roll;
@@ -324,29 +335,34 @@ function simulateOneMonth(isSilent = false) {
     }
   }
 
+  // 出会い抽選ロジック（遭遇率底上げ ＆ 初月確定枠）
   const maxAllowed = appState.stats.maxPartners || 2;
   let emptySlots = maxAllowed - appState.sim.activePartnerIds.length;
   let matchedPartners = [];
 
+  const isFirstMonthGuaranteed = (mIdx === 0 && appState.sim.activePartnerIds.length === 0);
+
   if (emptySlots > 0 && appState.stats.spouseAlert < 5) {
-    let meetBase = isUserMale ? 0.28 : 0.42;
+    let meetBase = isUserMale ? 0.45 : 0.55;
     if (isUserMale) {
-      meetBase += (appState.stats.budget - 4) * 0.05;
+      meetBase += (appState.stats.budget - 4) * 0.04;
       meetBase += (appState.stats.looks - 5) * 0.02;
     } else {
-      meetBase += (appState.stats.looks - 5) * 0.06;
+      meetBase += (appState.stats.looks - 5) * 0.05;
       meetBase += (appState.stats.budget - 4) * 0.01;
     }
 
-    if (appState.stats.targetAgePref === "younger") meetBase *= 0.65;
-    if (appState.stats.targetAgePref === "older") meetBase *= 1.25;
+    if (appState.stats.targetAgePref === "younger") meetBase *= 0.85;
+    if (appState.stats.targetAgePref === "older") meetBase *= 1.15;
     if (appState.stats.spouseAlert === 4) meetBase *= 0.5;
 
-    meetBase += (prefProp.meetBonus || 0);
-    meetBase = Math.max(0.12, Math.min(0.85, meetBase));
+    meetBase = Math.max(0.20, Math.min(0.85, meetBase));
 
-    if (Math.random() < meetBase) {
+    if (isFirstMonthGuaranteed || Math.random() < meetBase) {
       const p1 = createSynthesizedPartner(mIdx, currentRealAge);
+      p1.lastSexScore = calculateSexScore(p1, calMonth, isCrisisHappened, (prefProp.scoreBonus || 0));
+      p1.maxSexScore = p1.lastSexScore;
+
       appState.sim.partners.push(p1);
       appState.sim.activePartnerIds.push(p1.id);
       appState.sim.totalPartnerCounter++;
@@ -355,20 +371,17 @@ function simulateOneMonth(isSilent = false) {
       if (p1.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
       if (p1.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
 
-      if (emptySlots >= 2) {
-        let doubleRate = 0.10;
-        if (isUserMale) {
-          if (appState.stats.budget >= 8) doubleRate += 0.20;
-          else if (appState.stats.budget >= 6) doubleRate += 0.10;
-          if (appState.stats.looks >= 7) doubleRate += 0.10;
-        } else {
-          if (appState.stats.looks >= 8) doubleRate += 0.25;
-          else if (appState.stats.looks >= 6) doubleRate += 0.15;
-          if (appState.stats.libido >= 7) doubleRate += 0.10;
-        }
+      // 2人目判定（空き枠2以上かつ高スペック時）
+      if (emptySlots >= 2 && !isFirstMonthGuaranteed) {
+        let doubleRate = isUserMale 
+          ? (appState.stats.budget >= 6 ? 0.25 : 0.08) 
+          : (appState.stats.looks >= 6 ? 0.25 : 0.08);
 
         if (Math.random() < doubleRate) {
           const p2 = createSynthesizedPartner(mIdx, currentRealAge);
+          p2.lastSexScore = calculateSexScore(p2, calMonth, isCrisisHappened, (prefProp.scoreBonus || 0));
+          p2.maxSexScore = p2.lastSexScore;
+
           appState.sim.partners.push(p2);
           appState.sim.activePartnerIds.push(p2.id);
           appState.sim.totalPartnerCounter++;
@@ -398,12 +411,9 @@ function simulateOneMonth(isSilent = false) {
     }
   }
 
+  // 画面描画の確実な即時実行
   if (typeof renderAlertAndFlash === "function") renderAlertAndFlash(isCrisisHappened, isSilent);
   if (typeof updateMatrixDot === "function") updateMatrixDot(mIdx);
   if (typeof renderRealtimeMonthlyLog === "function") renderRealtimeMonthlyLog(mIdx, calMonth);
-
-  const actCountEl = document.getElementById("simActiveCount");
-  if (actCountEl) actCountEl.innerText = `${appState.sim.activePartnerIds.length} / ${maxAllowed}人`;
-  const totPartEl = document.getElementById("simTotalPartners");
-  if (totPartEl) totPartEl.innerText = `${appState.sim.totalPartnerCounter}人`;
+  if (typeof updateLiveStats === "function") updateLiveStats();
 }

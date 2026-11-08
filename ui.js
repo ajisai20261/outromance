@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（新ブースト仕様 完全版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（完全版）
    ============================================================ */
 
 /* --- AvatarCacheManager ブリッジ（avatars.js の実データを直接バインド） --- */
@@ -380,7 +380,7 @@ function updateLiveStats() {
   }
 }
 
-// 🆙ブースト機能：マチアプ高額プラン仕様（基本1人確定＋能力依存の追加マッチ）
+// 🆙ブースト機能：マチアプ高額プラン仕様
 function triggerBoostMatching(e) {
   if (e) e.stopPropagation();
   if (appState.stats.budget < 2) return;
@@ -600,15 +600,15 @@ function showNewPartnerToast(p, isDouble = false) {
   else if (p.category === "youth") badges += ' <span class="px-1.5 py-0.2 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 font-bold">若手</span>';
   badgeEl.innerHTML = badges;
 
-  const meta = (typeof AvatarCacheManager !== "undefined") ? AvatarCacheManager.getMeta(p.avatarId) : { quote: "" };
-  document.getElementById("toastPartnerQuote").innerText = meta.quote || p.quote || "「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」";
+  // パートナーのプロフセリフ（p.quote）を最優先で表示
+  document.getElementById("toastPartnerQuote").innerText = p.quote || "「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」";
 
   toast.classList.remove("hidden");
   setTimeout(() => { toast.classList.remove("scale-95", "opacity-0"); toast.classList.add("scale-100", "opacity-100"); }, 10);
   setTimeout(() => {
     toast.classList.remove("scale-100", "opacity-100");
     toast.classList.add("scale-95", "opacity-0");
-    setTimeout(() => toast.classList.add("hidden"), 300);
+    setTimeout(() => toast.classList.add("hidden"), 3200);
   }, 3200);
 }
 
@@ -639,7 +639,7 @@ function showBreakupPartnerToast(p, isUserMale, isManual = false, isTroubled = f
   setTimeout(() => {
     toast.classList.remove("scale-100", "opacity-100");
     toast.classList.add("scale-95", "opacity-0");
-    setTimeout(() => toast.classList.add("hidden"), 300);
+    setTimeout(() => toast.classList.add("hidden"), 3200);
   }, 3200);
 }
 
@@ -652,7 +652,7 @@ function showLawsuitToast(p) {
   setTimeout(() => {
     toast.classList.remove("scale-100", "opacity-100");
     toast.classList.add("scale-95", "opacity-0");
-    setTimeout(() => toast.classList.add("hidden"), 300);
+    setTimeout(() => toast.classList.add("hidden"), 3600);
   }, 3600);
 }
 
@@ -1277,7 +1277,7 @@ function calculateAndRenderResult() {
   if (endingDesc) endingDesc.innerText = desc;
 
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-  const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null };
+  const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null, color: "#a855f7" };
   
   const isLongestActive = (longestP.endMonth === null || longestP.endMonth >= 60);
   longestP.lastLine = (typeof generateLastLineText === "function") 

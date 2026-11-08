@@ -1,16 +1,6 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（5年制完全版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（軽量スリム版）
    ============================================================ */
-
-// 既存の宣言との衝突を防ぐ安全な参照（1月はお正月）
-if (typeof MONTH_EMOJIS === "undefined") {
-  window.MONTH_EMOJIS = {
-    1: "🎍", 2: "🍫", 3: "🎎", 4: "🌸", 5: "🎏", 6: "☔",
-    7: "🎋", 8: "🎆", 9: "🎑", 10: "🎃", 11: "🍁", 12: "🎄"
-  };
-} else {
-  MONTH_EMOJIS[1] = "🎍"; // 1月をお正月に上書き
-}
 
 var isSoundOn = false;
 var audioCtx = null;
@@ -21,7 +11,6 @@ var isTapInitialized = false;
 var lastTapAdvanceTime = 0;
 var currentHistorySortType = "duration";
 
-// スピード制御（1ヶ月 = 5.0秒 / 2.5秒 / 10.0秒）
 var simSpeedMs = 5000;
 var simTimer = null;
 
@@ -111,7 +100,6 @@ function triggerVibrate(pat) {
   if ("vibrate" in navigator) try { navigator.vibrate(pat); } catch(e) {}
 }
 
-// 確認事項の承諾 → シネマティック・プロローグ開始
 function acceptDisclaimer() {
   try { initAudio(); } catch(e) {}
   triggerVibrate(20);
@@ -125,7 +113,6 @@ function acceptDisclaimer() {
   runCinematicPrologue();
 }
 
-// プロローグ実行処理
 function runCinematicPrologue() {
   clearTimeout(prologueAutoTimer);
   prologueStep = 0;
@@ -141,7 +128,6 @@ function runCinematicPrologue() {
   advancePrologue();
 }
 
-// プロローグ進行（自動送り ＆ 画面タップでスキップ可能）
 function advancePrologue(e) {
   if (e) e.stopPropagation();
   clearTimeout(prologueAutoTimer);
@@ -158,7 +144,6 @@ function advancePrologue(e) {
   prologueAutoTimer = setTimeout(() => advancePrologue(), 1300);
 }
 
-// プロローグ完了 → Step 1-A（性別・お名前設定）
 function goToStep1A(e) {
   if (e) e.stopPropagation();
   try { initAudio(); } catch(e) {}
@@ -288,7 +273,6 @@ function applyStylePreset(presetType) {
       else break;
     }
   } else {
-    // balanced
     appState.stats.maxPartners = 2;
     appState.stats.budget = 4;
     points -= 2;
@@ -335,7 +319,6 @@ function updateLiveStats() {
     totalCountEl.innerText = `${appState.sim.partners.length}人`;
   }
 
-  // 🆙ブーストボタンの状態制御
   const btnBoost = document.getElementById("btnBoostMatching");
   if (btnBoost) {
     const canBoost = (appState.stats.budget >= 2 && activeCount < 4);
@@ -347,7 +330,6 @@ function updateLiveStats() {
     }
   }
 
-  // 🏡家庭ケアボタンの状態制御
   const btnCare = document.getElementById("btnLiveFamilyCare");
   if (btnCare) {
     const canCare = (appState.stats.budget >= 2 && appState.stats.spouseAlert > 1);
@@ -360,7 +342,6 @@ function updateLiveStats() {
   }
 }
 
-// 🆙ブースト機能
 function triggerBoostMatching(e) {
   if (e) e.stopPropagation();
   if (appState.stats.budget < 2) return;
@@ -376,6 +357,8 @@ function triggerBoostMatching(e) {
 
   for (let i = 0; i < emptySlots; i++) {
     const newP = createSynthesizedPartner(appState.sim.currentMonth, currentRealAge);
+    newP.lastSexScore = (typeof calculateSexScore === "function") ? calculateSexScore(newP, (appState.sim.currentMonth % 12) + 1, false, 0) : 60;
+    newP.maxSexScore = newP.lastSexScore;
     appState.sim.partners.push(newP);
     appState.sim.activePartnerIds.push(newP.id);
     appState.sim.totalPartnerCounter++;
@@ -478,7 +461,6 @@ function triggerScreenTapAdvance() {
   }
 }
 
-// 12ヶ月マトリックス（1月＝🎍門松）
 function refresh12MatrixGrid() {
   const currentYear = Math.floor(appState.sim.currentMonth / 12) + 1;
   const startM = (currentYear - 1) * 12 + 1;
@@ -502,7 +484,7 @@ function refresh12MatrixGrid() {
 
     const centerCircle = document.createElement("div");
     centerCircle.className = "w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-xs sm:text-[13px] select-none";
-    const monthEmoji = MONTH_EMOJIS[calMonth] || "🌸";
+    const monthEmoji = (typeof MONTH_EMOJIS !== "undefined" && MONTH_EMOJIS[calMonth]) ? MONTH_EMOJIS[calMonth] : "🌸";
     centerCircle.innerText = monthEmoji;
     dot.appendChild(centerCircle);
 
@@ -611,9 +593,7 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
   const largeBadge = document.getElementById("largeSpouseAlertBadge");
   const sitEl = document.getElementById("spouseSituationLog");
 
-  if (largeVal) {
-    largeVal.innerText = `Lv.${alertLv}/5`;
-  }
+  if (largeVal) largeVal.innerText = `Lv.${alertLv}/5`;
 
   if (alertLv >= 5) {
     if (alertBadge) {
@@ -623,9 +603,7 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
     if (largeBadge) {
       largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/80 border border-rose-500 animate-pulse flex-shrink-0";
     }
-    if (largeVal) {
-      largeVal.className = "text-[10.5px] font-black text-rose-300";
-    }
+    if (largeVal) largeVal.className = "text-[10.5px] font-black text-rose-300";
     if (sitEl) sitEl.innerText = "家庭内は完全な臨戦態勢。スマホの着信音ひとつで怒号が飛ぶ。";
   } else if (isCrisis || alertLv === 4) {
     if (!isSilent && !appState.sim.isSkipping && !appState.sim.isPaused) {
@@ -644,9 +622,7 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
     if (largeBadge) {
       largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/60 border border-rose-600 flex-shrink-0";
     }
-    if (largeVal) {
-      largeVal.className = "text-[10.5px] font-black text-rose-400";
-    }
+    if (largeVal) largeVal.className = "text-[10.5px] font-black text-rose-400";
     const spouseEvents = [
       "休日の夕方、スマホの通知を凝視され冷や汗が流れた。",
       "「最近、怪しい用事多くない？」と真顔で問い詰められた。",
@@ -662,140 +638,145 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
     if (largeBadge) {
       largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 flex-shrink-0";
     }
-    if (largeVal) {
-      largeVal.className = "text-[10.5px] font-black text-amber-400";
-    }
+    if (largeVal) largeVal.className = "text-[10.5px] font-black text-amber-400";
     if (sitEl && sitEl.innerText.indexOf("家族サービス") === -1) {
       sitEl.innerText = "平穏な週末。特に怪しまれる様子はない。";
     }
   }
 }
 
-// 逢瀬ログ描画
 function renderRealtimeMonthlyLog(mIdx, calMonth) {
-  const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
-  
-  const seasonBadge = document.getElementById("seasonBadge");
-  if (seasonBadge) {
-    const emoji = MONTH_EMOJIS[calMonth] || "🌸";
-    seasonBadge.innerText = `${emoji} ${calMonth}月`;
-  }
-
-  const monthTitle = document.getElementById("monthTitleLog");
-  if (monthTitle) monthTitle.innerText = seasons[calMonth] || "穏やかな午後の逢瀬";
-
-  const simAgeEl = document.getElementById("simCurrentAge");
-  if (simAgeEl) {
-    const currentAge = getRealAge(mIdx);
-    const passedY = Math.floor(mIdx / 12);
-    const passedM = (mIdx % 12) + 1;
-    const elapsedStr = passedY > 0 ? `${passedY}年${passedM}ヶ月` : `${passedM}ヶ月`;
-    simAgeEl.innerHTML = `<span class="text-purple-300 font-black text-sm">${appState.user.name}</span> <span class="font-bold text-white text-xs ml-1">${currentAge}歳</span> <span class="text-slate-400 text-[10.5px] font-normal">（婚外開始 ${elapsedStr}）</span>`;
-  }
-
-  const maxP = appState.stats.maxPartners || 2;
-  const activeCountEl = document.getElementById("simActiveCount");
-  if (activeCountEl) {
-    activeCountEl.innerText = `${appState.sim.activePartnerIds.length}/${maxP}人`;
-  }
-  const totalCountEl = document.getElementById("simTotalPartners");
-  if (totalCountEl) {
-    totalCountEl.innerText = `${appState.sim.partners.length}人`;
-  }
-
-  const listContainer = document.getElementById("currentMonthPartnersLog");
-  if (!listContainer) return;
-  const currentPartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
-
-  if (currentPartners.length === 0) {
-    listContainer.innerHTML = `<div class="text-xs text-slate-500 italic py-2 text-center">今月はアポなし。家庭と仕事に専念中……</div>`;
-    return;
-  }
-
-  let html = "";
-  const usedTexts = new Set();
-  const monthLogRecord = [];
-  const hasBudget = (appState.stats.budget > 0);
-
-  const stimBtnClass = hasBudget
-    ? "bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold shadow-[0_2px_4px_rgba(219,39,119,0.4)] border border-pink-400/60 active:translate-y-0.5 cursor-pointer"
-    : "bg-slate-900 border border-slate-800 text-slate-600 shadow-none cursor-not-allowed opacity-50";
-
-  const giftBtnClass = hasBudget
-    ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold shadow-[0_2px_4px_rgba(124,58,237,0.4)] border border-purple-400/60 active:translate-y-0.5 cursor-pointer"
-    : "bg-slate-900 border border-slate-800 text-slate-600 shadow-none cursor-not-allowed opacity-50";
-
-  const breakBtnClass = "bg-gradient-to-r from-slate-800 to-slate-900 hover:from-rose-900 hover:to-rose-800 text-slate-200 hover:text-white font-bold shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-slate-700 hover:border-rose-500 active:translate-y-0.5 cursor-pointer";
-
-  currentPartners.forEach(p => {
-    const actionText = p.lastActionText || generateMonthlyActionText(p, calMonth, usedTexts);
-    usedTexts.add(actionText);
-
-    const score = p.lastSexScore;
-    let scoreBadge = "";
-    if (score >= 150) {
-      scoreBadge = `<span class="limit-break-badge bg-gradient-to-r from-amber-400 via-pink-400 to-purple-400 text-slate-950 font-black px-1.5 py-0.5 rounded text-[9.5px] shadow-lg flex-shrink-0">⚡${score}pt</span>`;
-      if (!appState.sim.isSkipping) playLimitBreakChime();
-    } else if (score >= 120) {
-      scoreBadge = `<span class="bg-amber-950 text-amber-300 border border-amber-600 font-bold px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
-    } else if (score >= 80) {
-      scoreBadge = `<span class="bg-pink-950 text-pink-300 border border-pink-700 font-bold px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
-    } else {
-      scoreBadge = `<span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
+  try {
+    const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
+    
+    const seasonBadge = document.getElementById("seasonBadge");
+    if (seasonBadge) {
+      const emoji = (typeof MONTH_EMOJIS !== "undefined" && MONTH_EMOJIS[calMonth]) ? MONTH_EMOJIS[calMonth] : "🌸";
+      seasonBadge.innerText = `${emoji} ${calMonth}月`;
     }
 
-    let catBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-indigo-950/80 text-indigo-300 rounded border border-indigo-700/60 font-medium">🏷️${p.tag}</span>`;
-    if (p.category === "senior") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-purple-950/80 text-purple-300 rounded border border-purple-600/40 font-medium">シニア</span>';
-    if (p.category === "youth") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-emerald-950/80 text-emerald-300 rounded border border-emerald-600/40 font-medium">若手</span>';
+    const monthTitle = document.getElementById("monthTitleLog");
+    if (monthTitle) monthTitle.innerText = seasons[calMonth] || "穏やかな午後の逢瀬";
 
-    let chemBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-pink-950/80 text-pink-300 rounded border border-pink-600/60 font-black">相性 ${p.chemistry}</span>`;
+    const simAgeEl = document.getElementById("simCurrentAge");
+    if (simAgeEl) {
+      const currentAge = typeof getRealAge === "function" ? getRealAge(mIdx) : (appState.user.startAge || 40);
+      const passedY = Math.floor(mIdx / 12);
+      const passedM = (mIdx % 12) + 1;
+      const elapsedStr = passedY > 0 ? `${passedY}年${passedM}ヶ月` : `${passedM}ヶ月`;
+      simAgeEl.innerHTML = `<span class="text-purple-300 font-black text-sm">${appState.user.name}</span> <span class="font-bold text-white text-xs ml-1">${currentAge}歳</span> <span class="text-slate-400 text-[10.5px] font-normal">（婚外開始 ${elapsedStr}）</span>`;
+    }
 
-    monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score, tag: p.tag });
-    const avatarSrc = AvatarCacheManager.get(p.avatarId);
+    const maxP = appState.stats.maxPartners || 2;
+    const activeCountEl = document.getElementById("simActiveCount");
+    if (activeCountEl) activeCountEl.innerText = `${appState.sim.activePartnerIds.length}/${maxP}人`;
+    const totalCountEl = document.getElementById("simTotalPartners");
+    if (totalCountEl) totalCountEl.innerText = `${appState.sim.partners.length}人`;
 
-    html += `
-      <div class="p-2 sm:p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs shadow-md">
-        <div class="avatar-frame mt-0.5"><img src="${avatarSrc}" alt="${p.name}"></div>
-        <div class="flex-1 min-w-0 space-y-1.5">
-          <div class="flex items-center justify-between gap-1 min-w-0">
-            <div class="flex items-center gap-1.5 min-w-0 truncate">
-              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color}"></span>
-              <span class="font-bold text-slate-200 text-xs sm:text-[13px] truncate">${p.name}</span>
-              <span class="text-[10px] text-purple-300 truncate">(${p.age}歳 / ${p.area})</span>
+    const listContainer = document.getElementById("currentMonthPartnersLog");
+    if (!listContainer) return;
+    const currentPartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
+
+    if (currentPartners.length === 0) {
+      listContainer.innerHTML = `<div class="text-xs text-slate-500 italic py-2 text-center">今月はアポなし。家庭と仕事に専念中……</div>`;
+      return;
+    }
+
+    let html = "";
+    const usedTexts = new Set();
+    const monthLogRecord = [];
+    const hasBudget = (appState.stats.budget > 0);
+
+    const stimBtnClass = hasBudget
+      ? "bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold shadow-[0_2px_4px_rgba(219,39,119,0.4)] border border-pink-400/60 active:translate-y-0.5 cursor-pointer"
+      : "bg-slate-900 border border-slate-800 text-slate-600 shadow-none cursor-not-allowed opacity-50";
+
+    const giftBtnClass = hasBudget
+      ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold shadow-[0_2px_4px_rgba(124,58,237,0.4)] border border-purple-400/60 active:translate-y-0.5 cursor-pointer"
+      : "bg-slate-900 border border-slate-800 text-slate-600 shadow-none cursor-not-allowed opacity-50";
+
+    const breakBtnClass = "bg-gradient-to-r from-slate-800 to-slate-900 hover:from-rose-900 hover:to-rose-800 text-slate-200 hover:text-white font-bold shadow-[0_2px_4px_rgba(0,0,0,0.5)] border border-slate-700 hover:border-rose-500 active:translate-y-0.5 cursor-pointer";
+
+    currentPartners.forEach(p => {
+      let actionText = p.lastActionText;
+      if (!actionText && typeof generateMonthlyActionText === "function") {
+        actionText = generateMonthlyActionText(p, calMonth, usedTexts);
+      }
+      if (!actionText) actionText = "隠れ家ホテルで濃密な午後を過ごした。";
+      usedTexts.add(actionText);
+
+      const score = p.lastSexScore || 50;
+      let scoreBadge = "";
+      if (score >= 150) {
+        scoreBadge = `<span class="limit-break-badge bg-gradient-to-r from-amber-400 via-pink-400 to-purple-400 text-slate-950 font-black px-1.5 py-0.5 rounded text-[9.5px] shadow-lg flex-shrink-0">⚡${score}pt</span>`;
+      } else if (score >= 120) {
+        scoreBadge = `<span class="bg-amber-950 text-amber-300 border border-amber-600 font-bold px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
+      } else if (score >= 80) {
+        scoreBadge = `<span class="bg-pink-950 text-pink-300 border border-pink-700 font-bold px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
+      } else {
+        scoreBadge = `<span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[9.5px] flex-shrink-0">${score}pt</span>`;
+      }
+
+      let catBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-indigo-950/80 text-indigo-300 rounded border border-indigo-700/60 font-medium">🏷️${p.tag || "平日昼"}</span>`;
+      if (p.category === "senior") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-purple-950/80 text-purple-300 rounded border border-purple-600/40 font-medium">シニア</span>';
+      if (p.category === "youth") catBadge += ' <span class="px-1.5 py-0.5 text-[9px] bg-emerald-950/80 text-emerald-300 rounded border border-emerald-600/40 font-medium">若手</span>';
+
+      let chemBadge = `<span class="px-1.5 py-0.5 text-[9px] bg-pink-950/80 text-pink-300 rounded border border-pink-600/60 font-black">相性 ${p.chemistry || "B"}</span>`;
+
+      monthLogRecord.push({ id: p.id, name: p.name, avatarId: p.avatarId, color: p.color, action: actionText, score, tag: p.tag });
+      
+      let avatarSrc = "";
+      try {
+        if (typeof AvatarCacheManager !== "undefined" && AvatarCacheManager.get) {
+          avatarSrc = AvatarCacheManager.get(p.avatarId);
+        }
+      } catch(e) {}
+
+      html += `
+        <div class="p-2 sm:p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-2.5 text-xs shadow-md">
+          <div class="avatar-frame mt-0.5"><img src="${avatarSrc}" alt="${p.name}"></div>
+          <div class="flex-1 min-w-0 space-y-1.5">
+            <div class="flex items-center justify-between gap-1 min-w-0">
+              <div class="flex items-center gap-1.5 min-w-0 truncate">
+                <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${p.color || '#a855f7'}"></span>
+                <span class="font-bold text-slate-200 text-xs sm:text-[13px] truncate">${p.name}</span>
+                <span class="text-[10px] text-purple-300 truncate">(${p.age}歳 / ${p.area || "東京"})</span>
+              </div>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                ${chemBadge}
+                ${scoreBadge}
+              </div>
             </div>
-            <div class="flex items-center gap-1 flex-shrink-0">
-              ${chemBadge}
-              ${scoreBadge}
+
+            <div class="flex items-center justify-between gap-1 pt-0.5">
+              <div class="flex items-center gap-1 flex-wrap min-w-0">
+                ${catBadge}
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <button type="button" onclick="giveStimulus('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：大人のおもちゃで密会度を急上昇" class="px-2 py-0.5 rounded-lg text-[10px] transition ${stimBtnClass} flex items-center gap-0.5">
+                  <span>💓</span><span>刺激</span>
+                </button>
+                <button type="button" onclick="giveGift('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：プレゼントで関係継続・破局防止" class="px-2 py-0.5 rounded-lg text-[10px] transition ${giftBtnClass} flex items-center gap-0.5">
+                  <span>🎁</span><span>贈物</span>
+                </button>
+                <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-2 py-0.5 rounded-lg text-[10px] transition ${breakBtnClass} flex items-center gap-0.5">
+                  <span>👋</span><span>別れ</span>
+                </button>
+              </div>
             </div>
+
+            <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words pt-1 border-t border-slate-800/60">${actionText}</div>
           </div>
-
-          <div class="flex items-center justify-between gap-1 pt-0.5">
-            <div class="flex items-center gap-1 flex-wrap min-w-0">
-              ${catBadge}
-            </div>
-            <div class="flex items-center gap-1.5 flex-shrink-0">
-              <button type="button" onclick="giveStimulus('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：大人のおもちゃで密会度を急上昇" class="px-2 py-0.5 rounded-lg text-[10px] transition ${stimBtnClass} flex items-center gap-0.5">
-                <span>💓</span><span>刺激</span>
-              </button>
-              <button type="button" onclick="giveGift('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：プレゼントで関係継続・破局防止" class="px-2 py-0.5 rounded-lg text-[10px] transition ${giftBtnClass} flex items-center gap-0.5">
-                <span>🎁</span><span>贈物</span>
-              </button>
-              <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-2 py-0.5 rounded-lg text-[10px] transition ${breakBtnClass} flex items-center gap-0.5">
-                <span>👋</span><span>別れ</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="text-slate-300 text-[10.5px] sm:text-[11px] leading-snug break-words pt-1 border-t border-slate-800/60">${actionText}</div>
         </div>
-      </div>
-    `;
-  });
-  listContainer.innerHTML = html;
-  appState.sim.monthlyHistory[mIdx] = { month: mIdx, calMonth, partners: monthLogRecord };
+      `;
+    });
+    listContainer.innerHTML = html;
+    appState.sim.monthlyHistory[mIdx] = { month: mIdx, calMonth, partners: monthLogRecord };
+  } catch(err) {
+    console.error("renderRealtimeMonthlyLog error:", err);
+  }
 }
 
-// 💓 刺激：大人のおもちゃ
 function giveStimulus(partnerId, e) {
   if (e) e.stopPropagation();
   if (appState.stats.budget <= 0) return;
@@ -818,14 +799,8 @@ function giveStimulus(partnerId, e) {
 
   playLimitBreakChime();
 
-  const stimulusTexts = [
-    "密かに用意した小さな小箱を開けると、相手は赤面しながらも熱っぽい瞳で頷いた。",
-    "家庭では絶対に口にできない秘密の道具をベッドへ。理性を吹き飛ばすほどの悦楽に溺れた。",
-    "『こんなの初めて…』とシーツを強く握りしめる相手を、時間を忘れて翻弄し尽くした。",
-    "背徳的な新しい刺激に火がつき、互いの理性が焼き切れるような熱狂の夜を過ごした。",
-    "密かに取り寄せたトイを試す夜。罪悪感と官能が混ざり合い、かつてないほど濃密に肌を重ねた。"
-  ];
-  partner.lastActionText = stimulusTexts[Math.floor(Math.random() * stimulusTexts.length)];
+  const textList = (typeof STIMULUS_TEXTS !== "undefined") ? STIMULUS_TEXTS : ["理性を吹き飛ばすほどの悦楽に溺れた。"];
+  partner.lastActionText = textList[Math.floor(Math.random() * textList.length)];
 
   const mIdx = appState.sim.currentMonth;
   const calMonth = (mIdx % 12) + 1;
@@ -833,7 +808,6 @@ function giveStimulus(partnerId, e) {
   renderRealtimeMonthlyLog(mIdx, calMonth);
 }
 
-// 🎁 贈物：プレゼント
 function giveGift(partnerId, e) {
   if (e) e.stopPropagation();
   if (appState.stats.budget <= 0) return;
@@ -848,242 +822,13 @@ function giveGift(partnerId, e) {
   partner.giftProtectedUntil = appState.sim.currentMonth + 6;
   playRareChime();
 
-  const giftTexts = [
-    "「こんな素敵なもの…本当にいいの？」と瞳を潤ませ、深く強く抱きついてきた。",
-    "欲しがっていたアクセサリーをサプライズ。二人の絆がより確固たるものになった。",
-    "隠れ家ホテルのディナーと記念の品を贈り、お互いが唯一無二の存在であることを確かめ合った。"
-  ];
-  partner.lastActionText = giftTexts[Math.floor(Math.random() * giftTexts.length)];
+  const textList = (typeof GIFT_TEXTS !== "undefined") ? GIFT_TEXTS : ["二人の絆がより確固たるものになった。"];
+  partner.lastActionText = textList[Math.floor(Math.random() * textList.length)];
 
   const mIdx = appState.sim.currentMonth;
   const calMonth = (mIdx % 12) + 1;
   updateLiveStats();
   renderRealtimeMonthlyLog(mIdx, calMonth);
-}
-
-// 逢瀬テキスト生成（お正月・年齢差・各月豊富テキスト）
-function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
-  const playerAge = typeof getRealAge === "function" ? getRealAge(appState.sim.currentMonth) : (appState.user.startAge || 40);
-  const ageDiff = partner.age - playerAge;
-  const isRemoteDate = (partner.tag === "夜間遠征") ? (Math.random() < 0.35) : (Math.random() < 0.15);
-
-  let candidatePool = [];
-
-  // ① 初アポ（交際2ヶ月以内）
-  if (partner.durationMonths <= 2) {
-    if (ageDiff <= -12) {
-      candidatePool = [
-        "初アポ。三軒茶屋のカジュアルなバル。年の差を意識して服装を選んだが、相手は自然体で笑ってくれた。",
-        "初ホテル。神楽坂のデザイナーズホテルへ。『緊張してる？』と若々しい瞳に覗き込まれた。",
-        "初アポ。人目の少ない渋谷の路地裏カフェで待ち合わせ。世代の違いに内心ドギマギする。",
-        "初ホテル。お互いの家庭の深入りは避けつつも、溢れる若さと肌の張りに圧倒された。"
-      ];
-    } else if (ageDiff >= 12) {
-      candidatePool = [
-        "初アポ。相手が手配してくれた銀座の隠れ家個室で乾杯。洗練された大人のエスコートに圧倒される。",
-        "初ホテル。落ち着いたシティホテルの高層階。大人の品格と包容力に包まれて身を委ねた。",
-        "初アポ。日本橋の静かなラウンジでお茶。落ち着いた語り口に、日常の緊張がほどけていく。",
-        "初ホテル。急かされることのない、優しく深みのある愛撫に大人の色香を感じた。"
-      ];
-    } else {
-      candidatePool = [
-        "初アポ。三軒茶屋の路地裏個室バルで乾杯。渋谷を避けるのが二人の暗黙ルール。",
-        "二子玉川のテラス席で平日ランチ。そのまま隣駅の静かなデイユースへ。",
-        "初ホテル。神楽坂の静かな隠れ家ホテルで、お互いの家庭を詮索せず抱き合った。",
-        "恵比寿の目立たないバーから、タクシーで隠れ家ホテルへ直行。",
-        "初アポ。品川駅の雑踏を抜け、予約していたホテルのカフェラウンジで静かに合流した。"
-      ];
-    }
-  } 
-  // ② 1月（お正月・新春テキスト）
-  else if (month === 1) {
-    candidatePool = [
-      "初詣の帰り道、人目を避けて待ち合わせ。新年の始まりを隠れ家ホテルで祝った。",
-      "お正月休みの合間、買い出しを口実に家族から抜け出し、熱い新春の逢瀬にすべてを捧げた。",
-      "「今年もよろしくね」とホテルで静かに祝杯をあげ、誰にも知られない二人の一年をスタートさせた。",
-      "冷え込む新春の午後。コートを脱ぎ捨て、温もりを確かめ合うように貪欲に抱き合った。"
-    ];
-  } 
-  // ③ 遠征デート
-  else if (isRemoteDate) {
-    candidatePool = [
-      "有休を重ねて急遽、ロマンスカーで箱根温泉へ日帰り逃避行。",
-      "熱海のオーシャンビューホテル。波音を聞きながら誰にも言えない午後を過ごした。",
-      "レンタカーで湘南・三浦半島へ海沿いドライブ。夕暮れの車内で手を重ねた。",
-      "人目を避けて舞浜・お台場のリゾートホテルへ。現実を忘れて深く肌を重ねた。",
-      "新幹線で軽井沢へ。避暑地の冷たい空気の中、コートに隠れて指を絡め合った。",
-      "横浜みなとみらいの夜景が見える高層ホテル。日常を遠く置き去りにして抱き合う。"
-    ];
-  } 
-  // ④ 年齢差特化テキスト（約40%）
-  else if (Math.random() < 0.40 && (ageDiff <= -8 || ageDiff >= 8)) {
-    if (ageDiff <= -15) {
-      candidatePool = [
-        "『実は親とほとんど同年代なんです』と悪戯っぽく笑われ、背徳感のままシーツを強く掴んだ。",
-        "ベッドで容赦なく求められ、圧倒的な体力差を痛感しながらも若き熱情にすべてを委ねた。",
-        "流行りのカフェでスイーツを口元に運ばれ、周囲の若い視線を気にしながら苦笑い。",
-        "『大人の余裕がある人が好き』と囁かれ、背伸びしてホテルの上層階バーでグラスを傾けた。",
-        "無防備な寝顔を見つめながら、背負っている家庭の重さと甘い罪悪感を噛み締めた。"
-      ];
-    } else if (ageDiff <= -8) {
-      candidatePool = [
-        "無邪気なLINEのスタンプ連打に翻弄されつつ、仕事の合間を縫ってホテル街へ駆け込んだ。",
-        "人目を避けて選んだ郊外のドライブイン。車内でスマホの音楽を共有しながら手を重ねた。",
-        "『普段は奥さんに甘えられないんでしょ？』と小悪魔のように囁かれ、理性が揺らいだ。",
-        "少し背伸びしたブランドの香水を纏ってきた相手を、愛おしく抱き寄せた。"
-      ];
-    } else if (ageDiff >= 15) {
-      candidatePool = [
-        "銀座の老舗割烹の個室で舌鼓。家庭では絶対に味わえない落ち着いた時間とお酒に酔いしれる。",
-        "クラシックホテルの静寂な客室。急かされない、ゆったりと深みのある濃密な愛撫に身を委ねた。",
-        "『あなたといると、あの頃の青春を取り戻せる』と愛おしそうに頬に手を添えられた。",
-        "洗練された所作と香水の残り香に大人の色香を感じながら、静かに肌の温もりを確かめ合った。",
-        "人生の酸いも甘いも知るパートナーの柔らかな微笑みに、張り詰めていた心が完全に解けた。"
-      ];
-    } else {
-      candidatePool = [
-        "『無理しなくていいのよ』と優しく頭を撫でられ、日頃のプレッシャーがシーツの上で溶けていった。",
-        "鎌倉の隠れ家古民家で雨宿り。人目を気にせず、落ち着いた大人の逃避行を堪能した。",
-        "家庭や仕事の愚痴を静かに受け止めてもらい、心も身体も深く満たされる午後を過ごした。",
-        "静かなバーで並んで座り、触れるか触れないかの距離感で交わす視線に胸が高鳴った。"
-      ];
-    }
-  } 
-  // ⑤ 季節・通常月テキスト
-  else {
-    switch (month) {
-      case 2:
-        candidatePool = [
-          "人目を盗んで小さな高級チョコを手渡され、甘い余韻のままホテルへ。",
-          "「本命にはあげられないから」とホテルでチョコを渡され、深く唇を重ねた。",
-          "バレンタイン直後の平日。お互いの家庭のイベントをやり過ごした労をねぎらい合う。",
-          "寒空の下、コートのポケットの中でそっと指を絡め合いながらホテル街へ向かった。"
-        ];
-        break;
-      case 3:
-        candidatePool = [
-          "年度末の繁忙期、仕事帰りに駆け込みで隠れ家ホテルのデイユースへ。",
-          "春風の冷たい夜、お互いの仕事の愚痴や家庭の疲れをベッドで癒やし合う。",
-          "異動や環境の変化を口実に、夜遅くまで連絡を取り合い逢瀬の約束を取り付けた。",
-          "年度末の喧騒を抜け出し、静かなホテルの一室で時間を忘れて抱き合った。"
-        ];
-        break;
-      case 4:
-        candidatePool = [
-          "人通りの少ない目黒川の裏通りで、息を潜めて夜桜を眺めたあとホテルへ。",
-          "桜の舞い散る午後。有休を合わせた隠れ家ホテルで穏やかな春の逢瀬。",
-          "新年度の慌ただしさから逃れるように、昼下がりのホテルで濃密な2時間を過ごす。",
-          "薄着になり始めた季節。久しぶりに見る肌の白さに息を呑んだ。"
-        ];
-        break;
-      case 5:
-        candidatePool = [
-          "連休明けの平日昼下がり、家庭の重圧から解放されて飢えたように抱き合う。",
-          "初夏の爽やかな風が吹くテラス席で待ち合わせ、そのまま隣駅の定宿へ。",
-          "ゴールデンウィークの家族サービスで擦り減った心を、ホテルで優しく埋め合わせた。",
-          "新緑の並木道を人目を気にしながら歩き、足早にいつもの隠れ家へ入った。"
-        ];
-        break;
-      case 6:
-        candidatePool = [
-          "ゲリラ豪雨を口実に、急遽シティホテルのデイユースへ駆け込み雨宿りの逢瀬。",
-          "梅雨の湿気と背徳の熱気が混ざり合い、いつもより濃厚に肌を重ねた。",
-          "雨音で外の気配がかき消されるホテルの部屋。世界に二人きりになった錯覚を覚える。",
-          "相合傘で歩くわずかな距離。肩が触れ合うたびに背徳の快感が走った。"
-        ];
-        break;
-      case 7:
-        candidatePool = [
-          "薄着の季節。「肌が綺麗だね」とホテルのシーツの上で囁かれた。",
-          "冷房の効いたホテルの部屋で、火照った身体を重ね合って涼を取る。",
-          "夕暮れのビールで喉を潤し、熱帯夜の街を避けてホテルの暗闇へと逃げ込んだ。",
-          "日焼けした肌の境界線に指を滑らせ、背徳的な夏の逢瀬に溺れた。"
-        ];
-        break;
-      case 8:
-        candidatePool = [
-          "お盆の帰省期間。家族サービスの合間を縫い、わずか1時間の熱い逢瀬にすべてを賭けた。",
-          "猛暑の午後。お互いのアリバイを完璧に固めてから、涼しい隠れ家ホテルで密会。",
-          "夏の夜風に吹かれながら、家庭に戻る直前の寂しさを紛らわせるように抱き合った。",
-          "家族旅行の土産話を苦笑い混じりに聞きながら、ベッドの上で唇を奪い合う。"
-        ];
-        break;
-      case 9:
-        candidatePool = [
-          "少し涼しくなった夜、あてもなく夜風に吹かれながら郊外の隠れ家ホテルへ。",
-          "夏の終わりを感じさせる虫の声。どこか切ない気分のまま、深く肌を重ねた。",
-          "秋の気配が漂う夕暮れ時。仕事終わりのわずかな隙間に濃密な時間を過ごした。",
-          "お互いの家庭の秋の行事の予定を確認し合いながら、密会の合間を縫う相談をした。"
-        ];
-        break;
-      case 10:
-        candidatePool = [
-          "平日に有休を合わせ、隠れ家個室の和食ランチを楽しんだあといつものホテルへ。",
-          "秋晴れの爽やかな午後。人目を避けて選んだホテルで、贅沢な時間を貪る。",
-          "「最近、少し痩せた？」と心配そうに首筋にキスを落とされた。",
-          "落ち着いた秋の夜。ワインを嗜みながら、誰にも言えない秘密の会話を交わした。"
-        ];
-        break;
-      case 11:
-        candidatePool = [
-          "寒くなった手を、コートのポケットの中でそっと握り合ってホテルへ急いだ。",
-          "冬の訪れを感じる冷たい空気の中、温め合うように激しく求め合った。",
-          "マフラーに相手の香水の匂いが微かに残り、帰りの電車で慌てて消した。",
-          "「もうすぐ年末だね」と少し寂しげな瞳で見つめられ、強く抱きしめ返した。"
-        ];
-        break;
-      case 12:
-        candidatePool = [
-          "忘年会の口実をフル活用し、終電を気にせずホテルで今年最後の密会を堪能した。",
-          "クリスマス直前の平日。街のイルミネーションを横目に、秘密の部屋へ滑り込む。",
-          "家庭では絶対に話せない1年間の裏の歴史を振り返りながら、二人で静かに乾杯した。",
-          "年の瀬の慌ただしさを抜け出し、誰にも邪魔されない至福の時間を過ごした。"
-        ];
-        break;
-      default:
-        candidatePool = [
-          "個室ディナーのあと、タクシーを拾っていつもの隠れ家ホテルで濃密な2時間。",
-          "平日昼下がりのデイユース。日常の現実をカーテンで遮断し、深く肌を重ねた。"
-        ];
-    }
-  }
-
-  let availableChoices = candidatePool.filter(t => !usedTexts.has(t));
-
-  // 候補枯渇時のバックアップ（25種）
-  if (availableChoices.length === 0) {
-    const backupPool = [
-      "隠れ家ホテルの静寂の中、お互いの存在だけを確かめ合うように深く抱き合った。",
-      "家庭の愚痴も仕事の重圧も、シーツの温もりの中にすべて溶けて消えていった。",
-      "「会いたかった…」と部屋に入った瞬間に抱きつかれ、激しく唇を奪われた。",
-      "人目を気にして足早に別れたが、手のひらには相手の温もりがいつまでも残っていた。",
-      "お互いのアリバイを確認し合い、完璧な秘密を守り抜くスリルと快感に酔いしれた。",
-      "誰にも言えない関係だからこそ、わずか数時間の逢瀬が何倍もの輝きを放つ。",
-      "ホテルの薄暗い照明の下、日常の顔を脱ぎ捨てて本能のままに愛し合った。",
-      "別れ際、エレベーターの前で交わした名残惜しそうな視線が脳裏に焼き付いている。",
-      "罪悪感と恍惚が背中合わせの密会。この背徳こそが、生きている実感を呼び覚ます。",
-      "仕事帰りの駅のホーム、すれ違いざまに目配せをしてから時間差でホテル街へ向かった。",
-      "互いのスマホをマナーモードにして、現実世界のすべてをシャットアウトした午後。",
-      "「私たち、いつまでこうしていられるのかな」と呟かれ、答えの代わりに強く抱きしめた。",
-      "人目につかない路地裏の個室カフェで密会。テーブルの下でそっと足が触れ合う。",
-      "シャワーを浴びて日常の匂いを完璧に落とし、お互い何食わぬ顔でそれぞれの家庭へ戻った。",
-      "平日昼の静かなホテル街。誰にも見咎められない暗黙の聖域で、心行くまで愛を交わす。",
-      "「奥さんには内緒ね」と悪戯っぽく微笑まれ、甘い毒を飲まされたように溺れていく。",
-      "背徳の逢瀬を終えたあとの心地よい疲労感。明日からの日常を生き延びる糧を手に入れた。",
-      "急な呼び出しにも関わらず、駆けつけてくれた相手の健気さに胸が熱くなった。",
-      "タクシーの後部座席、運転手の目を盗んでコートの下でそっと手を重ねた。",
-      "家庭での役割をすべて忘れ、ただの一人の男と女として貪り合う至極の時間。",
-      "ホテルのシーツを強く握りしめ、声にならない声を漏らしながら絶頂を迎えた。",
-      "スマートフォンの通知に怯えながらも、目の前の温もりからどうしても離れられない。",
-      "お互いの家庭の平和を願うからこそ、この部屋の秘密だけは絶対に墓場まで持っていく。",
-      "帰り道の冷たい夜風が、火照った身体と秘密の余韻をゆっくりと冷ましていく。",
-      "「また来月ね」と小さく手を振る姿を見送り、胸の奥に灯った背徳の炎を確かめた。"
-    ];
-    availableChoices = backupPool.filter(t => !usedTexts.has(t));
-    if (availableChoices.length === 0) availableChoices = backupPool;
-  }
-
-  return availableChoices[Math.floor(Math.random() * availableChoices.length)];
 }
 
 function showClickMonthDetail(mIdx) {
@@ -1289,32 +1034,6 @@ function retireFromTwoYear() {
   finishSimulation();
 }
 
-function generateLastLineText(partner, isPartnerMale, isStillActive) {
-  if (isStillActive) {
-    return isPartnerMale
-      ? "「5年経った今でも、あなたといる時間が一番落ち着くよ。これからもずっとよろしくね。」"
-      : "「5年経った今でも、あなたと過ごす温もりは少しも色褪せないよ。これからもずっと一緒にいようね。」";
-  }
-  if (partner.durationMonths >= 60) {
-    return isPartnerMale
-      ? "「5年もの長い間、俺だけを想い続けてくれてありがとう。お前は俺の裏の人生最高の誇りだよ。」"
-      : "「5年以上もの長い月日、私の人生のすべてを彩ってくれて本当にありがとう。あなたに出会えた奇跡を一生忘れません。」";
-  }
-  if (partner.maxSexScore >= 150) {
-    return isPartnerMale
-      ? "「お前と過ごしたベッドの熱気、生涯墓場まで持っていく最高の宝物だ。女として幸せにしてくれてありがとう。」"
-      : "「あんなに激しく魂まで奪われたのは、後にも先にもあなただけでした。一生消えない甘い傷痕を残してくれてありがとう。」";
-  }
-  if (partner.chemistry === "S") {
-    return isPartnerMale
-      ? "「生まれ変わったら、必ず俺がお前を一番に見つける。男としての自信を取り戻せた最高の宝物だった。」"
-      : "「生まれ変わったら奥さんより先に私を一番に見つけてね……本当に幸せだったよ。」";
-  }
-  return isPartnerMale
-    ? "「父親・夫の役目に戻るよ。短い間だったけど、本当に楽しかった。ありがとう。」"
-    : "「ごめんね、今は母親に戻らなきゃいけないの。今まで本当にありがとう。」";
-}
-
 function sortPartnersHistory(type) {
   currentHistorySortType = type;
   const btnDur = document.getElementById("sortBtnDuration");
@@ -1488,7 +1207,9 @@ function calculateAndRenderResult() {
   const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null };
   
   const isLongestActive = (longestP.endMonth === null || longestP.endMonth >= 60);
-  longestP.lastLine = generateLastLineText(longestP, isTargetPartnerMale, isLongestActive);
+  longestP.lastLine = (typeof generateLastLineText === "function") 
+    ? generateLastLineText(longestP, isTargetPartnerMale, isLongestActive) 
+    : "「今までありがとう。日常に戻るね。」";
 
   const longImg = document.getElementById("longestPartnerImg");
   if (longImg) longImg.src = AvatarCacheManager.get(longestP.avatarId);

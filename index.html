@@ -554,18 +554,18 @@
         </button>
       </div>
 
-      <!-- アクションボタン群 -->
+     <!-- アクションボタン群（𝕏シェア → リプレイ → 画像保存の順） -->
       <div class="space-y-2.5 pt-2">
-        <button onclick="generateSquareCard()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
-          <span>📷 成績表カードを画像保存（1080×1080）</span>
-        </button>
-
-        <button onclick="shareOnX()" class="w-full py-3 px-6 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 transition active:scale-95 flex items-center justify-center gap-2">
+        <button onclick="shareOnX()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-100 shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
           <span>𝕏 で結果をポスト・シェア</span>
         </button>
 
         <button onclick="restartApp()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-800 via-indigo-800 to-slate-900 hover:from-purple-700 hover:to-indigo-700 text-white border border-purple-500/50 shadow-xl transition active:scale-95 flex items-center justify-center gap-2">
           <span>↺ もう一度最初からプレイする</span>
+        </button>
+
+        <button onclick="generateSquareCard()" class="w-full py-2.5 px-6 rounded-xl font-bold text-xs bg-slate-950/80 hover:bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 transition active:scale-95 flex items-center justify-center gap-2">
+          <span>📷 成績表カードを画像保存（1080×1080）</span>
         </button>
       </div>
     </section>

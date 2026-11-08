@@ -317,7 +317,6 @@ function updateLiveStats() {
     totalCountEl.innerText = `${appState.sim.partners.length}人`;
   }
 
-  // 進行画面の家庭ケアボタン状態（活動費2以上 ＆ 警戒度2以上で活性化）
   const btnCare = document.getElementById("btnLiveFamilyCare");
   if (btnCare) {
     const canCare = (appState.stats.budget >= 2 && appState.stats.spouseAlert > 1);
@@ -899,7 +898,7 @@ function onMilestoneStyleChange() {
   }
 }
 
-// 1年ごとマイルストーンモーダル描画（全件表示・家庭ケア削除・連打ガード付き）
+// 1年ごとマイルストーンモーダル描画
 function renderYearlyMilestoneModal() {
   const mIdx = appState.sim.currentMonth;
   const currentAge = getRealAge(mIdx);
@@ -912,7 +911,6 @@ function renderYearlyMilestoneModal() {
   const tagEl = document.getElementById("milestoneHeaderTag");
   if (tagEl) tagEl.innerText = `${yearIndex}年目（${mIdx}ヶ月）の節目`;
 
-  // サマリー
   const totalEl = document.getElementById("twoYearSummaryTotal");
   if (totalEl) totalEl.innerText = `${appState.sim.partners.length}人`;
   const sortedByDur = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
@@ -921,7 +919,6 @@ function renderYearlyMilestoneModal() {
   const scoreEl = document.getElementById("twoYearSummaryScore");
   if (scoreEl) scoreEl.innerText = `${appState.sim.globalMaxSexScore} pt`;
 
-  // 継続中パートナー全員をスクロールなしで全件表示
   renderActivePartnersListInMilestone();
 
   const incEl = document.getElementById("milestoneIncomeReport");
@@ -934,7 +931,6 @@ function renderYearlyMilestoneModal() {
 
   onMilestoneStyleChange();
 
-  // 【連打スキップ防止ガード】モーダル出現後0.6秒間は進行ボタンをロック
   const btnResume = document.getElementById("btnResumeNextYear");
   if (btnResume) {
     btnResume.disabled = true;
@@ -1060,12 +1056,13 @@ function sortPartnersHistory(type) {
   renderAllPartnersList(type);
 }
 
+// 交際履歴一覧（年齢は若い順：昇順）
 function renderAllPartnersList(sortType = "duration") {
   let sorted = [...appState.sim.partners];
   if (sortType === "duration") {
     sorted.sort((a, b) => b.durationMonths - a.durationMonths);
   } else if (sortType === "age") {
-    sorted.sort((a, b) => b.startAge - a.startAge);
+    sorted.sort((a, b) => a.startAge - b.startAge); // 若い順（昇順）
   } else if (sortType === "score") {
     sorted.sort((a, b) => (b.maxSexScore || 0) - (a.maxSexScore || 0));
   }
@@ -1168,6 +1165,7 @@ function calculateAndRenderResult() {
   const badgeListEl = document.getElementById("resAchieveBadgeList");
   if (badgeListEl) badgeListEl.innerHTML = badgesHtml;
 
+  // 称号・エンディング判定（年下・年上の単独判定を追加）
   let title = "『首都圏の彷徨い人』";
   let desc = "首都圏の喧騒の中、家庭と日常の狭間で静かに駆け抜けた5年間。";
 
@@ -1183,6 +1181,12 @@ function calculateAndRenderResult() {
   } else if (hasOlder20 && hasYounger20) {
     title = "『世代超越の覇王』";
     desc = "20歳以上年上の品格と、20歳以上年下の情熱。極限の年齢差を双方魅了し尽くした奇跡の存在。";
+  } else if (hasYounger20) {
+    title = "『若き情熱の略奪者』";
+    desc = "親子ほど年の離れた若き熱情に溺れ、加齢の現実を忘れ去るほどの背徳的な逢瀬を駆け抜けた。";
+  } else if (hasOlder20) {
+    title = "『深淵の包擁者』";
+    desc = "人生の酸いも甘いも噛み分けた年長者の深い包容力に身を委ね、成熟した大人の関係を紡ぎ抜いた。";
   } else if (ach100Kills) {
     title = "『首都圏の婚外修羅』";
     desc = "5年間で100人以上の異性と関係を紡ぎ、夜の首都圏を完全に支配した伝説のアチーブメント。";

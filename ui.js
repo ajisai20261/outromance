@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（完全版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（新ブースト仕様 完全版）
    ============================================================ */
 
 /* --- AvatarCacheManager ブリッジ（avatars.js の実データを直接バインド） --- */
@@ -349,9 +349,13 @@ function updateLiveStats() {
   const maxP = appState.stats.maxPartners || 2;
   const activeCount = appState.sim.activePartnerIds.length;
   const activeCountEl = document.getElementById("simActiveCount");
-  if (activeCountEl) activeCountEl.innerText = `${activeCount}/${maxP}人`;
+  if (activeCountEl) {
+    activeCountEl.innerText = `${activeCount}/${maxP}人`;
+  }
   const totalCountEl = document.getElementById("simTotalPartners");
-  if (totalCountEl) totalCountEl.innerText = `${appState.sim.partners.length}人`;
+  if (totalCountEl) {
+    totalCountEl.innerText = `${appState.sim.partners.length}人`;
+  }
 
   const btnBoost = document.getElementById("btnBoostMatching");
   if (btnBoost) {
@@ -376,6 +380,7 @@ function updateLiveStats() {
   }
 }
 
+// 🆙ブースト機能：マチアプ高額プラン仕様（基本1人確定＋能力依存の追加マッチ）
 function triggerBoostMatching(e) {
   if (e) e.stopPropagation();
   if (appState.stats.budget < 2) return;
@@ -387,19 +392,48 @@ function triggerBoostMatching(e) {
 
   const emptySlots = 4 - appState.sim.activePartnerIds.length;
   const currentRealAge = getRealAge(appState.sim.currentMonth);
+  const isUserMale = (appState.user.gender === "male");
   const matchedList = [];
 
-  for (let i = 0; i < emptySlots; i++) {
-    const newP = createSynthesizedPartner(appState.sim.currentMonth, currentRealAge);
-    newP.lastSexScore = (typeof calculateSexScore === "function") ? calculateSexScore(newP, (appState.sim.currentMonth % 12) + 1, false, 0) : 60;
-    newP.maxSexScore = newP.lastSexScore;
-    appState.sim.partners.push(newP);
-    appState.sim.activePartnerIds.push(newP.id);
-    appState.sim.totalPartnerCounter++;
-    matchedList.push(newP);
+  // ① 基本1人確定マッチング（高額プラン保証枠）
+  const p1 = createSynthesizedPartner(appState.sim.currentMonth, currentRealAge);
+  p1.lastSexScore = (typeof calculateSexScore === "function") ? calculateSexScore(p1, (appState.sim.currentMonth % 12) + 1, false, 0) : 60;
+  p1.maxSexScore = p1.lastSexScore;
+  appState.sim.partners.push(p1);
+  appState.sim.activePartnerIds.push(p1.id);
+  appState.sim.totalPartnerCounter++;
+  matchedList.push(p1);
 
-    if (newP.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
-    if (newP.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
+  if (p1.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
+  if (p1.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
+
+  // ② 追加枠の確率計算（ステータス反映）
+  const extraSlots = emptySlots - 1;
+  if (extraSlots > 0) {
+    let extraChance = 0.40;
+    if (isUserMale) {
+      extraChance += (appState.stats.budget - 2) * 0.08;
+      extraChance += (appState.stats.looks - 4) * 0.05;
+    } else {
+      extraChance += (appState.stats.looks - 4) * 0.10;
+      extraChance += (appState.stats.budget - 2) * 0.03;
+    }
+    extraChance = Math.max(0.20, Math.min(0.85, extraChance));
+
+    for (let i = 0; i < extraSlots; i++) {
+      if (Math.random() < extraChance) {
+        const extraP = createSynthesizedPartner(appState.sim.currentMonth, currentRealAge);
+        extraP.lastSexScore = (typeof calculateSexScore === "function") ? calculateSexScore(extraP, (appState.sim.currentMonth % 12) + 1, false, 0) : 60;
+        extraP.maxSexScore = extraP.lastSexScore;
+        appState.sim.partners.push(extraP);
+        appState.sim.activePartnerIds.push(extraP.id);
+        appState.sim.totalPartnerCounter++;
+        matchedList.push(extraP);
+
+        if (extraP.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
+        if (extraP.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
+      }
+    }
   }
 
   playLimitBreakChime();
@@ -629,15 +663,21 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
   const largeBadge = document.getElementById("largeSpouseAlertBadge");
   const sitEl = document.getElementById("spouseSituationLog");
 
-  if (largeVal) largeVal.innerText = `Lv.${alertLv}/5`;
+  if (largeVal) {
+    largeVal.innerText = `Lv.${alertLv}/5`;
+  }
 
   if (alertLv >= 5) {
     if (alertBadge) {
       alertBadge.innerText = "🚨 離婚危機";
       alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500 font-black animate-ping";
     }
-    if (largeBadge) largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/80 border border-rose-500 animate-pulse flex-shrink-0";
-    if (largeVal) largeVal.className = "text-[10.5px] font-black text-rose-300";
+    if (largeBadge) {
+      largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/80 border border-rose-500 animate-pulse flex-shrink-0";
+    }
+    if (largeVal) {
+      largeVal.className = "text-[10.5px] font-black text-rose-300";
+    }
     if (sitEl) sitEl.innerText = "家庭内は完全な臨戦態勢。スマホの着信音ひとつで怒号が飛ぶ。";
   } else if (isCrisis || alertLv === 4) {
     if (!isSilent && !appState.sim.isSkipping && !appState.sim.isPaused) {
@@ -653,8 +693,12 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
       alertBadge.innerText = "⚠️ 身バレ危機";
       alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700 animate-pulse";
     }
-    if (largeBadge) largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/60 border border-rose-600 flex-shrink-0";
-    if (largeVal) largeVal.className = "text-[10.5px] font-black text-rose-400";
+    if (largeBadge) {
+      largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/60 border border-rose-600 flex-shrink-0";
+    }
+    if (largeVal) {
+      largeVal.className = "text-[10.5px] font-black text-rose-400";
+    }
     const spouseEvents = [
       "休日の夕方、スマホの通知を凝視され冷や汗が流れた。",
       "「最近、怪しい用事多くない？」と真顔で問い詰められた。",
@@ -667,8 +711,12 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
       alertBadge.innerText = (activeCount > 2) ? "多忙密会" : "平穏";
       alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40";
     }
-    if (largeBadge) largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 flex-shrink-0";
-    if (largeVal) largeVal.className = "text-[10.5px] font-black text-amber-400";
+    if (largeBadge) {
+      largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 flex-shrink-0";
+    }
+    if (largeVal) {
+      largeVal.className = "text-[10.5px] font-black text-amber-400";
+    }
     if (sitEl && sitEl.innerText.indexOf("家族サービス") === -1) {
       sitEl.innerText = "平穏な週末。特に怪しまれる様子はない。";
     }

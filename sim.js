@@ -1,13 +1,13 @@
 /* ============================================================
-   sim.js - OUTROMANCE コアシミュレーション（5年制・1年ごとマイルストーン）
+   sim.js - OUTROMANCE コアシミュレーション（5年制・年齢距離減衰・スペック連動）
    ============================================================ */
 
 window.appState = window.appState || {
-  user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 50, birthMonth: 1, selectedStyle: "balanced" },
+  user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 40, birthMonth: 1, selectedStyle: "balanced" },
   stats: { looks: 5, libido: 5, stamina: 5, budget: 4, income: 5, childBurden: 5, spouseAffection: 5, spouseAlert: 3, targetAgePref: "same", maxPartners: 2 },
   tempPoints: 0,
   sim: {
-    currentMonth: 0, currentAge: 50, isPaused: false, isSkipping: false,
+    currentMonth: 0, currentAge: 40, isPaused: false, isSkipping: false,
     partners: [], activePartnerIds: [], totalPartnerCounter: 0,
     monthlyHistory: [], isRetired: false, isDivorced: false, lastMilestoneMonth: -1,
     globalMaxSexScore: 0, highestScorePartner: null,
@@ -19,7 +19,7 @@ var appState = window.appState;
 
 // 誕生月が1月固定のため、開始月（1月）と加齢が完全に一致
 function getRealAge(mIdx) {
-  const startAge = appState.user.startAge || 50;
+  const startAge = appState.user.startAge || 40;
   return startAge + Math.floor(mIdx / 12);
 }
 
@@ -52,6 +52,53 @@ function calculateSexScore(partner, month, isCrisis, prefBonus = 0) {
   return Math.max(10, Math.round(base + libidoBonus + masteryBonus + eventBonus + thrillBonus + prefBonus));
 }
 
+// 年齢抽選ロジック：±3歳は高確率均等、以降は指数減衰。外見(looks)と活動費(budget)が高いほど極端な年齢差が出現しやすい
+function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
+  const userGender = appState.user.gender;
+  const looks = appState.stats.looks || 5;
+  const budget = appState.stats.budget || 2;
+
+  // 減衰許容度（スペックが高いほど極端な年齢差を引き込みやすい）
+  let spreadPower = 1.0;
+  if (userGender === "male") {
+    spreadPower += (budget - 2) * 0.15 + (looks - 4) * 0.10;
+  } else {
+    spreadPower += (looks - 4) * 0.22 + (budget - 2) * 0.05;
+  }
+  spreadPower = Math.max(0.6, Math.min(2.2, spreadPower));
+
+  // ±3歳以内の判定（基本45%〜スペックで最大65%が近距離に収縮）
+  const isNear = (Math.random() < (0.42 / spreadPower));
+
+  if (targetPref === "same") {
+    if (isNear) {
+      const delta = Math.floor(Math.random() * 7) - 3; // -3 〜 +3
+      return Math.max(18, Math.min(85, playerAge + delta));
+    }
+    // ±4歳以上の減衰抽選
+    const sign = Math.random() < 0.5 ? 1 : -1;
+    const rawGap = 4 + Math.floor(Math.pow(Math.random(), 1.8 / spreadPower) * 22);
+    return Math.max(18, Math.min(85, playerAge + sign * rawGap));
+  } else if (targetPref === "younger") {
+    if (isNear) {
+      const delta = Math.floor(Math.random() * 4); // 0 〜 -3
+      return Math.max(18, playerAge - delta);
+    }
+    // 年下方向への減衰抽選（スペックが高いと20歳以上下も出現）
+    const rawGap = 4 + Math.floor(Math.pow(Math.random(), 1.6 / spreadPower) * 24);
+    return Math.max(18, playerAge - rawGap);
+  } else {
+    // older
+    if (isNear) {
+      const delta = Math.floor(Math.random() * 4); // 0 〜 +3
+      return Math.min(85, playerAge + delta);
+    }
+    // 年上方向への減衰抽選（スペックが高いと20歳以上上も出現）
+    const rawGap = 4 + Math.floor(Math.pow(Math.random(), 1.6 / spreadPower) * 24);
+    return Math.min(85, playerAge + rawGap);
+  }
+}
+
 function createSynthesizedPartner(startMonth, playerAge) {
   const isTargetMale = (appState.user.gender === "female");
   const prefix = isTargetMale ? "M" : "F";
@@ -63,21 +110,8 @@ function createSynthesizedPartner(startMonth, playerAge) {
   const areaList = AREAS_NO_STATION.tokyo;
   const area = `東京・${areaList[Math.floor(Math.random() * areaList.length)]}`;
 
-  let partnerAge = playerAge;
-  const targetPref = appState.stats.targetAgePref;
-
-  if (targetPref === "younger") {
-    if (Math.random() < 0.70) partnerAge = Math.max(18, playerAge - Math.floor(3 + Math.random() * 6));
-    else if (Math.random() < 0.60) partnerAge = Math.max(18, playerAge - Math.floor(9 + Math.random() * 10));
-    else partnerAge = Math.max(18, playerAge - Math.floor(20 + Math.random() * 8));
-  } else if (targetPref === "older") {
-    if (Math.random() < 0.70) partnerAge = Math.min(85, playerAge + Math.floor(3 + Math.random() * 6));
-    else if (Math.random() < 0.60) partnerAge = Math.min(85, playerAge + Math.floor(9 + Math.random() * 10));
-    else partnerAge = Math.min(85, playerAge + Math.floor(20 + Math.random() * 8));
-  } else {
-    if (Math.random() < 0.75) partnerAge = Math.max(18, Math.min(85, playerAge + Math.floor(Math.random() * 7) - 3));
-    else partnerAge = Math.max(18, Math.min(85, playerAge + Math.floor(Math.random() * 11) - 5));
-  }
+  const targetPref = appState.stats.targetAgePref || "same";
+  const partnerAge = rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale);
 
   const name = pickGenerationalName(targetGender, partnerAge);
   const tag = pickPartnerTag(partnerAge, job);

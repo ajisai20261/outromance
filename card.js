@@ -1,5 +1,5 @@
 /* ============================================================
-   card.js - OUTROMANCE 成績表カード生成 ＆ SNS連携（最新3項目対応・完全版）
+   card.js - OUTROMANCE 成績表カード生成 ＆ SNS連携（安全化完全版）
    ============================================================ */
 
 async function generateSquareCard() {
@@ -64,7 +64,7 @@ async function generateSquareCard() {
   const familyStatusStr = appState.sim.isDivorced ? "家庭崩壊・離婚" : "配偶者と同居中";
   ctx.fillText(`${appState.user.name}（${appState.user.startAge}歳→${finalAge}歳 / 東京） ${familyStatusStr}`, 72, 304);
 
-  // 主要記録（年収枠を撤廃し、画面と同じ3項目横並びレイアウト）
+  // 主要記録（画面と同じ3項目横並びレイアウト）
   const totalCountStr = document.getElementById("resTotalCount")?.innerText || `${appState.sim.partners.length}人`;
   const sexCountStr = document.getElementById("resSexCount")?.innerText || "0回";
   const totalHoursStr = document.getElementById("resTotalHours")?.innerText || "0時間";
@@ -128,7 +128,7 @@ async function generateSquareCard() {
 
   // パートナー枠（最長交際 ＆ 最高密会度スコア）
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-  const longestP = sortedByDuration[0] || { name: "なし", durationMonths: 0, area: "東京", avatarId: "F01", tag: "平日昼", endMonth: null };
+  const longestP = sortedByDuration[0] || { name: "なし", durationMonths: 0, area: "東京", avatarId: "F01", tag: "平日昼", endMonth: null, color: "#a855f7" };
   const highestScoreP = appState.sim.highestScorePartner || longestP;
 
   ctx.imageSmoothingEnabled = false;
@@ -140,7 +140,9 @@ async function generateSquareCard() {
   ctx.strokeRect(72, 660, 440, 245);
 
   const longestImg = new Image();
-  longestImg.src = AvatarCacheManager.get(longestP.avatarId);
+  longestImg.src = (typeof getSafeAvatarSrc === "function") 
+    ? getSafeAvatarSrc(longestP.avatarId, longestP.name, longestP.color) 
+    : (AvatarCacheManager.get(longestP.avatarId) || "");
   ctx.drawImage(longestImg, 92, 682, 56, 56);
 
   ctx.fillStyle = "#f472b6";
@@ -162,7 +164,9 @@ async function generateSquareCard() {
   ctx.strokeRect(532, 660, 476, 245);
 
   const highestImg = new Image();
-  highestImg.src = AvatarCacheManager.get(highestScoreP.avatarId);
+  highestImg.src = (typeof getSafeAvatarSrc === "function") 
+    ? getSafeAvatarSrc(highestScoreP.avatarId, highestScoreP.name, highestScoreP.color) 
+    : (AvatarCacheManager.get(highestScoreP.avatarId) || "");
   ctx.drawImage(highestImg, 552, 682, 56, 56);
 
   ctx.fillStyle = "#fbbf24";

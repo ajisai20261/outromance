@@ -1,5 +1,5 @@
 /* ============================================================
-   card.js - OUTROMANCE 成績表カード生成 ＆ SNS連携（最新3項目対応）
+   card.js - OUTROMANCE 成績表カード生成 ＆ SNS連携（最新3項目対応・完全版）
    ============================================================ */
 
 async function generateSquareCard() {
@@ -50,7 +50,7 @@ async function generateSquareCard() {
   ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
   ctx.fillText("歴史〜", 72 + preW + uraW, 182);
 
-  // 称号表示
+  // 称号表示（リザルト画面のバッジテキストを同期反映）
   const titleEl = document.getElementById("resTitleBadge");
   const title = titleEl ? titleEl.innerText : "『首都圏の彷徨い人』";
   ctx.fillStyle = "#fef08a";
@@ -64,7 +64,7 @@ async function generateSquareCard() {
   const familyStatusStr = appState.sim.isDivorced ? "家庭崩壊・離婚" : "配偶者と同居中";
   ctx.fillText(`${appState.user.name}（${appState.user.startAge}歳→${finalAge}歳 / 東京） ${familyStatusStr}`, 72, 304);
 
-  // 主要記録（年収を削除し、横3枠で綺麗に配置）
+  // 主要記録（年収枠を撤廃し、画面と同じ3項目横並びレイアウト）
   const totalCountStr = document.getElementById("resTotalCount")?.innerText || `${appState.sim.partners.length}人`;
   const sexCountStr = document.getElementById("resSexCount")?.innerText || "0回";
   const totalHoursStr = document.getElementById("resTotalHours")?.innerText || "0時間";
@@ -95,7 +95,7 @@ async function generateSquareCard() {
     ctx.fillText(s.val, x + 20, y + 86);
   });
 
-  // アチーブメントバッジ群（5枠横並び）
+  // アチーブメント判定（±20歳差、150pt対応）
   let hasOlder20 = appState.sim.metOlder20Plus;
   let hasYounger20 = appState.sim.metYounger20Plus;
   appState.sim.partners.forEach(p => {
@@ -126,14 +126,14 @@ async function generateSquareCard() {
     ctx.fillText((a.ok ? "★ " : "☆ ") + a.name, ax + 14, ay + 28);
   });
 
-  // パートナー枠（最長交際 ＆ 最高密会度）
+  // パートナー枠（最長交際 ＆ 最高密会度スコア）
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
   const longestP = sortedByDuration[0] || { name: "なし", durationMonths: 0, area: "東京", avatarId: "F01", tag: "平日昼", endMonth: null };
   const highestScoreP = appState.sim.highestScorePartner || longestP;
 
   ctx.imageSmoothingEnabled = false;
 
-  // 最長交際
+  // 最長交際パートナー枠
   ctx.fillStyle = "rgba(24, 18, 43, 0.85)";
   ctx.fillRect(72, 660, 440, 245);
   ctx.strokeStyle = "rgba(168, 85, 247, 0.45)";
@@ -155,7 +155,7 @@ async function generateSquareCard() {
   ctx.font = "italic 15px 'Noto Sans JP', sans-serif";
   wrapCanvasText(ctx, longestP.lastLine || "「……」", 92, 776, 400, 23);
 
-  // 最高スコア
+  // 最高密会度パートナー枠
   ctx.fillStyle = "rgba(30, 18, 25, 0.85)";
   ctx.fillRect(532, 660, 476, 245);
   ctx.strokeStyle = "rgba(244, 63, 94, 0.45)";

@@ -2,7 +2,6 @@
    ui.js - OUTROMANCE UI描画・演出・音響制御（5年制完全版）
    ============================================================ */
 
-// 月別絵文字（未定義エラー防止のため冒頭で完全定義・1月はお正月）
 var MONTH_EMOJIS = {
   1: "🎍", 2: "🍫", 3: "🎎", 4: "🌸", 5: "🎏", 6: "☔",
   7: "🎋", 8: "🎆", 9: "🎑", 10: "🎃", 11: "🍁", 12: "🎄"
@@ -27,7 +26,7 @@ function initAudio() {
 }
 
 function toggleSound() {
-  initAudio();
+  try { initAudio(); } catch(e) {}
   isSoundOn = !isSoundOn;
   const icon = document.getElementById("soundIcon");
   const text = document.getElementById("soundText");
@@ -107,17 +106,21 @@ function triggerVibrate(pat) {
   if ("vibrate" in navigator) try { navigator.vibrate(pat); } catch(e) {}
 }
 
+// 確認事項の承諾 → シネマティック・プロローグ開始
 function acceptDisclaimer() {
-  initAudio();
+  try { initAudio(); } catch(e) {}
   triggerVibrate(20);
+
   const stepDisc = document.getElementById("stepDisclaimer");
   const step0 = document.getElementById("step0");
   if (stepDisc) stepDisc.classList.add("hidden");
   if (step0) step0.classList.remove("hidden");
+
   window.scrollTo({ top: 0, behavior: "smooth" });
   runCinematicPrologue();
 }
 
+// プロローグ実行処理
 function runCinematicPrologue() {
   clearTimeout(prologueAutoTimer);
   prologueStep = 0;
@@ -133,6 +136,7 @@ function runCinematicPrologue() {
   advancePrologue();
 }
 
+// プロローグ進行（自動送り ＆ 画面タップでスキップ可能）
 function advancePrologue(e) {
   if (e) e.stopPropagation();
   clearTimeout(prologueAutoTimer);
@@ -149,11 +153,13 @@ function advancePrologue(e) {
   prologueAutoTimer = setTimeout(() => advancePrologue(), 1300);
 }
 
+// プロローグ完了 → Step 1-A（性別・お名前設定）
 function goToStep1A(e) {
   if (e) e.stopPropagation();
-  initAudio();
+  try { initAudio(); } catch(e) {}
   if (isSoundOn) playTone(440, 0.15);
   triggerVibrate(20);
+
   document.getElementById("step0")?.classList.add("hidden");
   document.getElementById("step1a")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -228,7 +234,7 @@ function rerollStats() {
 }
 
 function applyStylePreset(presetType) {
-  initAudio();
+  try { initAudio(); } catch(e) {}
   triggerVibrate(15);
   if (isSoundOn) playTone(659.25, 0.1);
 
@@ -355,7 +361,7 @@ function triggerBoostMatching(e) {
   if (appState.stats.budget < 2) return;
   if (appState.sim.activePartnerIds.length >= 4) return;
 
-  initAudio();
+  try { initAudio(); } catch(e) {}
   triggerVibrate([50, 60, 50, 60, 80]);
   appState.stats.budget = Math.max(0, appState.stats.budget - 2);
 
@@ -422,7 +428,7 @@ function buyLiveFamilyCare(e) {
   if (appState.stats.budget < 2) return;
   if (appState.stats.spouseAlert <= 1) return;
 
-  initAudio();
+  try { initAudio(); } catch(e) {}
   appState.stats.budget = Math.max(0, appState.stats.budget - 2);
   appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 2);
 
@@ -660,7 +666,7 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
   }
 }
 
-// 逢瀬ログ描画（誕生月表記を撤廃、1月はお正月）
+// 逢瀬ログ描画
 function renderRealtimeMonthlyLog(mIdx, calMonth) {
   const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
   
@@ -792,7 +798,7 @@ function giveStimulus(partnerId, e) {
   const partner = appState.sim.partners.find(p => p.id === partnerId);
   if (!partner) return;
 
-  initAudio();
+  try { initAudio(); } catch(e) {}
   triggerVibrate([40, 60, 40]);
   appState.stats.budget = Math.max(0, appState.stats.budget - 1);
 
@@ -830,7 +836,7 @@ function giveGift(partnerId, e) {
   const partner = appState.sim.partners.find(p => p.id === partnerId);
   if (!partner) return;
 
-  initAudio();
+  try { initAudio(); } catch(e) {}
   triggerVibrate(30);
   appState.stats.budget = Math.max(0, appState.stats.budget - 1);
 
@@ -850,7 +856,7 @@ function giveGift(partnerId, e) {
   renderRealtimeMonthlyLog(mIdx, calMonth);
 }
 
-// 逢瀬テキスト生成（誕生日関連全廃・1月はお正月テキストへ刷新）
+// 逢瀬テキスト生成（お正月・年齢差・各月豊富テキスト）
 function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
   const playerAge = typeof getRealAge === "function" ? getRealAge(appState.sim.currentMonth) : (appState.user.startAge || 40);
   const ageDiff = partner.age - playerAge;
@@ -884,7 +890,7 @@ function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
       ];
     }
   } 
-  // ② 1月（お正月・新春テキスト：誕生日要素は完全撤廃）
+  // ② 1月（お正月・新春テキスト）
   else if (month === 1) {
     candidatePool = [
       "初詣の帰り道、人目を避けて待ち合わせ。新年の始まりを隠れ家ホテルで祝った。",
@@ -904,10 +910,9 @@ function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
       "横浜みなとみらいの夜景が見える高層ホテル。日常を遠く置き去りにして抱き合う。"
     ];
   } 
-  // ④ 年齢差特化テキスト（約40%の確率で発動）
+  // ④ 年齢差特化テキスト（約40%）
   else if (Math.random() < 0.40 && (ageDiff <= -8 || ageDiff >= 8)) {
     if (ageDiff <= -15) {
-      // 20歳前後の大幅年下
       candidatePool = [
         "『実は親とほとんど同年代なんです』と悪戯っぽく笑われ、背徳感のままシーツを強く掴んだ。",
         "ベッドで容赦なく求められ、圧倒的な体力差を痛感しながらも若き熱情にすべてを委ねた。",
@@ -916,7 +921,6 @@ function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
         "無防備な寝顔を見つめながら、背負っている家庭の重さと甘い罪悪感を噛み締めた。"
       ];
     } else if (ageDiff <= -8) {
-      // 10歳前後の年下
       candidatePool = [
         "無邪気なLINEのスタンプ連打に翻弄されつつ、仕事の合間を縫ってホテル街へ駆け込んだ。",
         "人目を避けて選んだ郊外のドライブイン。車内でスマホの音楽を共有しながら手を重ねた。",
@@ -924,7 +928,6 @@ function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
         "少し背伸びしたブランドの香水を纏ってきた相手を、愛おしく抱き寄せた。"
       ];
     } else if (ageDiff >= 15) {
-      // 20歳前後の大幅年上
       candidatePool = [
         "銀座の老舗割烹の個室で舌鼓。家庭では絶対に味わえない落ち着いた時間とお酒に酔いしれる。",
         "クラシックホテルの静寂な客室。急かされない、ゆったりと深みのある濃密な愛撫に身を委ねた。",
@@ -933,7 +936,6 @@ function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
         "人生の酸いも甘いも知るパートナーの柔らかな微笑みに、張り詰めていた心が完全に解けた。"
       ];
     } else {
-      // 10歳前後の年上
       candidatePool = [
         "『無理しなくていいのよ』と優しく頭を撫でられ、日頃のプレッシャーがシーツの上で溶けていった。",
         "鎌倉の隠れ家古民家で雨宿り。人目を気にせず、落ち着いた大人の逃避行を堪能した。",
@@ -1041,10 +1043,9 @@ function generateMonthlyActionText(partner, month, usedTexts = new Set()) {
     }
   }
 
-  // ⑥ 同月にまだ使われていないテキストを抽出
   let availableChoices = candidatePool.filter(t => !usedTexts.has(t));
 
-  // ⑦ 候補枯渇時の超豊富バックアップ（25種）
+  // 候補枯渇時のバックアップ（25種）
   if (availableChoices.length === 0) {
     const backupPool = [
       "隠れ家ホテルの静寂の中、お互いの存在だけを確かめ合うように深く抱き合った。",
@@ -1117,7 +1118,7 @@ function closeClickDetail() { document.getElementById("clickMonthDetail")?.class
 
 function manualBreakup(partnerId, e) {
   if (e) e.stopPropagation();
-  initAudio();
+  try { initAudio(); } catch(e) {}
   triggerVibrate(20);
 
   const idx = appState.sim.activePartnerIds.indexOf(partnerId);
@@ -1150,7 +1151,6 @@ function manualBreakup(partnerId, e) {
   updateLiveStats();
 }
 
-// 決算時：スタイル選択変更に伴うリアルタイム再配分プレビュー
 function onMilestoneStyleChange() {
   const styleSel = document.getElementById("milestoneStyleSelect");
   if (!styleSel) return;
@@ -1165,7 +1165,6 @@ function onMilestoneStyleChange() {
     appState.stats.budget = 2;
     if (appState.stats.stamina < 9) appState.stats.stamina++;
   } else {
-    // balanced
     appState.stats.maxPartners = 2;
     appState.stats.budget = Math.max(2, appState.stats.income - 1);
   }
@@ -1176,7 +1175,6 @@ function onMilestoneStyleChange() {
   }
 }
 
-// 1年ごとマイルストーンモーダル描画
 function renderYearlyMilestoneModal() {
   const mIdx = appState.sim.currentMonth;
   const currentAge = getRealAge(mIdx);
@@ -1312,7 +1310,6 @@ function generateLastLineText(partner, isPartnerMale, isStillActive) {
     : "「ごめんね、今は母親に戻らなきゃいけないの。今まで本当にありがとう。」";
 }
 
-// 交際履歴の並び替え
 function sortPartnersHistory(type) {
   currentHistorySortType = type;
   const btnDur = document.getElementById("sortBtnDuration");
@@ -1334,7 +1331,6 @@ function sortPartnersHistory(type) {
   renderAllPartnersList(type);
 }
 
-// 交際履歴一覧（年齢は若い順：昇順）
 function renderAllPartnersList(sortType = "duration") {
   let sorted = [...appState.sim.partners];
   if (sortType === "duration") {

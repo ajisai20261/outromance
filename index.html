@@ -295,11 +295,15 @@
         </div>
       </div>
 
-      <!-- 12ヶ月マトリックス（1行表示・大ドット） -->
+      <!-- 12ヶ月マトリックス（右上に 🆙ブースト ボタンを配置） -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-1.5 shadow-xl">
         <div class="flex justify-between items-center text-[11px] px-1">
           <span id="matrixPhaseTitle" class="font-bold text-purple-300">1年目（1〜12ヶ月）</span>
-          <span class="text-slate-400 text-[10px]">全5年（計60ヶ月）</span>
+          
+          <!-- 🆙ブースト ボタン（活動費2消費：空き枠を一挙に全席マッチング） -->
+          <button type="button" onclick="triggerBoostMatching(event)" id="btnBoostMatching" title="活動費2消費：空いている交際枠を一挙に埋める" class="px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1">
+            <span>🆙</span><span>ブースト</span>
+          </button>
         </div>
 
         <div class="bg-slate-950 p-2 sm:p-2.5 rounded-lg border border-slate-800/80">
@@ -336,6 +340,21 @@
         </div>
         <p id="toastPartnerQuote" class="text-[9.5px] text-slate-300 italic pt-1 mt-1 border-t border-white/10 leading-snug truncate">
           「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」
+        </p>
+      </div>
+
+      <!-- ブースト一括マッチング通知トースト -->
+      <div id="boostToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-amber-950 via-purple-950 to-pink-950 border-2 border-amber-400 rounded-xl p-3 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-amber-400/30 pb-1.5 mb-2">
+          <div class="flex items-center gap-1.5 text-xs font-black text-amber-300">
+            <span class="text-base animate-bounce">🆙</span>
+            <span>BOOST FEVER!</span>
+          </div>
+          <span class="text-[10px] text-pink-200 font-bold" id="boostToastCount">3人マッチング成立！</span>
+        </div>
+        <div class="flex items-center justify-center gap-2.5" id="boostAvatarsContainer"></div>
+        <p class="text-[10px] text-amber-100/90 text-center italic pt-1.5 mt-1 border-t border-white/10 leading-snug">
+          注目度が急上昇し、空き枠に熱烈なメッセージが殺到！
         </p>
       </div>
 
@@ -385,7 +404,7 @@
           <span id="alertStateText" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">平穏</span>
         </div>
 
-        <div id="currentMonthPartnersLog" class="space-y-1.5 min-h-[50px]">
+        <div id="currentMonthPartnersLog" class="space-y-2 min-h-[50px]">
           <div class="text-xs text-slate-500 italic py-2 text-center">まだパートナーはいません。アプリを巡回中……</div>
         </div>
       </div>
@@ -554,7 +573,7 @@
         </button>
       </div>
 
-     <!-- アクションボタン群（𝕏シェア → リプレイ → 画像保存の順） -->
+      <!-- アクションボタン群（𝕏シェア → リプレイ → 画像保存の順） -->
       <div class="space-y-2.5 pt-2">
         <button onclick="shareOnX()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-100 shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
           <span>𝕏 で結果をポスト・シェア</span>

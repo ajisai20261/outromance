@@ -177,12 +177,11 @@
     <!-- STEP 1-B: 開始条件 ＆ スタイル設定 -->
     <section id="step1b" class="hidden space-y-4 py-2">
       <!-- ユーザー認識バー -->
-      <div class="bg-purple-950/50 border border-purple-500/40 rounded-xl px-4 py-2 flex items-center justify-between shadow-lg">
+      <div class="bg-purple-950/50 border border-purple-500/40 rounded-xl px-4 py-2.5 flex items-center justify-center shadow-lg">
         <div class="flex items-center gap-2">
           <span class="text-xs text-purple-300 font-semibold">プレイヤー:</span>
           <span id="step1bUserBadge" class="text-sm font-black text-white">ユウスケ（40歳スタート）</span>
         </div>
-        <span class="text-[10px] text-purple-300/80">東京・都心の魔境</span>
       </div>
 
       <div class="text-center space-y-0.5">
@@ -254,9 +253,11 @@
       <button onclick="startSimulation()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.35)] transition active:scale-95 flex items-center justify-center gap-2">
         <span>この設定で5年の婚外へ旅立つ！ 🚀</span>
       </button>
-      <div class="text-center">
-        <button onclick="backToStep1A()" class="text-xs text-slate-400 hover:text-white transition">‹ 戻る</button>
-      </div>
+
+      <!-- 戻るボタン -->
+      <button onclick="backToStep1A()" class="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center gap-1.5 shadow">
+        <span>‹ 基本設定（性別・お名前）に戻る</span>
+      </button>
     </section>
 
     <!-- STEP 2: 進行画面 -->
@@ -282,7 +283,8 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between text-center text-[10.5px] sm:text-[11px] px-1">
+        <!-- 4ステータス横並び -->
+        <div class="flex items-center justify-between text-center text-[11px] sm:text-xs px-2">
           <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white ml-0.5">5</span></div>
           <div class="text-slate-700">|</div>
           <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="liveStatStamina" class="font-bold text-white ml-0.5">5</span></div>
@@ -290,8 +292,6 @@
           <div><span class="text-rose-400 font-medium">🔥性欲</span> <span id="liveStatLibido" class="font-bold text-white ml-0.5">5</span></div>
           <div class="text-slate-700">|</div>
           <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="liveStatBudget" class="font-bold text-white ml-0.5">Lv.2</span></div>
-          <div class="text-slate-700">|</div>
-          <div><span class="text-emerald-400 font-medium">💰年収</span> <span id="liveStatIncome" class="font-bold text-white ml-0.5">Lv.5</span></div>
         </div>
       </div>
 
@@ -390,8 +390,8 @@
         </div>
       </div>
 
-      <!-- 配偶者警戒度 -->
-      <div class="bg-slate-950/90 border border-slate-850 rounded-xl px-3 py-2 text-xs flex items-center justify-between gap-2">
+      <!-- 配偶者警戒度 ＆ 進行画面の家庭ケアボタン（活動費-2消費） -->
+      <div class="bg-slate-950/90 border border-slate-850 rounded-xl p-2.5 text-xs flex items-center justify-between gap-2 shadow">
         <div class="flex items-center gap-2 min-w-0 flex-1">
           <span class="text-slate-300 font-bold flex items-center gap-1 flex-shrink-0">
             <span>🏠 家庭:</span>
@@ -400,9 +400,16 @@
             平穏な週末。特に怪しまれる様子はない。
           </span>
         </div>
-        <div id="largeSpouseAlertBadge" class="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 flex-shrink-0">
-          <span class="text-[9.5px] text-slate-400">警戒</span>
-          <span id="largeSpouseAlertVal" class="text-[10.5px] font-black text-amber-400">Lv.3/5</span>
+
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <div id="largeSpouseAlertBadge" class="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80">
+            <span class="text-[9.5px] text-slate-400">警戒</span>
+            <span id="largeSpouseAlertVal" class="text-[10.5px] font-black text-amber-400">Lv.3/5</span>
+          </div>
+
+          <button type="button" onclick="buyLiveFamilyCare(event)" id="btnLiveFamilyCare" title="活動費2消費：家族サービスで警戒度を-2" class="px-2 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 text-emerald-300 font-bold text-[10px] transition active:scale-95 flex items-center gap-1">
+            <span>🏡</span><span>家庭ケア</span><span class="text-[9px] text-emerald-400/80">(-2費)</span>
+          </button>
         </div>
       </div>
 
@@ -434,7 +441,7 @@
         </div>
       </div>
 
-      <!-- 主要記録（3項目横並び1行・年収削除） -->
+      <!-- 主要記録（3項目横並び1行） -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 grid grid-cols-3 gap-2 text-center shadow-lg">
         <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/60">
           <div class="text-[9.5px] text-slate-400">累計交際人数</div>
@@ -527,18 +534,27 @@
         </div>
       </div>
 
-      <!-- 全交際履歴アコーディオン -->
+      <!-- 全交際履歴アコーディオン（ソート機能付き） -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div id="allHistoryWrapper" class="hidden space-y-2">
-          <div class="text-[11px] font-semibold text-slate-400">すべての交際履歴</div>
-          <div id="allPartnersList" class="space-y-2 text-xs max-h-60 overflow-y-auto"></div>
+          <div class="flex items-center justify-between text-[11px] border-b border-slate-800 pb-1.5">
+            <span class="font-bold text-slate-300">交際履歴一覧</span>
+            <div class="flex items-center gap-1">
+              <span class="text-[9.5px] text-slate-500">並び順:</span>
+              <button type="button" id="sortBtnDuration" onclick="sortPartnersHistory('duration')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-900 text-purple-200 border border-purple-500 transition">期間順</button>
+              <button type="button" id="sortBtnAge" onclick="sortPartnersHistory('age')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 transition">年齢順</button>
+              <button type="button" id="sortBtnScore" onclick="sortPartnersHistory('score')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 transition">密会pt順</button>
+            </div>
+          </div>
+          <div id="allPartnersList" class="space-y-2 text-xs max-h-64 overflow-y-auto pt-1"></div>
         </div>
 
-        <button id="toggleAllPartnersBtn" onclick="toggleAllPartners()" class="w-full py-2 text-xs text-purple-400 hover:text-purple-300 border border-purple-900/60 rounded-xl bg-purple-950/30 transition">
+        <button id="toggleAllPartnersBtn" onclick="toggleAllPartners()" class="w-full py-2.5 text-xs font-semibold text-purple-400 hover:text-purple-300 border border-purple-900/60 rounded-xl bg-purple-950/30 transition">
           すべての交際履歴（全0人）を確認する ▼
         </button>
       </div>
 
+      <!-- アクションボタン群 -->
       <div class="space-y-2.5 pt-2">
         <button onclick="generateSquareCard()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
           <span>📷 成績表カードを画像保存（1080×1080）</span>
@@ -548,16 +564,16 @@
           <span>𝕏 で結果をポスト・シェア</span>
         </button>
 
-        <button onclick="restartApp()" class="w-full py-2.5 text-xs text-slate-400 hover:text-white transition">
-          ↺ もう一度最初からシミュレーションする
+        <button onclick="restartApp()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-800 via-indigo-800 to-slate-900 hover:from-purple-700 hover:to-indigo-700 text-white border border-purple-500/50 shadow-xl transition active:scale-95 flex items-center justify-center gap-2">
+          <span>↺ もう一度最初からプレイする</span>
         </button>
       </div>
     </section>
   </main>
 
-  <!-- 年次マイルストーンモーダル（1年ごと決算 ＆ スタイル変更で動的再計算） -->
+  <!-- 年次マイルストーンモーダル -->
   <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3.5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
+    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3.5 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
       <div class="text-center space-y-0.5">
         <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold" id="milestoneHeaderTag">12-Month Milestone</span>
         <h3 class="text-base sm:text-lg font-bold text-white" id="twoYearTitle">1年目の決算：41歳の現在</h3>
@@ -581,12 +597,13 @@
         </div>
       </div>
 
+      <!-- 継続中パートナー一覧（全件表示） -->
       <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-1.5">
         <div class="text-xs font-bold text-purple-300">💖 現在継続中のパートナー</div>
-        <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs max-h-28 overflow-y-auto"></div>
+        <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs"></div>
       </div>
 
-      <!-- 次期の婚外方針再設定（スタイル変更で下の再配分が動的再計算される） -->
+      <!-- 次期の婚外方針再設定 -->
       <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
         <div class="font-bold text-purple-300">🎯 次期の婚外方針を見直す</div>
         <div class="grid grid-cols-2 gap-2">
@@ -609,7 +626,7 @@
         </div>
       </div>
 
-      <!-- 加齢減衰と自動再投資結果（スタイル選択に応じて動的に変化） -->
+      <!-- 加齢減衰と自動再投資結果 -->
       <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5 text-xs">
         <div class="flex justify-between items-center">
           <span class="font-bold text-slate-300">📉 加齢減衰と自己投資結果</span>
@@ -620,18 +637,7 @@
         </div>
       </div>
 
-      <!-- 家庭ケア -->
-      <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-3 flex justify-between items-center text-xs">
-        <div>
-          <div class="font-bold text-emerald-300">🏡 家庭ケア（警戒度 -2Lv）</div>
-          <div class="text-[10px] text-slate-400">配偶者警戒: <span id="modalAlertVal" class="font-bold text-amber-400">Lv.3</span></div>
-        </div>
-        <button type="button" onclick="buyFamilyCare()" id="btnFamilyCare" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition active:scale-95">
-          ケア実行 (-1活動費)
-        </button>
-      </div>
-
-      <!-- 進行ボタン（タップ誤爆防止ディレイ組み込み） -->
+      <!-- 進行ボタン（0.6秒ディレイガード付き） -->
       <div class="space-y-2 pt-1 border-t border-slate-800">
         <button id="btnResumeNextYear" onclick="resumeNextYear()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
           <span>この方針で次の1年を進める ›</span>

@@ -52,7 +52,7 @@ function calculateSexScore(partner, month, isCrisis, prefBonus = 0) {
   return Math.max(10, Math.round(base + libidoBonus + masteryBonus + eventBonus + thrillBonus + prefBonus));
 }
 
-// 年齢抽選ロジック：最大差キャップ撤廃（下限18歳〜上限85歳、離れるほど確率急減）
+// 年齢抽選ロジック：最大差キャップ撤廃 ＆ レア年齢差の出現率UP版
 function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
   const userGender = appState.user.gender;
   const looks = appState.stats.looks || 5;
@@ -67,39 +67,42 @@ function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
   }
   spreadBonus = Math.max(0, Math.min(12, spreadBonus));
 
-  // --- 1. 同年代狙い (same) ---
-  // 85%は ±3歳以内、残り15%でも最大 ±6歳までに厳格クランプ
+  // 1. 同年代狙い (same)：85%は±3歳、15%は最大±6歳（厳格維持）
   if (targetPref === "same") {
     if (Math.random() < 0.85) {
-      const delta = Math.floor(Math.random() * 7) - 3; // -3 〜 +3
+      const delta = Math.floor(Math.random() * 7) - 3;
       return Math.max(18, Math.min(85, playerAge + delta));
     } else {
       const sign = Math.random() < 0.5 ? 1 : -1;
-      const delta = 4 + Math.floor(Math.random() * 3); // ±4 〜 ±6
+      const delta = 4 + Math.floor(Math.random() * 3);
       return Math.max(18, Math.min(85, playerAge + sign * delta));
     }
   }
 
-  // --- 年齢差の幾何減衰関数（離れるほど急速に確率が低下） ---
+  // 年齢差の減衰抽選（レア出現率を底上げ）
   function rollDecayedGap() {
-    let gap = 3; // 最低でも3歳差からスタート
-    // スペックが高いほど遠くまで伸びやすくなる（継続率 0.62 〜 0.74）
-    const continueRate = 0.62 + (spreadBonus / 12) * 0.12;
+    let gap = 3;
+    // 継続率を 0.68〜0.82 に上方修正（大差まで伸びやすく）
+    const continueRate = 0.68 + (spreadBonus / 12) * 0.14;
     
-    // 確率判定が成功するたびに1〜2歳ずつ差が広がる（失敗した時点でストップ）
+    // 約12%の確率で背徳の跳躍（一気に+6〜12歳差広がる）
+    if (Math.random() < 0.12) {
+      gap += 6 + Math.floor(Math.random() * 7);
+    }
+
     while (Math.random() < continueRate && gap < 70) {
-      gap += 1 + Math.floor(Math.random() * 2);
+      gap += 1 + Math.floor(Math.random() * 3);
     }
     return gap;
   }
 
-  // --- 2. 年下狙い (younger) ---
+  // 2. 年下狙い (younger)
   if (targetPref === "younger") {
     const gap = rollDecayedGap();
     return Math.max(18, playerAge - gap); // 下限18歳
   }
 
-  // --- 3. 年上狙い (older) ---
+  // 3. 年上狙い (older)
   if (targetPref === "older") {
     const gap = rollDecayedGap();
     return Math.min(85, playerAge + gap); // 上限85歳
@@ -335,7 +338,7 @@ function simulateOneMonth(isSilent = false) {
     }
   }
 
-  // 出会い抽選ロジック（遭遇率底上げ ＆ 初月確定枠）
+  // 出会い抽選ロジック（基本マッチ率を少し控えめに調整）
   const maxAllowed = appState.stats.maxPartners || 2;
   let emptySlots = maxAllowed - appState.sim.activePartnerIds.length;
   let matchedPartners = [];
@@ -343,12 +346,12 @@ function simulateOneMonth(isSilent = false) {
   const isFirstMonthGuaranteed = (mIdx === 0 && appState.sim.activePartnerIds.length === 0);
 
   if (emptySlots > 0 && appState.stats.spouseAlert < 5) {
-    let meetBase = isUserMale ? 0.45 : 0.55;
+    let meetBase = isUserMale ? 0.36 : 0.44;
     if (isUserMale) {
-      meetBase += (appState.stats.budget - 4) * 0.04;
+      meetBase += (appState.stats.budget - 4) * 0.035;
       meetBase += (appState.stats.looks - 5) * 0.02;
     } else {
-      meetBase += (appState.stats.looks - 5) * 0.05;
+      meetBase += (appState.stats.looks - 5) * 0.045;
       meetBase += (appState.stats.budget - 4) * 0.01;
     }
 
@@ -356,7 +359,7 @@ function simulateOneMonth(isSilent = false) {
     if (appState.stats.targetAgePref === "older") meetBase *= 1.15;
     if (appState.stats.spouseAlert === 4) meetBase *= 0.5;
 
-    meetBase = Math.max(0.20, Math.min(0.85, meetBase));
+    meetBase = Math.max(0.15, Math.min(0.75, meetBase));
 
     if (isFirstMonthGuaranteed || Math.random() < meetBase) {
       const p1 = createSynthesizedPartner(mIdx, currentRealAge);
@@ -371,11 +374,11 @@ function simulateOneMonth(isSilent = false) {
       if (p1.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
       if (p1.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
 
-      // 2人目判定（空き枠2以上かつ高スペック時）
+      // 2人目抽選（空き枠2以上時）
       if (emptySlots >= 2 && !isFirstMonthGuaranteed) {
         let doubleRate = isUserMale 
-          ? (appState.stats.budget >= 6 ? 0.25 : 0.08) 
-          : (appState.stats.looks >= 6 ? 0.25 : 0.08);
+          ? (appState.stats.budget >= 6 ? 0.20 : 0.06) 
+          : (appState.stats.looks >= 6 ? 0.20 : 0.06);
 
         if (Math.random() < doubleRate) {
           const p2 = createSynthesizedPartner(mIdx, currentRealAge);

@@ -1,69 +1,25 @@
 /* ============================================================
-   game.js - OUTROMANCE メインループ ＆ ライフサイクル制御（5年制）
+   game.js - OUTROMANCE ゲームループ・ライフサイクル制御（5年制完全版）
    ============================================================ */
 
-const PixelAvatarEngine = {
-  generate(idStr) {
-    const cvs = document.createElement("canvas");
-    cvs.width = 48; cvs.height = 48;
-    const ctx = cvs.getContext("2d");
-    const isMale = idStr.startsWith("M");
-    const num = parseInt(idStr.slice(1)) || 1;
-    const isSenior = (num === 17 || num === 18);
-
-    ctx.fillStyle = isMale ? "#0d1b2a" : "#2b1022";
-    ctx.fillRect(0, 0, 48, 48);
-
-    const skinColors = ["#ffd7ba", "#fec89a", "#fcd5ce", "#f8edeb"];
-    ctx.fillStyle = skinColors[num % skinColors.length];
-    ctx.fillRect(14, 15, 20, 21);
-
-    const hairColors = isSenior ? ["#cbd5e1", "#94a3b8", "#e2e8f0"] : (isMale ? ["#1e293b", "#334155", "#475569", "#78350f"] : ["#451a03", "#78350f", "#831843", "#172554"]);
-    ctx.fillStyle = hairColors[num % hairColors.length];
-    ctx.fillRect(12, 10, 24, 9);
-    if (!isMale) { ctx.fillRect(10, 16, 4, 16); ctx.fillRect(34, 16, 4, 16); }
-
-    ctx.fillStyle = "#0f172a";
-    ctx.fillRect(18, 22, 3, 4);
-    ctx.fillRect(27, 22, 3, 4);
-
-    ctx.fillStyle = isMale ? "#334155" : "#be185d";
-    ctx.fillRect(8, 36, 32, 12);
-    return cvs.toDataURL("image/png");
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof initScreenTapHandler === "function") {
+    initScreenTapHandler();
   }
-};
+});
 
-const AvatarCacheManager = {
-  cache: {},
-  init() {
-    const fSource = window.FEMALE_AVATARS_DATA || {};
-    for (const [k, v] of Object.entries(fSource)) this.cache[k] = v;
-    const mSource = window.MALE_AVATARS_DATA || {};
-    for (const [k, v] of Object.entries(mSource)) this.cache[k] = v;
-  },
-  get(idStr) {
-    if (!idStr) return PixelAvatarEngine.generate("F01");
-    const clean = idStr.trim().toUpperCase();
-    if (this.cache[clean]) return this.cache[clean];
-    const generated = PixelAvatarEngine.generate(clean);
-    this.cache[clean] = generated;
-    return generated;
-  },
-  getMeta(idStr) {
-    const meta = window.AVATARS_METADATA || {};
-    return meta[idStr] || { label: "パートナー", cat: "normal", quote: "「秘密の時間を大切にしましょう。」" };
-  }
-};
-
+// シミュレーション開始
 function startSimulation() {
-  AvatarCacheManager.init();
+  initAudio();
+  triggerVibrate(30);
 
-  appState.user.startAge = parseInt(document.getElementById("userAge")?.value) || 50;
+  const startAgeVal = parseInt(document.getElementById("userAge")?.value || "40", 10);
+  appState.user.startAge = startAgeVal;
   appState.stats.targetAgePref = document.getElementById("targetAgePref")?.value || "same";
 
+  // シミュレーション進行用ステート初期化
   appState.sim.currentMonth = 0;
-  appState.sim.currentAge = appState.user.startAge;
-  appState.sim.lastMilestoneMonth = -1;
+  appState.sim.currentAge = startAgeVal;
   appState.sim.isPaused = false;
   appState.sim.isSkipping = false;
   appState.sim.partners = [];
@@ -72,6 +28,7 @@ function startSimulation() {
   appState.sim.monthlyHistory = [];
   appState.sim.isRetired = false;
   appState.sim.isDivorced = false;
+  appState.sim.lastMilestoneMonth = -1;
   appState.sim.globalMaxSexScore = 0;
   appState.sim.highestScorePartner = null;
   appState.sim.metOlder20Plus = false;
@@ -80,26 +37,92 @@ function startSimulation() {
   appState.sim.breakupCountIn2Years = 0;
   appState.sim.lawsuitCount = 0;
 
+  // 画面遷移
   document.getElementById("step1b")?.classList.add("hidden");
   document.getElementById("step2")?.classList.remove("hidden");
   document.getElementById("headerControls")?.classList.remove("hidden");
-
-  updateLiveStats();
   window.scrollTo({ top: 0, behavior: "smooth" });
 
-  initScreenTapHandler();
   refresh12MatrixGrid();
-  startSimLoop();
+  updateLiveStats();
+
+  // 初月実行
+  simulationTick();
 }
 
-function startSimLoop() {
+// 1ヶ月分の進行ティック
+function simulationTick() {
   clearTimeout(simTimer);
-  simTimer = setTimeout(simulationTick, simSpeedMs);
+  if (appState.sim.isPaused || appState.sim.isRetired || appState.sim.isDivorced) return;
+
+  const mIdx = appState.sim.currentMonth;
+
+  // 5年完走判定（計60ヶ月 = 0〜59ヶ月終了時）
+  if (mIdx >= 60) {
+    finishSimulation();
+    return;
+  }
+
+  // 1年（12ヶ月）ごとの決算マイルストーン判定（12, 24, 36, 48ヶ月終了時）
+  if (mIdx > 0 && mIdx % 12 === 0 && appState.sim.lastMilestoneMonth !== mIdx) {
+    appState.sim.lastMilestoneMonth = mIdx;
+    pauseSimulationInternal();
+
+    // 加齢に伴うステータス自然減衰処理
+    applyYearlyAgingDecay();
+
+    // 決算モーダル表示
+    renderYearlyMilestoneModal();
+    document.getElementById("twoYearModal")?.classList.remove("hidden");
+    return;
+  }
+
+  // 1ヶ月のシミュレーション計算実行
+  simulateOneMonth(false);
+
+  // 翌月インデックスへ進める
+  appState.sim.currentMonth++;
+
+  // 次のティック予約（一時停止中でなければ）
+  if (!appState.sim.isPaused && !appState.sim.isSkipping) {
+    simTimer = setTimeout(simulationTick, simSpeedMs);
+  }
+}
+
+// 加齢減衰（1年ごとの体力・外見等の微減衰）
+function applyYearlyAgingDecay() {
+  const currentAge = getRealAge(appState.sim.currentMonth);
+  if (currentAge >= 45 && Math.random() < 0.35) {
+    appState.stats.stamina = Math.max(2, appState.stats.stamina - 1);
+  }
+  if (currentAge >= 50 && Math.random() < 0.40) {
+    appState.stats.looks = Math.max(2, appState.stats.looks - 1);
+  }
+  if (currentAge >= 55 && Math.random() < 0.30) {
+    appState.stats.libido = Math.max(2, appState.stats.libido - 1);
+  }
+}
+
+// 一時停止・再開の切り替え
+function togglePauseSimulation() {
+  initAudio();
+  triggerVibrate(15);
+  const btn = document.getElementById("pausePlayBtn");
+
+  if (appState.sim.isPaused) {
+    appState.sim.isPaused = false;
+    if (btn) btn.innerText = "⏸️";
+    simulationTick();
+  } else {
+    appState.sim.isPaused = true;
+    clearTimeout(simTimer);
+    if (btn) btn.innerText = "▶️";
+  }
 }
 
 function pauseSimulationInternal() {
-  clearTimeout(simTimer);
   appState.sim.isPaused = true;
+  clearTimeout(simTimer);
   const btn = document.getElementById("pausePlayBtn");
   if (btn) btn.innerText = "▶️";
 }
@@ -108,158 +131,106 @@ function resumeSimulationInternal() {
   appState.sim.isPaused = false;
   const btn = document.getElementById("pausePlayBtn");
   if (btn) btn.innerText = "⏸️";
-  startSimLoop();
+  simulationTick();
 }
 
-function togglePauseSimulation() {
-  if (appState.sim.isPaused) resumeSimulationInternal();
-  else pauseSimulationInternal();
-}
-
-// 5年（60ヶ月）で終了、1年ごと（12, 24, 36, 48ヶ月）にマイルストーン
-function simulationTick() {
-  if (appState.sim.isPaused) return;
-
-  if (appState.sim.currentMonth >= 60) {
-    finishSimulation();
-    return;
-  }
-
-  if (appState.sim.currentMonth > 0 && appState.sim.currentMonth % 12 === 0 && appState.sim.currentMonth !== appState.sim.lastMilestoneMonth) {
-    pauseForYearlyMilestone();
-    return;
-  }
-
-  simulateOneMonth(false);
-  if (appState.sim.isDivorced) return;
-  appState.sim.currentMonth++;
-  startSimLoop();
-}
-
-// 1年後へスキップ
+// 1年後へスキップ（次の12ヶ月の節目または60ヶ月まで超高速シミュレート）
 function skipToEndOfYear() {
-  pauseSimulationInternal();
+  if (appState.sim.isSkipping) return;
+  initAudio();
+  triggerVibrate([30, 40, 50]);
+
+  clearTimeout(simTimer);
   appState.sim.isSkipping = true;
-  const overlay = document.getElementById("flashOverlay");
-  if (overlay) overlay.className = "fixed inset-0 pointer-events-none z-50 transition-colors";
+  appState.sim.isPaused = false;
 
-  let nextMile = (Math.floor(appState.sim.currentMonth / 12) + 1) * 12;
-  if (nextMile <= appState.sim.currentMonth) nextMile += 12;
-  nextMile = Math.min(60, nextMile);
+  const currentYearIdx = Math.floor(appState.sim.currentMonth / 12);
+  const targetMonth = Math.min(60, (currentYearIdx + 1) * 12);
 
-  while (appState.sim.currentMonth < nextMile) {
+  while (appState.sim.currentMonth < targetMonth && !appState.sim.isDivorced) {
     simulateOneMonth(true);
-    if (appState.sim.isDivorced) {
-      appState.sim.isSkipping = false;
-      return;
-    }
     appState.sim.currentMonth++;
   }
+
   appState.sim.isSkipping = false;
 
-  if (appState.sim.currentMonth % 12 === 0 && appState.sim.currentMonth < 60) {
-    pauseForYearlyMilestone();
-  } else if (appState.sim.currentMonth >= 60) {
+  if (appState.sim.isDivorced) return;
+
+  // 年次マイルストーンまたは完走へ合流
+  if (appState.sim.currentMonth >= 60) {
     finishSimulation();
+  } else {
+    appState.sim.lastMilestoneMonth = appState.sim.currentMonth;
+    pauseSimulationInternal();
+    applyYearlyAgingDecay();
+    renderYearlyMilestoneModal();
+    document.getElementById("twoYearModal")?.classList.remove("hidden");
   }
 }
 
+// 離婚ゲームオーバー発生処理
 function triggerDivorceGameOver(mIdx, isSilent = false) {
   clearTimeout(simTimer);
   appState.sim.isDivorced = true;
-  const overlay = document.getElementById("flashOverlay");
-  if (overlay) overlay.classList.add("red-flash-active");
-  playAlarm();
-  triggerVibrate([200, 100, 200, 100, 200]);
+  appState.sim.isPaused = true;
 
+  // 交際中のパートナー全員を強制関係解消
   appState.sim.partners.forEach(p => {
-    if (!p.endAge || appState.sim.activePartnerIds.includes(p.id)) {
+    if (appState.sim.activePartnerIds.includes(p.id)) {
       p.endMonth = mIdx;
       p.endAge = p.age;
     }
   });
   appState.sim.activePartnerIds = [];
 
-  setTimeout(() => {
-    document.getElementById("step2")?.classList.add("hidden");
-    document.getElementById("headerControls")?.classList.add("hidden");
-    document.getElementById("step3")?.classList.remove("hidden");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    calculateAndRenderResult();
-  }, isSilent ? 0 : 800);
-}
-
-// 1年ごとの自動加齢・決算処理
-function pauseForYearlyMilestone() {
-  pauseSimulationInternal();
-  const overlay = document.getElementById("flashOverlay");
-  if (overlay) overlay.classList.remove("red-flash-active");
-  closeClickDetail();
-
-  const mIdx = appState.sim.currentMonth;
-  appState.sim.lastMilestoneMonth = mIdx;
-  const currentAge = getRealAge(mIdx);
-  appState.sim.currentAge = currentAge;
-
-  // 1年加齢によるステータス微減（1pt減少）
-  const dropPick = Math.floor(Math.random() * 3);
-  if (dropPick === 0 && appState.stats.looks > 2) appState.stats.looks--;
-  else if (dropPick === 1 && appState.stats.stamina > 2) appState.stats.stamina--;
-  else if (dropPick === 2 && appState.stats.libido > 2) appState.stats.libido--;
-
-  // 本業年収水準の自然推移（たまに昇給）
-  if (Math.random() < 0.25) {
-    appState.stats.income = Math.min(7, appState.stats.income + 1);
+  if (!isSilent) {
+    playAlarm();
+    triggerVibrate([150, 100, 150, 100, 200]);
   }
 
-  // 自動リカバリー＆次期活動費チャージ
-  const style = appState.user.selectedStyle || "balanced";
-  if (style === "carnage") {
-    appState.stats.budget = Math.min(10, appState.stats.income);
-  } else if (style === "pure") {
-    appState.stats.budget = 2;
-    if (appState.stats.stamina < 8) appState.stats.stamina++;
-  } else {
-    appState.stats.budget = Math.max(2, appState.stats.income - 1);
-  }
-
-  renderYearlyMilestoneModal();
-  document.getElementById("twoYearModal")?.classList.remove("hidden");
-  if (isSoundOn) playTone(440, 0.2);
+  finishSimulation();
 }
 
+// 5年完走または強制終了時の結果画面遷移
 function finishSimulation() {
   clearTimeout(simTimer);
-  const mIdx = appState.sim.currentMonth;
+  appState.sim.isPaused = true;
+
+  // 完走時に継続中だったパートナーの終了月を確定
   appState.sim.partners.forEach(p => {
-    if (!p.endAge || appState.sim.activePartnerIds.includes(p.id)) {
-      p.endMonth = mIdx;
+    if (appState.sim.activePartnerIds.includes(p.id)) {
+      p.endMonth = 60;
       p.endAge = p.age;
     }
   });
-  appState.sim.activePartnerIds = [];
 
+  // UI切り替え
   document.getElementById("step2")?.classList.add("hidden");
   document.getElementById("headerControls")?.classList.add("hidden");
+  document.getElementById("twoYearModal")?.classList.add("hidden");
   document.getElementById("step3")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 
-  calculateAndRenderResult();
+  if (typeof calculateAndRenderResult === "function") {
+    calculateAndRenderResult();
+  }
+
+  if (typeof playRareChime === "function" && !appState.sim.isDivorced) {
+    playRareChime();
+  }
 }
 
+// もう一度最初からプレイする
 function restartApp() {
+  clearTimeout(simTimer);
+  initAudio();
+  triggerVibrate(20);
+
+  // 初期画面（Step 1-A）へ巻き戻し
   document.getElementById("step3")?.classList.add("hidden");
-  document.getElementById("step0")?.classList.remove("hidden");
-  runCinematicPrologue();
+  document.getElementById("step2")?.classList.add("hidden");
+  document.getElementById("step1b")?.classList.add("hidden");
+  document.getElementById("headerControls")?.classList.add("hidden");
+  document.getElementById("step1a")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function initApp() {
-  document.getElementById("stepDisclaimer")?.classList.remove("hidden");
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initApp);
-} else {
-  initApp();
 }

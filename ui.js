@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（完全版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（誤タップ防止 完全版）
    ============================================================ */
 
 /* --- AvatarCacheManager ブリッジ（avatars.js の実データを直接バインド） --- */
@@ -47,6 +47,7 @@ var prologueAutoTimer = null;
 var tapStartX = 0, tapStartY = 0;
 var isTapInitialized = false;
 var lastTapAdvanceTime = 0;
+var milestoneModalOpenedTime = 0; // 決算モーダル表示時刻（誤タップ防止判定用）
 var currentHistorySortType = "duration";
 
 var simSpeedMs = 5000;
@@ -475,7 +476,7 @@ function showBoostToast(matchedList) {
   setTimeout(() => {
     toast.classList.remove("scale-100", "opacity-100");
     toast.classList.add("scale-95", "opacity-0");
-    setTimeout(() => toast.classList.add("hidden"), 300);
+    setTimeout(() => toast.classList.add("hidden"), 3800);
   }, 3800);
 }
 
@@ -600,7 +601,6 @@ function showNewPartnerToast(p, isDouble = false) {
   else if (p.category === "youth") badges += ' <span class="px-1.5 py-0.2 text-[9px] bg-emerald-900 text-emerald-200 rounded border border-emerald-500/30 font-bold">若手</span>';
   badgeEl.innerHTML = badges;
 
-  // パートナーのプロフセリフ（p.quote）を最優先で表示
   document.getElementById("toastPartnerQuote").innerText = p.quote || "「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」";
 
   toast.classList.remove("hidden");
@@ -1003,6 +1003,9 @@ function renderYearlyMilestoneModal() {
   const currentAge = getRealAge(mIdx);
   const yearIndex = mIdx / 12;
 
+  // モーダル表示時刻を記録（タイムスタンプ式ガード）
+  milestoneModalOpenedTime = performance.now();
+
   const titleEl = document.getElementById("twoYearTitle");
   if (titleEl) {
     titleEl.innerHTML = `<span class="text-purple-300 font-black">${appState.user.name}</span> <span>${yearIndex}年目の決算：${currentAge}歳の現在</span>`;
@@ -1030,14 +1033,23 @@ function renderYearlyMilestoneModal() {
 
   onMilestoneStyleChange();
 
+  // モーダル全体を1秒間タップ無効化（CSS pointer-eventsガード）
+  const modalBox = document.querySelector("#twoYearModal > div");
+  if (modalBox) {
+    modalBox.classList.add("pointer-events-none");
+    setTimeout(() => {
+      modalBox.classList.remove("pointer-events-none");
+    }, 1000);
+  }
+
   const btnResume = document.getElementById("btnResumeNextYear");
   if (btnResume) {
     btnResume.disabled = true;
-    btnResume.classList.add("opacity-50", "pointer-events-none");
+    btnResume.classList.add("opacity-50");
     setTimeout(() => {
       btnResume.disabled = false;
-      btnResume.classList.remove("opacity-50", "pointer-events-none");
-    }, 600);
+      btnResume.classList.remove("opacity-50");
+    }, 1000);
   }
 }
 
@@ -1075,6 +1087,9 @@ function renderActivePartnersListInMilestone() {
 }
 
 function resumeNextYear() {
+  // 表示から0.8秒以内のタップは誤爆とみなして無効化
+  if (performance.now() - milestoneModalOpenedTime < 800) return;
+
   const styleSel = document.getElementById("milestoneStyleSelect");
   if (styleSel) {
     const newStyle = styleSel.value;
@@ -1093,6 +1108,9 @@ function resumeNextYear() {
 }
 
 function retireFromTwoYear() {
+  // 表示から1.0秒以内のタップは誤爆とみなして無効化
+  if (performance.now() - milestoneModalOpenedTime < 1000) return;
+
   clearTimeout(simTimer);
   document.getElementById("twoYearModal")?.classList.add("hidden");
   appState.sim.isRetired = true;

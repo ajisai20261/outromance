@@ -1,5 +1,5 @@
 /* ============================================================
-   sim.js - OUTROMANCE コアシミュレーション（完全版）
+   sim.js - OUTROMANCE コアシミュレーション（一都三県対応 完全版）
    ============================================================ */
 
 window.appState = window.appState || {
@@ -58,7 +58,6 @@ function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
   const looks = appState.stats.looks || 5;
   const budget = appState.stats.budget || 2;
 
-  // スペックによる外側拡張ボーナス（0〜12）
   let spreadBonus = 0;
   if (userGender === "male") {
     spreadBonus = (budget - 2) * 1.5 + (looks - 4) * 1.0;
@@ -79,12 +78,10 @@ function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
     }
   }
 
-  // 年齢差の減衰抽選（レア出現率を底上げ）
   function rollDecayedGap() {
     let gap = 3;
     const continueRate = 0.68 + (spreadBonus / 12) * 0.14;
     
-    // 約12%の確率で背徳の跳躍（一気に+6〜12歳差広がる）
     if (Math.random() < 0.12) {
       gap += 6 + Math.floor(Math.random() * 7);
     }
@@ -98,13 +95,13 @@ function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
   // 2. 年下狙い (younger)
   if (targetPref === "younger") {
     const gap = rollDecayedGap();
-    return Math.max(18, playerAge - gap); // 下限18歳
+    return Math.max(18, playerAge - gap);
   }
 
   // 3. 年上狙い (older)
   if (targetPref === "older") {
     const gap = rollDecayedGap();
-    return Math.min(85, playerAge + gap); // 上限85歳
+    return Math.min(85, playerAge + gap);
   }
 
   return playerAge;
@@ -117,8 +114,28 @@ function createSynthesizedPartner(startMonth, playerAge) {
   const jobPool = isTargetMale ? MALE_JOBS_POOL : FEMALE_JOBS_POOL;
   const job = jobPool[Math.floor(Math.random() * jobPool.length)];
 
-  const areaList = AREAS_NO_STATION.tokyo;
-  const area = `東京・${areaList[Math.floor(Math.random() * areaList.length)]}`;
+  // 【改修点】一都三県ウェイト抽選（東京45%、神奈川25%、埼玉15%、千葉15%）
+  const rPref = Math.random();
+  let prefKey = "tokyo";
+  let prefLabel = "東京";
+  if (rPref < 0.45) {
+    prefKey = "tokyo";
+    prefLabel = "東京";
+  } else if (rPref < 0.70) {
+    prefKey = "kanagawa";
+    prefLabel = "神奈川";
+  } else if (rPref < 0.85) {
+    prefKey = "saitama";
+    prefLabel = "埼玉";
+  } else {
+    prefKey = "chiba";
+    prefLabel = "千葉";
+  }
+
+  const areaPool = (typeof AREAS_NO_STATION !== "undefined" && AREAS_NO_STATION[prefKey]) 
+    ? AREAS_NO_STATION[prefKey] 
+    : ["銀座", "中目黒", "恵比寿"];
+  const area = `${prefLabel}・${areaPool[Math.floor(Math.random() * areaPool.length)]}`;
 
   const targetPref = appState.stats.targetAgePref || "same";
   const partnerAge = rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale);
@@ -139,7 +156,7 @@ function createSynthesizedPartner(startMonth, playerAge) {
 
   const avatarId = prefix + String(avatarNum).padStart(2, '0');
 
-  // 裏事情タグ × 性別の動的ランダムセリフ（events.js の関数をコール）
+  // 裏事情タグ × 性別の動的ランダムセリフ
   const quote = (typeof pickPartnerQuote === "function") 
     ? pickPartnerQuote(targetGender, tag) 
     : "「はじめまして。落ち着いた大人の関係になれたら嬉しいです。」";
@@ -219,7 +236,10 @@ function simulateOneMonth(isSilent = false) {
     appState.sim.crisisCountIn2Years++;
   }
 
-  const divorceChance = isCrisisHappened ? 0.33 : 0.06;
+  // 1年目（12ヶ月未満）は即死離婚を防止
+  const isFirstYear = (mIdx < 12);
+  const divorceChance = isFirstYear ? 0.0 : (isCrisisHappened ? 0.30 : 0.05);
+
   if (appState.stats.spouseAlert >= 5 && Math.random() < divorceChance) {
     if (typeof triggerDivorceGameOver === "function") {
       triggerDivorceGameOver(mIdx, isSilent);

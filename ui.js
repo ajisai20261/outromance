@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（誤タップ防止 完全版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（6×2列マトリックス完全版）
    ============================================================ */
 
 /* --- AvatarCacheManager ブリッジ（avatars.js の実データを直接バインド） --- */
@@ -530,6 +530,7 @@ function triggerScreenTapAdvance() {
   }
 }
 
+// 【改修点】6×2列マトリックス生成（絵文字＋月ラベルの2段組み大きめ表示）
 function refresh12MatrixGrid() {
   const currentYear = Math.floor(appState.sim.currentMonth / 12) + 1;
   const startM = (currentYear - 1) * 12 + 1;
@@ -548,13 +549,19 @@ function refresh12MatrixGrid() {
 
     const dot = document.createElement("div");
     dot.id = "grid-dot-" + i;
-    dot.className = "w-full aspect-square rounded-full transition-all duration-300 cursor-pointer hover:scale-115 flex items-center justify-center p-[2px] bg-slate-800 border border-slate-700/60";
+    // 大きめ正円＋外枠リング用パディング（6列レイアウトで視認性・タップ感大幅向上）
+    dot.className = "w-full aspect-square rounded-full transition-all duration-300 cursor-pointer hover:scale-110 active:scale-95 flex items-center justify-center p-[2.5px] bg-slate-800 border border-slate-700/60 shadow-inner";
     dot.onclick = (e) => { e.stopPropagation(); showClickMonthDetail(absMonth); };
 
     const centerCircle = document.createElement("div");
-    centerCircle.className = "w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-xs sm:text-[13px] select-none";
+    centerCircle.className = "w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center select-none shadow-sm";
+
     const monthEmoji = (typeof MONTH_EMOJIS !== "undefined" && MONTH_EMOJIS[calMonth]) ? MONTH_EMOJIS[calMonth] : "🌸";
-    centerCircle.innerText = monthEmoji;
+
+    centerCircle.innerHTML = `
+      <span class="text-sm sm:text-base leading-none">${monthEmoji}</span>
+      <span class="text-[8.5px] sm:text-[9.5px] font-bold text-slate-400 mt-0.5 leading-none">${calMonth}月</span>
+    `;
     dot.appendChild(centerCircle);
 
     row.appendChild(dot);
@@ -1160,7 +1167,7 @@ function renderAllPartnersList(sortType = "duration") {
   sorted.forEach((p, idx) => {
     const avatarSrc = getSafeAvatarSrc(p.avatarId, p.name, p.color);
     allHtml += `
-      <div class="p-2.5 rounded bg-slate-950/50 border border-slate-850 flex justify-between items-center text-xs">
+      <div class="p-2.5 rounded bg-slate-950/50 border border-slate-855 flex justify-between items-center text-xs">
         <div class="flex items-center gap-2">
           <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
           <div>

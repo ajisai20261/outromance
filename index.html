@@ -256,30 +256,32 @@
       </button>
     </section>
 
-    <!-- STEP 2: 進行画面 -->
-    <section id="step2" class="hidden space-y-2.5 pb-10 select-none cursor-pointer">
+    <!-- STEP 2: 進行画面（スリム化・縦幅圧縮版） -->
+    <section id="step2" class="hidden space-y-2 pb-8 select-none cursor-pointer">
       
-      <!-- ステータス集約枠 -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-2 shadow-lg">
-        <div class="flex items-center justify-between text-xs border-b border-slate-800/80 pb-2">
-          <div class="min-w-0 pr-2">
-            <span id="simCurrentAge" class="text-xs sm:text-[13px] font-bold text-white truncate block">
-              ユウスケ 40歳（婚外開始 1ヶ月）
+      <!-- ステータス集約枠（最上段：婚外○年目＋ブーストボタン） -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 sm:p-2.5 space-y-1.5 shadow-lg">
+        <div class="flex items-center justify-between text-xs pb-1.5 border-b border-slate-800/80">
+          <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <!-- 婚外○年目 名前 ○歳 -->
+            <span id="simCurrentAge" class="font-bold truncate block text-xs sm:text-[13px]">
+              <span class="text-purple-300">婚外1年目</span> <span class="text-white font-black">ユウスケ</span> <span class="text-slate-300">40歳</span>
             </span>
-          </div>
-          <div class="flex items-center gap-2.5 flex-shrink-0 text-[11px]">
-            <div>
-              <span class="text-slate-400 text-[10px]">交際数:</span>
-              <span id="simActiveCount" class="font-bold text-purple-400 ml-0.5">0/2人</span>
-            </div>
-            <div>
-              <span class="text-slate-400 text-[10px]">累計:</span>
-              <span id="simTotalPartners" class="font-bold text-pink-400 ml-0.5">0人</span>
+            <div class="text-[10px] text-slate-400 flex items-center gap-1 flex-shrink-0">
+              <span>交際:</span><span id="simActiveCount" class="font-bold text-purple-300">0/2人</span>
+              <span class="text-slate-600">/</span>
+              <span>累計:</span><span id="simTotalPartners" class="font-bold text-pink-300">0人</span>
             </div>
           </div>
+
+          <!-- 上段右端に配置したブーストボタン -->
+          <button type="button" onclick="triggerBoostMatching(event)" id="btnBoostMatching" title="活動費2消費：空いている交際枠を一挙に埋める" class="px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 flex-shrink-0">
+            <span>🆙</span><span>ブースト</span>
+          </button>
         </div>
 
-        <div class="flex items-center justify-between text-center text-[11px] sm:text-xs px-2">
+        <!-- 4大ステータス -->
+        <div class="flex items-center justify-between text-center text-[10.5px] sm:text-[11px] px-1">
           <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white ml-0.5">5</span></div>
           <div class="text-slate-700">|</div>
           <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="liveStatStamina" class="font-bold text-white ml-0.5">5</span></div>
@@ -290,23 +292,10 @@
         </div>
       </div>
 
-      <!-- 12ヶ月マトリックス（6×2列レイアウト） -->
-      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-1.5 shadow-xl">
-        <div class="flex justify-between items-center text-[11px] px-1">
-          <span id="matrixPhaseTitle" class="font-bold text-purple-300">1年目（1〜12ヶ月）</span>
-          
-          <button type="button" onclick="triggerBoostMatching(event)" id="btnBoostMatching" title="活動費2消費：空いている交際枠を一挙に埋める" class="px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1">
-            <span>🆙</span><span>ブースト</span>
-          </button>
-        </div>
-
-        <!-- 6列×2行グリッド -->
-        <div class="bg-slate-950 p-2 sm:p-2.5 rounded-lg border border-slate-800/80">
-          <div id="matrixGridRow" class="grid grid-cols-6 gap-2 sm:gap-2.5 items-center"></div>
-        </div>
-        <div class="flex justify-between text-[9px] text-slate-500 px-1">
-          <span>※マスをタップすると当時の逢瀬ログを確認</span>
-          <span>上段 1〜6月 ｜ 下段 7〜12月</span>
+      <!-- 12ヶ月マトリックス（上下テキストを全削除し、6×2列の円のみに極小化） -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-1.5 sm:p-2 shadow-xl">
+        <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800/80">
+          <div id="matrixGridRow" class="grid grid-cols-6 gap-1.5 sm:gap-2 items-center"></div>
         </div>
       </div>
 
@@ -389,40 +378,32 @@
         </div>
       </div>
 
-      <!-- 月次逢瀬ログ -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 sm:p-3 space-y-2">
-        <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-1.5">
-          <div class="font-bold text-slate-200 flex items-center gap-1.5">
-            <span id="seasonBadge">🎍 1月</span>
-            <span id="monthTitleLog">新春の気配の逢瀬</span>
-          </div>
-          <span id="alertStateText" class="text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">平穏</span>
-        </div>
-
-        <div id="currentMonthPartnersLog" class="space-y-2 min-h-[50px]">
-          <div class="text-xs text-slate-500 italic py-2 text-center">まだパートナーはいません。アプリを巡回中……</div>
+      <!-- 月次逢瀬ログ（季節ヘッダー行を全削除し直接ログを展開） -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 sm:p-2.5">
+        <div id="currentMonthPartnersLog" class="space-y-1.5 min-h-[46px]">
+          <div class="text-xs text-slate-500 italic py-2 text-center">今月はアポなし。家庭と仕事に専念中……</div>
         </div>
       </div>
 
       <!-- 配偶者警戒度 ＆ 家庭ケアボタン -->
-      <div class="bg-slate-950/90 border border-slate-850 rounded-xl p-2.5 text-xs flex items-center justify-between gap-2 shadow">
-        <div class="flex items-center gap-2 min-w-0 flex-1">
-          <span class="text-slate-300 font-bold flex items-center gap-1 flex-shrink-0">
+      <div class="bg-slate-950/90 border border-slate-850 rounded-xl p-2 sm:p-2.5 text-xs flex items-center justify-between gap-2 shadow">
+        <div class="flex items-center gap-1.5 min-w-0 flex-1">
+          <span class="text-slate-300 font-bold flex items-center gap-1 flex-shrink-0 text-[11px]">
             <span>🏠 家庭:</span>
           </span>
-          <span id="spouseSituationLog" class="text-slate-400 text-[10.5px] truncate flex-1">
+          <span id="spouseSituationLog" class="text-slate-400 text-[10px] sm:text-[10.5px] truncate flex-1">
             平穏な週末。特に怪しまれる様子はない。
           </span>
         </div>
 
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <div id="largeSpouseAlertBadge" class="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80">
-            <span class="text-[9.5px] text-slate-400">警戒</span>
-            <span id="largeSpouseAlertVal" class="text-[10.5px] font-black text-amber-400">Lv.3/5</span>
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          <div id="largeSpouseAlertBadge" class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/80">
+            <span class="text-[9px] text-slate-400">警戒</span>
+            <span id="largeSpouseAlertVal" class="text-[10px] font-black text-amber-400">Lv.3/5</span>
           </div>
 
-          <button type="button" onclick="buyLiveFamilyCare(event)" id="btnLiveFamilyCare" title="活動費2消費：家族サービスで警戒度を-2" class="px-2 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 text-emerald-300 font-bold text-[10px] transition active:scale-95 flex items-center gap-1">
-            <span>🏡</span><span>家庭ケア</span><span class="text-[9px] text-emerald-400/80">(-2費)</span>
+          <button type="button" onclick="buyLiveFamilyCare(event)" id="btnLiveFamilyCare" title="活動費2消費：家族サービスで警戒度を-2" class="px-2 py-0.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 text-emerald-300 font-bold text-[9.5px] sm:text-[10px] transition active:scale-95 flex items-center gap-1">
+            <span>🏡</span><span>家庭ケア</span>
           </button>
         </div>
       </div>
@@ -677,4 +658,3 @@
   <canvas id="exportCanvas" width="1080" height="1080" class="hidden"></canvas>
 </body>
 </html>
-```[cite: 6]

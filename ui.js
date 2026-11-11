@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（6×2列マトリックス完全版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（スリム化・6×2列完全版）
    ============================================================ */
 
 /* --- AvatarCacheManager ブリッジ（avatars.js の実データを直接バインド） --- */
@@ -363,9 +363,9 @@ function updateLiveStats() {
     const canBoost = (appState.stats.budget >= 2 && activeCount < 4);
     btnBoost.disabled = !canBoost;
     if (!canBoost) {
-      btnBoost.className = "px-2.5 py-0.5 rounded-full font-bold text-[10.5px] bg-slate-900 border border-slate-800 text-slate-600 cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none";
+      btnBoost.className = "px-2.5 py-0.5 rounded-full font-bold text-[10.5px] bg-slate-900 border border-slate-800 text-slate-600 cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none flex-shrink-0";
     } else {
-      btnBoost.className = "px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 cursor-pointer";
+      btnBoost.className = "px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 cursor-pointer flex-shrink-0";
     }
   }
 
@@ -374,9 +374,9 @@ function updateLiveStats() {
     const canCare = (appState.stats.budget >= 2 && appState.stats.spouseAlert > 1);
     btnCare.disabled = !canCare;
     if (!canCare) {
-      btnCare.className = "px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-600 font-bold text-[10px] cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none";
+      btnCare.className = "px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-600 font-bold text-[9.5px] sm:text-[10px] cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none";
     } else {
-      btnCare.className = "px-2 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 text-emerald-300 font-bold text-[10px] transition active:scale-95 flex items-center gap-1 cursor-pointer";
+      btnCare.className = "px-2 py-0.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 text-emerald-300 font-bold text-[9.5px] sm:text-[10px] transition active:scale-95 flex items-center gap-1 cursor-pointer";
     }
   }
 }
@@ -530,7 +530,7 @@ function triggerScreenTapAdvance() {
   }
 }
 
-// 【改修点】6×2列マトリックス生成（絵文字＋月ラベルの2段組み大きめ表示）
+// 6×2列マトリックス生成（絵文字＋月ラベルの2段組み大きめ表示）
 function refresh12MatrixGrid() {
   const currentYear = Math.floor(appState.sim.currentMonth / 12) + 1;
   const startM = (currentYear - 1) * 12 + 1;
@@ -680,10 +680,10 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
       alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500 font-black animate-ping";
     }
     if (largeBadge) {
-      largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/80 border border-rose-500 animate-pulse flex-shrink-0";
+      largeBadge.className = "flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-500 animate-pulse flex-shrink-0";
     }
     if (largeVal) {
-      largeVal.className = "text-[10.5px] font-black text-rose-300";
+      largeVal.className = "text-[10px] font-black text-rose-300";
     }
     if (sitEl) sitEl.innerText = "家庭内は完全な臨戦態勢。スマホの着信音ひとつで怒号が飛ぶ。";
   } else if (isCrisis || alertLv === 4) {
@@ -701,10 +701,10 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
       alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700 animate-pulse";
     }
     if (largeBadge) {
-      largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/60 border border-rose-600 flex-shrink-0";
+      largeBadge.className = "flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-600 flex-shrink-0";
     }
     if (largeVal) {
-      largeVal.className = "text-[10.5px] font-black text-rose-400";
+      largeVal.className = "text-[10px] font-black text-rose-400";
     }
     const spouseEvents = [
       "休日の夕方、スマホの通知を凝視され冷や汗が流れた。",
@@ -719,10 +719,10 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
       alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40";
     }
     if (largeBadge) {
-      largeBadge.className = "flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 flex-shrink-0";
+      largeBadge.className = "flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/80 flex-shrink-0";
     }
     if (largeVal) {
-      largeVal.className = "text-[10.5px] font-black text-amber-400";
+      largeVal.className = "text-[10px] font-black text-amber-400";
     }
     if (sitEl && sitEl.innerText.indexOf("家族サービス") === -1) {
       sitEl.innerText = "平穏な週末。特に怪しまれる様子はない。";
@@ -743,13 +743,12 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
     const monthTitle = document.getElementById("monthTitleLog");
     if (monthTitle) monthTitle.innerText = seasons[calMonth] || "穏やかな午後の逢瀬";
 
+    // 最上段：【婚外○年目 名前 ○歳】の短縮コンパクト形式へ動的更新
     const simAgeEl = document.getElementById("simCurrentAge");
     if (simAgeEl) {
       const currentAge = typeof getRealAge === "function" ? getRealAge(mIdx) : (appState.user.startAge || 40);
-      const passedY = Math.floor(mIdx / 12);
-      const passedM = (mIdx % 12) + 1;
-      const elapsedStr = passedY > 0 ? `${passedY}年${passedM}ヶ月` : `${passedM}ヶ月`;
-      simAgeEl.innerHTML = `<span class="text-purple-300 font-black text-sm">${appState.user.name}</span> <span class="font-bold text-white text-xs ml-1">${currentAge}歳</span> <span class="text-slate-400 text-[10.5px] font-normal">（婚外開始 ${elapsedStr}）</span>`;
+      const passedYear = Math.floor(mIdx / 12) + 1;
+      simAgeEl.innerHTML = `<span class="text-purple-300">婚外${passedYear}年目</span> <span class="text-white font-black ml-1">${appState.user.name}</span> <span class="text-slate-300 ml-1">${currentAge}歳</span>`;
     }
 
     const maxP = appState.stats.maxPartners || 2;
@@ -1167,7 +1166,7 @@ function renderAllPartnersList(sortType = "duration") {
   sorted.forEach((p, idx) => {
     const avatarSrc = getSafeAvatarSrc(p.avatarId, p.name, p.color);
     allHtml += `
-      <div class="p-2.5 rounded bg-slate-950/50 border border-slate-855 flex justify-between items-center text-xs">
+      <div class="p-2.5 rounded bg-slate-950/50 border border-slate-850 flex justify-between items-center text-xs">
         <div class="flex items-center gap-2">
           <div class="avatar-frame-sm"><img src="${avatarSrc}" alt="${p.name}"></div>
           <div>

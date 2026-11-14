@@ -199,24 +199,36 @@ function simulateOneMonth(isSilent = false) {
   let activePartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
   let isCrisisHappened = false;
 
+  // 【修正】家庭崩壊度（spouseAlert）の上昇・下降バランス調整
   const stamina = appState.stats.stamina || 4;
-  let alertUpChance = (stamina >= 7) ? 0.04 : (stamina <= 3 ? 0.15 : 0.08);
+  const activeCount = activePartners.length;
 
-  if (activePartners.length >= 3 && Math.random() < alertUpChance) {
-    appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
-  }
-  if (stamina <= 3 && activePartners.length >= 2 && Math.random() < 0.10) {
-    appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
-  }
+  if (activeCount > 0) {
+    // 交際人数に応じたベース上昇率（1人:6%、2人:13%、3人:21%、4人:28%）
+    let alertUpChance = [0, 0.06, 0.13, 0.21, 0.28][Math.min(4, activeCount)];
+    // 体力が高いほど家庭での振る舞いに余裕が出てバレにくい
+    alertUpChance -= (stamina - 4) * 0.015;
+    // パートナーの特性によるリスク増減
+    if (activePartners.some(p => p.tag === "夜間遠征" || p.tag === "年下独身")) alertUpChance += 0.04;
+    if (activePartners.every(p => p.tag === "秘密厳守")) alertUpChance -= 0.03;
 
-  let alertDownChance = (stamina >= 7) ? 0.40 : (activePartners.length === 0 ? 0.30 : 0.08);
-  if (Math.random() < alertDownChance) {
-    appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 1);
+    alertUpChance = Math.max(0.02, Math.min(0.45, alertUpChance));
+
+    if (Math.random() < alertUpChance) {
+      appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
+    } else if (Math.random() < 0.04) {
+      // 交際中は自然鎮静は低確率（4%）
+      appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 1);
+    }
+  } else {
+    // パートナー0人の月は家庭に専念するため鎮静しやすい（25%）
+    if (Math.random() < 0.25) {
+      appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 1);
+    }
   }
 
   const prefProp = PREF_PROPERTIES.tokyo;
 
-  const activeCount = activePartners.length;
   let staminaProtection = (stamina - 4) * 0.018;
   let riskRate = (appState.stats.spouseAlert * 0.028) + (activeCount * 0.018) + (prefProp.crisisBonus || 0) - staminaProtection;
   riskRate = Math.max(0.005, Math.min(0.40, riskRate));

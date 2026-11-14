@@ -9,7 +9,9 @@ function loadImageAsync(src) {
       return;
     }
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (!src.startsWith("data:")) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = src;
@@ -47,7 +49,6 @@ async function generateSquareCard() {
   const W = 1080;
   const H = 1080;
 
-  // 1. 背景グラデーション（ナイト・パープル＆スレート）
   const bgGrad = ctx.createLinearGradient(0, 0, W, H);
   bgGrad.addColorStop(0, "#090d16");
   bgGrad.addColorStop(0.5, "#170f29");
@@ -55,7 +56,6 @@ async function generateSquareCard() {
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, W, H);
 
-  // 装飾用ライトグロー
   const glow1 = ctx.createRadialGradient(220, 200, 10, 220, 200, 460);
   glow1.addColorStop(0, "rgba(168, 85, 247, 0.22)");
   glow1.addColorStop(1, "rgba(168, 85, 247, 0)");
@@ -68,19 +68,16 @@ async function generateSquareCard() {
   ctx.fillStyle = glow2;
   ctx.fillRect(0, 0, W, H);
 
-  // 外枠フレーム
   ctx.strokeStyle = "rgba(192, 132, 252, 0.45)";
   ctx.lineWidth = 4;
   drawRoundedRect(ctx, 28, 28, W - 56, H - 56, 28);
   ctx.stroke();
 
-  // 2. ヘッダータイトル
   ctx.textAlign = "center";
   ctx.fillStyle = "#c084fc";
   ctx.font = "bold 22px 'Noto Sans JP', sans-serif";
   ctx.fillText("OUTROMANCE : 婚外5年シミュレーター 〜既婚者たちの裏歴史〜", W / 2, 82);
 
-  // プレイヤー名 ＆ 年齢軌跡
   const userName = appState.user.name || "ユウスケ";
   const startAge = appState.user.startAge || 40;
   const finalAge = (typeof getRealAge === "function") ? getRealAge(appState.sim.currentMonth) : (startAge + 5);
@@ -90,7 +87,6 @@ async function generateSquareCard() {
   ctx.font = "900 48px 'Noto Sans JP', sans-serif";
   ctx.fillText(`${userName} さんの5年間（${startAge}歳 → ${finalAge}歳）`, W / 2, 146);
 
-  // 3. 称号プレート
   const titleEl = document.getElementById("resTitleBadge");
   const titleText = titleEl ? titleEl.innerText : "『首都圏の彷徨い人』";
 
@@ -113,7 +109,6 @@ async function generateSquareCard() {
   ctx.font = "900 50px 'Noto Sans JP', sans-serif";
   ctx.fillText(truncateText(ctx, titleText, W - 180), W / 2, 272);
 
-  // 4. 3大戦績ボックス（累計人数 / 肌を重ねた回数 / 密会時間）
   const totalPartners = appState.sim.partners.length;
   let totalSex = 0, totalDates = 0;
   appState.sim.partners.forEach(p => {
@@ -150,7 +145,6 @@ async function generateSquareCard() {
     ctx.fillText(item.val, bx + boxW / 2, by + 100);
   });
 
-  // 5. アチーブメント・ステータスバッジ行（最新6実績＋特殊状態同期）
   let hasOlder20 = appState.sim.metOlder20Plus;
   let hasYounger20 = appState.sim.metYounger20Plus;
   appState.sim.partners.forEach(p => {
@@ -178,7 +172,6 @@ async function generateSquareCard() {
     activeBadges.push({ text: appState.sim.isRetired ? "🚪 静寂の自主引退" : "🌃 首都圏の5年間完走", bg: "#1e293b", border: "#64748b", color: "#cbd5e1" });
   }
 
-  // 最大4個まで横並びに美しく描画
   const showBadges = activeBadges.slice(0, 4);
   ctx.font = "bold 20px 'Noto Sans JP', sans-serif";
   const badgeHeights = 42;
@@ -202,13 +195,14 @@ async function generateSquareCard() {
     curBX += bw + 14;
   });
 
-  // 6. 記憶のパートナー2枚カード（最長交際 ＆ 最高密会スコア）
+  // 記憶のパートナー2枚カード（案A：年齢統一 ＋ 二冠達成表示）
   const sortedByDuration = [...appState.sim.partners].sort((a, b) => b.durationMonths - a.durationMonths);
   const longestP = sortedByDuration[0] || {
-    name: "該当なし", startAge: startAge, endAge: startAge, durationMonths: 0,
+    id: "", name: "該当なし", startAge: startAge, endAge: startAge, durationMonths: 0,
     chemistry: "-", avatarId: "F01", tag: "なし", area: "東京", color: "#a855f7", maxSexScore: 0
   };
   const highestP = appState.sim.highestScorePartner || longestP;
+  const isSameTopPartner = Boolean(longestP.id && highestP.id && longestP.id === highestP.id);
 
   const longImgSrc = (typeof getSafeAvatarSrc === "function") ? getSafeAvatarSrc(longestP.avatarId, longestP.name, longestP.color) : "";
   const highImgSrc = (typeof getSafeAvatarSrc === "function") ? getSafeAvatarSrc(highestP.avatarId, highestP.name, highestP.color) : "";
@@ -221,17 +215,23 @@ async function generateSquareCard() {
       headerColor: "#f472b6",
       partner: longestP,
       img: longImg,
+      isLongest: true,
       sub1: `交際 ${longestP.durationMonths}ヶ月（約${(longestP.durationMonths / 12).toFixed(1)}年）`,
-      sub2: `🏷️${longestP.tag || "平日昼"} ｜ 相性 ${longestP.chemistry || "B"}`
+      sub2: `🏷️${longestP.tag || "平日昼"} ｜ 相性 ${longestP.chemistry || "B"}`,
+      sub2Color: "#a5b4fc"
     },
     {
       header: "🔥 歴代最高密会スコア",
-      borderColor: "rgba(251, 113, 133, 0.55)",
+      borderColor: isSameTopPartner ? "rgba(250, 204, 21, 0.8)" : "rgba(251, 113, 133, 0.55)",
       headerColor: "#fbbf24",
       partner: highestP,
       img: highImg,
+      isLongest: false,
       sub1: `最高スコア: ${appState.sim.globalMaxSexScore || highestP.maxSexScore || 0} pt`,
-      sub2: `🏷️${highestP.tag || "平日昼"} ｜ 相性 ${highestP.chemistry || "B"}`
+      sub2: isSameTopPartner
+        ? `👑 最長交際と二冠達成！ ｜ 相性 ${highestP.chemistry || "B"}`
+        : `🏷️${highestP.tag || "平日昼"} ｜ 相性 ${highestP.chemistry || "B"}`,
+      sub2Color: isSameTopPartner ? "#fde047" : "#a5b4fc"
     }
   ];
 
@@ -248,13 +248,11 @@ async function generateSquareCard() {
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // カード見出し
     ctx.textAlign = "center";
     ctx.fillStyle = card.headerColor;
     ctx.font = "bold 23px 'Noto Sans JP', sans-serif";
     ctx.fillText(card.header, cx + pCardW / 2, pCardY + 42);
 
-    // アバター枠（132x132）
     const avSize = 132;
     const avX = cx + (pCardW - avSize) / 2;
     const avY = pCardY + 62;
@@ -270,30 +268,27 @@ async function generateSquareCard() {
       ctx.restore();
     }
 
-    // 名前・年齢
     const p = card.partner;
-    const dispAge = (idx === 0) ? (p.endAge || p.startAge) : p.startAge;
+    const dispAge = (card.isLongest && p.endAge && p.endAge > p.startAge)
+      ? `${p.startAge}歳→${p.endAge}歳`
+      : `${p.startAge}歳`;
     ctx.fillStyle = "#ffffff";
-    ctx.font = "900 30px 'Noto Sans JP', sans-serif";
-    ctx.fillText(truncateText(ctx, `${p.name} (${dispAge}歳)`, pCardW - 36), cx + pCardW / 2, avY + avSize + 44);
+    ctx.font = "900 28px 'Noto Sans JP', sans-serif";
+    ctx.fillText(truncateText(ctx, `${p.name} (${dispAge})`, pCardW - 36), cx + pCardW / 2, avY + avSize + 44);
 
-    // エリア・職業
     ctx.fillStyle = "#cbd5e1";
     ctx.font = "500 20px 'Noto Sans JP', sans-serif";
     ctx.fillText(truncateText(ctx, `${p.area || "東京"} ｜ ${p.job || "一般事務"}`, pCardW - 36), cx + pCardW / 2, avY + avSize + 78);
 
-    // 期間 / スコア
     ctx.fillStyle = card.headerColor;
     ctx.font = "bold 24px 'Noto Sans JP', sans-serif";
     ctx.fillText(card.sub1, cx + pCardW / 2, avY + avSize + 118);
 
-    // タグ・相性
-    ctx.fillStyle = "#a5b4fc";
+    ctx.fillStyle = card.sub2Color;
     ctx.font = "bold 19px 'Noto Sans JP', sans-serif";
     ctx.fillText(card.sub2, cx + pCardW / 2, avY + avSize + 150);
   });
 
-  // 7. フッター（スタジオ表記 ＆ ハッシュタグ）
   ctx.textAlign = "center";
   ctx.fillStyle = "#94a3b8";
   ctx.font = "bold 21px 'Noto Sans JP', sans-serif";
@@ -303,7 +298,6 @@ async function generateSquareCard() {
   ctx.font = "18px 'Noto Sans JP', sans-serif";
   ctx.fillText("※本作はフィクションです。実在の人物・団体とは一切関係ありません。", W / 2, 1022);
 
-  // モーダルへ画像反映・表示
   const dataUrl = canvas.toDataURL("image/png");
   const outImg = document.getElementById("generatedCardImage");
   if (outImg) outImg.src = dataUrl;
@@ -314,7 +308,6 @@ function closeImageModal() {
   document.getElementById("imageSaveModal")?.classList.add("hidden");
 }
 
-// X（旧Twitter）シェア機能（未定義の場合のフォールバック兼最新称号連動）
 if (typeof window.shareOnX !== "function") {
   window.shareOnX = function() {
     const userName = appState.user.name || "ユウスケ";

@@ -1,5 +1,5 @@
 /* ============================================================
-   sim.js - OUTROMANCE コアシミュレーション（一都三県対応 完全版）
+   sim.js - OUTROMANCE コアシミュレーション（100人斬り・女性マッチ調整 完全版）
    ============================================================ */
 
 window.appState = window.appState || {
@@ -114,7 +114,7 @@ function createSynthesizedPartner(startMonth, playerAge) {
   const jobPool = isTargetMale ? MALE_JOBS_POOL : FEMALE_JOBS_POOL;
   const job = jobPool[Math.floor(Math.random() * jobPool.length)];
 
-  // 【改修点】一都三県ウェイト抽選（東京45%、神奈川25%、埼玉15%、千葉15%）
+  // 一都三県ウェイト抽選（東京45%、神奈川25%、埼玉15%、千葉15%）
   const rPref = Math.random();
   let prefKey = "tokyo";
   let prefLabel = "東京";
@@ -360,7 +360,7 @@ function simulateOneMonth(isSilent = false) {
     }
   }
 
-  // 出会い抽選ロジック
+  // 【改修】出会い抽選ロジック（女性外見重視・活動費ペナルティ撤廃・二人マッチ率大幅向上）
   const maxAllowed = appState.stats.maxPartners || 2;
   let emptySlots = maxAllowed - appState.sim.activePartnerIds.length;
   let matchedPartners = [];
@@ -368,20 +368,20 @@ function simulateOneMonth(isSilent = false) {
   const isFirstMonthGuaranteed = (mIdx === 0 && appState.sim.activePartnerIds.length === 0);
 
   if (emptySlots > 0 && appState.stats.spouseAlert < 5) {
-    let meetBase = isUserMale ? 0.36 : 0.44;
+    let meetBase = 0.45;
     if (isUserMale) {
-      meetBase += (appState.stats.budget - 4) * 0.035;
-      meetBase += (appState.stats.looks - 5) * 0.02;
+      // 男性：活動費と外見が影響
+      meetBase = 0.44 + (appState.stats.budget - 3) * 0.04 + (appState.stats.looks - 4) * 0.03;
     } else {
-      meetBase += (appState.stats.looks - 5) * 0.045;
-      meetBase += (appState.stats.budget - 4) * 0.01;
+      // 女性：活動費0でもペナルティなし！外見（looks）の比重を大幅強化
+      meetBase = 0.52 + (appState.stats.looks - 4) * 0.065;
     }
 
-    if (appState.stats.targetAgePref === "younger") meetBase *= 0.85;
+    if (appState.stats.targetAgePref === "younger") meetBase *= 0.88;
     if (appState.stats.targetAgePref === "older") meetBase *= 1.15;
-    if (appState.stats.spouseAlert === 4) meetBase *= 0.5;
+    if (appState.stats.spouseAlert === 4) meetBase *= 0.65;
 
-    meetBase = Math.max(0.15, Math.min(0.75, meetBase));
+    meetBase = Math.max(0.25, Math.min(0.88, meetBase));
 
     if (isFirstMonthGuaranteed || Math.random() < meetBase) {
       const p1 = createSynthesizedPartner(mIdx, currentRealAge);
@@ -396,10 +396,13 @@ function simulateOneMonth(isSilent = false) {
       if (p1.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
       if (p1.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
 
-      if (emptySlots >= 2 && !isFirstMonthGuaranteed) {
-        let doubleRate = isUserMale 
-          ? (appState.stats.budget >= 6 ? 0.20 : 0.06) 
-          : (appState.stats.looks >= 6 ? 0.20 : 0.06);
+      // 【改修】二人同時マッチ率（DOUBLE MATCH）の大幅向上（男女共通・100人斬り対応）
+      if (emptySlots >= 2) {
+        let doubleRate = isUserMale
+          ? (0.35 + (appState.stats.budget - 2) * 0.06 + (appState.stats.looks - 4) * 0.04)
+          : (0.38 + (appState.stats.looks - 4) * 0.075);
+
+        doubleRate = Math.max(0.25, Math.min(0.82, doubleRate));
 
         if (Math.random() < doubleRate) {
           const p2 = createSynthesizedPartner(mIdx, currentRealAge);
@@ -413,6 +416,21 @@ function simulateOneMonth(isSilent = false) {
 
           if (p2.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
           if (p2.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
+
+          // 修羅乱舞型（4人枠）で空き枠が3つ以上ある場合、さらに3人目の追加マッチチャンス
+          if (emptySlots >= 3 && Math.random() < (doubleRate * 0.45)) {
+            const p3 = createSynthesizedPartner(mIdx, currentRealAge);
+            p3.lastSexScore = calculateSexScore(p3, calMonth, isCrisisHappened, (prefProp.scoreBonus || 0));
+            p3.maxSexScore = p3.lastSexScore;
+
+            appState.sim.partners.push(p3);
+            appState.sim.activePartnerIds.push(p3.id);
+            appState.sim.totalPartnerCounter++;
+            matchedPartners.push(p3);
+
+            if (p3.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
+            if (p3.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
+          }
         }
       }
     }

@@ -1,10 +1,10 @@
 /* ============================================================
-   sim.js - OUTROMANCE コアシミュレーション（100人斬り・女性マッチ調整 完全版）
+   sim.js - OUTROMANCE コアシミュレーション（完全版）
    ============================================================ */
 
 window.appState = window.appState || {
   user: { name: "ユウスケ", gender: "male", pref: "tokyo", startAge: 40, birthMonth: 1, selectedStyle: "balanced" },
-  stats: { looks: 5, libido: 5, stamina: 5, budget: 4, income: 5, childBurden: 5, spouseAffection: 5, spouseAlert: 3, targetAgePref: "same", maxPartners: 2 },
+  stats: { looks: 5, libido: 5, stamina: 5, budget: 4, income: 5, childBurden: 5, spouseAffection: 5, spouseAlert: 1, targetAgePref: "same", maxPartners: 2 },
   tempPoints: 0,
   sim: {
     currentMonth: 0, currentAge: 40, isPaused: false, isSkipping: false,
@@ -17,7 +17,6 @@ window.appState = window.appState || {
 };
 var appState = window.appState;
 
-// 1月固定開始のため、開始月（1月）と加齢が一致
 function getRealAge(mIdx) {
   const startAge = appState.user.startAge || 40;
   return startAge + Math.floor(mIdx / 12);
@@ -52,7 +51,6 @@ function calculateSexScore(partner, month, isCrisis, prefBonus = 0) {
   return Math.max(10, Math.round(base + libidoBonus + masteryBonus + eventBonus + thrillBonus + prefBonus));
 }
 
-// 年齢抽選ロジック：最大差キャップ撤廃 ＆ レア年齢差の出現率UP版
 function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
   const userGender = appState.user.gender;
   const looks = appState.stats.looks || 5;
@@ -66,7 +64,6 @@ function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
   }
   spreadBonus = Math.max(0, Math.min(12, spreadBonus));
 
-  // 1. 同年代狙い (same)：85%は±3歳、15%は最大±6歳（厳格維持）
   if (targetPref === "same") {
     if (Math.random() < 0.85) {
       const delta = Math.floor(Math.random() * 7) - 3;
@@ -81,24 +78,20 @@ function rollPartnerAgeWithDecay(playerAge, targetPref, isTargetMale) {
   function rollDecayedGap() {
     let gap = 3;
     const continueRate = 0.68 + (spreadBonus / 12) * 0.14;
-    
     if (Math.random() < 0.12) {
       gap += 6 + Math.floor(Math.random() * 7);
     }
-
     while (Math.random() < continueRate && gap < 70) {
       gap += 1 + Math.floor(Math.random() * 3);
     }
     return gap;
   }
 
-  // 2. 年下狙い (younger)
   if (targetPref === "younger") {
     const gap = rollDecayedGap();
     return Math.max(18, playerAge - gap);
   }
 
-  // 3. 年上狙い (older)
   if (targetPref === "older") {
     const gap = rollDecayedGap();
     return Math.min(85, playerAge + gap);
@@ -114,7 +107,6 @@ function createSynthesizedPartner(startMonth, playerAge) {
   const jobPool = isTargetMale ? MALE_JOBS_POOL : FEMALE_JOBS_POOL;
   const job = jobPool[Math.floor(Math.random() * jobPool.length)];
 
-  // 一都三県ウェイト抽選（東京45%、神奈川25%、埼玉15%、千葉15%）
   const rPref = Math.random();
   let prefKey = "tokyo";
   let prefLabel = "東京";
@@ -155,8 +147,6 @@ function createSynthesizedPartner(startMonth, playerAge) {
   }
 
   const avatarId = prefix + String(avatarNum).padStart(2, '0');
-
-  // 裏事情タグ × 性別の動的ランダムセリフ
   const quote = (typeof pickPartnerQuote === "function") 
     ? pickPartnerQuote(targetGender, tag) 
     : "「はじめまして。落ち着いた大人の関係になれたら嬉しいです。」";
@@ -236,7 +226,6 @@ function simulateOneMonth(isSilent = false) {
     appState.sim.crisisCountIn2Years++;
   }
 
-  // 1年目（12ヶ月未満）は即死離婚を防止
   const isFirstYear = (mIdx < 12);
   const divorceChance = isFirstYear ? 0.0 : (isCrisisHappened ? 0.30 : 0.05);
 
@@ -360,7 +349,7 @@ function simulateOneMonth(isSilent = false) {
     }
   }
 
-  // 【改修】出会い抽選ロジック（女性外見重視・活動費ペナルティ撤廃・二人マッチ率大幅向上）
+  // 出会い抽選ロジック
   const maxAllowed = appState.stats.maxPartners || 2;
   let emptySlots = maxAllowed - appState.sim.activePartnerIds.length;
   let matchedPartners = [];
@@ -370,10 +359,8 @@ function simulateOneMonth(isSilent = false) {
   if (emptySlots > 0 && appState.stats.spouseAlert < 5) {
     let meetBase = 0.45;
     if (isUserMale) {
-      // 男性：活動費と外見が影響
       meetBase = 0.44 + (appState.stats.budget - 3) * 0.04 + (appState.stats.looks - 4) * 0.03;
     } else {
-      // 女性：活動費0でもペナルティなし！外見（looks）の比重を大幅強化
       meetBase = 0.52 + (appState.stats.looks - 4) * 0.065;
     }
 
@@ -396,7 +383,6 @@ function simulateOneMonth(isSilent = false) {
       if (p1.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
       if (p1.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
 
-      // 【改修】二人同時マッチ率（DOUBLE MATCH）の大幅向上（男女共通・100人斬り対応）
       if (emptySlots >= 2) {
         let doubleRate = isUserMale
           ? (0.35 + (appState.stats.budget - 2) * 0.06 + (appState.stats.looks - 4) * 0.04)
@@ -417,7 +403,6 @@ function simulateOneMonth(isSilent = false) {
           if (p2.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
           if (p2.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
 
-          // 修羅乱舞型（4人枠）で空き枠が3つ以上ある場合、さらに3人目の追加マッチチャンス
           if (emptySlots >= 3 && Math.random() < (doubleRate * 0.45)) {
             const p3 = createSynthesizedPartner(mIdx, currentRealAge);
             p3.lastSexScore = calculateSexScore(p3, calMonth, isCrisisHappened, (prefProp.scoreBonus || 0));

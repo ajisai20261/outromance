@@ -1,5 +1,5 @@
 /* ============================================================
-   sim.js - OUTROMANCE コアシミュレーション（完全版）
+   sim.js - OUTROMANCE コアシミュレーション（警戒度・慰謝料バランス調整 完全版）
    ============================================================ */
 
 window.appState = window.appState || {
@@ -199,30 +199,32 @@ function simulateOneMonth(isSilent = false) {
   let activePartners = appState.sim.partners.filter(p => appState.sim.activePartnerIds.includes(p.id));
   let isCrisisHappened = false;
 
-  // 【修正】家庭崩壊度（spouseAlert）の上昇・下降バランス調整
+  // 【調整】家庭崩壊度（spouseAlert）の上昇緩和 ＆ 自然鎮静引き上げ
   const stamina = appState.stats.stamina || 4;
   const activeCount = activePartners.length;
 
   if (activeCount > 0) {
-    // 交際人数に応じたベース上昇率（1人:6%、2人:13%、3人:21%、4人:28%）
-    let alertUpChance = [0, 0.06, 0.13, 0.21, 0.28][Math.min(4, activeCount)];
+    // 交際人数ごとのベース上昇率（1人:2%、2人:5%、3人:9%、4人:13%）
+    let alertUpChance = [0, 0.02, 0.05, 0.09, 0.13][Math.min(4, activeCount)];
     // 体力が高いほど家庭での振る舞いに余裕が出てバレにくい
-    alertUpChance -= (stamina - 4) * 0.015;
-    // パートナーの特性によるリスク増減
-    if (activePartners.some(p => p.tag === "夜間遠征" || p.tag === "年下独身")) alertUpChance += 0.04;
-    if (activePartners.every(p => p.tag === "秘密厳守")) alertUpChance -= 0.03;
+    alertUpChance -= (stamina - 4) * 0.012;
+    // パートナーの特性によるリスク微調整
+    if (activePartners.some(p => p.tag === "夜間遠征" || p.tag === "年下独身")) alertUpChance += 0.025;
+    if (activePartners.every(p => p.tag === "秘密厳守")) alertUpChance -= 0.02;
 
-    alertUpChance = Math.max(0.02, Math.min(0.45, alertUpChance));
+    alertUpChance = Math.max(0.01, Math.min(0.22, alertUpChance));
+
+    // 交際中の自然鎮静率（ベース8% + 体力ボーナス）
+    const alertDownChance = Math.min(0.25, 0.08 + Math.max(0, stamina - 4) * 0.02);
 
     if (Math.random() < alertUpChance) {
       appState.stats.spouseAlert = Math.min(5, appState.stats.spouseAlert + 1);
-    } else if (Math.random() < 0.04) {
-      // 交際中は自然鎮静は低確率（4%）
+    } else if (Math.random() < alertDownChance) {
       appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 1);
     }
   } else {
-    // パートナー0人の月は家庭に専念するため鎮静しやすい（25%）
-    if (Math.random() < 0.25) {
+    // パートナー0人の月は家庭に専念するため鎮静しやすい（30%）
+    if (Math.random() < 0.30) {
       appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 1);
     }
   }
@@ -230,8 +232,8 @@ function simulateOneMonth(isSilent = false) {
   const prefProp = PREF_PROPERTIES.tokyo;
 
   let staminaProtection = (stamina - 4) * 0.018;
-  let riskRate = (appState.stats.spouseAlert * 0.028) + (activeCount * 0.018) + (prefProp.crisisBonus || 0) - staminaProtection;
-  riskRate = Math.max(0.005, Math.min(0.40, riskRate));
+  let riskRate = (appState.stats.spouseAlert * 0.024) + (activeCount * 0.012) + (prefProp.crisisBonus || 0) - staminaProtection;
+  riskRate = Math.max(0.005, Math.min(0.32, riskRate));
 
   if (Math.random() < riskRate && activeCount > 0) {
     isCrisisHappened = true;
@@ -239,7 +241,7 @@ function simulateOneMonth(isSilent = false) {
   }
 
   const isFirstYear = (mIdx < 12);
-  const divorceChance = isFirstYear ? 0.0 : (isCrisisHappened ? 0.30 : 0.05);
+  const divorceChance = isFirstYear ? 0.0 : (isCrisisHappened ? 0.25 : 0.04);
 
   if (appState.stats.spouseAlert >= 5 && Math.random() < divorceChance) {
     if (typeof triggerDivorceGameOver === "function") {
@@ -248,7 +250,7 @@ function simulateOneMonth(isSilent = false) {
     return;
   }
 
-  const concurrentPenalty = { 1: 0.6, 2: 1.0, 3: 1.5, 4: 2.1 }[appState.stats.maxPartners] || 1.0;
+  const concurrentPenalty = { 1: 0.6, 2: 1.0, 3: 1.4, 4: 1.8 }[appState.stats.maxPartners] || 1.0;
   const isUserMale = (appState.user.gender === "male");
 
   activePartners.forEach(p => {
@@ -272,17 +274,19 @@ function simulateOneMonth(isSilent = false) {
     }
   });
 
-  // 慰謝料被請求判定
+  // 【調整】慰謝料被請求判定（家庭崩壊度Lv.3以上 ＆ 1プレイ最大1回までで連発防止）
   let lawsuitPartner = null;
-  for (const p of activePartners) {
-    let lawsuitRate = 0.003;
-    if (p.tag === "冷えきり") lawsuitRate = 0.006;
-    if (p.tag === "秘密厳守") lawsuitRate = 0.0;
-    if (stamina >= 7) lawsuitRate *= 0.5;
+  if (appState.stats.spouseAlert >= 3 && appState.sim.lawsuitCount < 1) {
+    for (const p of activePartners) {
+      let lawsuitRate = 0.0015; // ベース0.15%へ引き下げ
+      if (p.tag === "冷えきり") lawsuitRate = 0.003;
+      if (p.tag === "秘密厳守") lawsuitRate = 0.0;
+      if (stamina >= 7) lawsuitRate *= 0.5;
 
-    if (Math.random() < lawsuitRate) {
-      lawsuitPartner = p;
-      break;
+      if (Math.random() < lawsuitRate) {
+        lawsuitPartner = p;
+        break;
+      }
     }
   }
 

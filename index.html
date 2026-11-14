@@ -256,10 +256,10 @@
       </button>
     </section>
 
-    <!-- STEP 2: 進行画面（スリム化・縦幅圧縮版） -->
+    <!-- STEP 2: 進行画面（スリム化・5ステータス上段集約版） -->
     <section id="step2" class="hidden space-y-2 pb-8 select-none cursor-pointer">
       
-      <!-- ステータス集約枠（最上段：婚外○年目＋ブーストボタン） -->
+      <!-- ステータス集約枠（最上段：婚外○年目＋ブーストボタン / 2段目：5ステータス横並び） -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 sm:p-2.5 space-y-1.5 shadow-lg">
         <div class="flex items-center justify-between text-xs pb-1.5 border-b border-slate-800/80">
           <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
@@ -274,25 +274,27 @@
             </div>
           </div>
 
-          <!-- 上段右端に配置したブーストボタン -->
-          <button type="button" onclick="triggerBoostMatching(event)" id="btnBoostMatching" title="活動費2消費：空いている交際枠を一挙に埋める" class="px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 flex-shrink-0">
+          <!-- 上段右端に配置したブーストボタン（消費1） -->
+          <button type="button" onclick="triggerBoostMatching(event)" id="btnBoostMatching" title="活動費1消費：空いている交際枠を一挙に埋める" class="px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 flex-shrink-0">
             <span>🆙</span><span>ブースト</span>
           </button>
         </div>
 
-        <!-- 4大ステータス -->
-        <div class="flex items-center justify-between text-center text-[10.5px] sm:text-[11px] px-1">
-          <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white ml-0.5">5</span></div>
+        <!-- 5大ステータス（活動費4＋警戒3/5を横並び） -->
+        <div class="flex items-center justify-between text-center text-[10px] sm:text-[11px] px-0.5">
+          <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white">5</span></div>
           <div class="text-slate-700">|</div>
-          <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="liveStatStamina" class="font-bold text-white ml-0.5">5</span></div>
+          <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="liveStatStamina" class="font-bold text-white">5</span></div>
           <div class="text-slate-700">|</div>
-          <div><span class="text-rose-400 font-medium">🔥性欲</span> <span id="liveStatLibido" class="font-bold text-white ml-0.5">5</span></div>
+          <div><span class="text-rose-400 font-medium">🔥性欲</span> <span id="liveStatLibido" class="font-bold text-white">5</span></div>
           <div class="text-slate-700">|</div>
-          <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="liveStatBudget" class="font-bold text-white ml-0.5">Lv.2</span></div>
+          <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="liveStatBudget" class="font-bold text-white">4</span></div>
+          <div class="text-slate-700">|</div>
+          <div id="largeSpouseAlertBadge"><span class="text-amber-400 font-medium">🚨警戒</span> <span id="largeSpouseAlertVal" class="font-bold text-amber-300">3/5</span></div>
         </div>
       </div>
 
-      <!-- 12ヶ月マトリックス（上下テキストを全削除し、6×2列の円のみに極小化） -->
+      <!-- 12ヶ月マトリックス（6×2列の円のみ） -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-1.5 sm:p-2 shadow-xl">
         <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800/80">
           <div id="matrixGridRow" class="grid grid-cols-6 gap-1.5 sm:gap-2 items-center"></div>
@@ -378,34 +380,21 @@
         </div>
       </div>
 
-      <!-- 月次逢瀬ログ（季節ヘッダー行を全削除し直接ログを展開） -->
+      <!-- 月次逢瀬ログ -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 sm:p-2.5">
         <div id="currentMonthPartnersLog" class="space-y-1.5 min-h-[46px]">
           <div class="text-xs text-slate-500 italic py-2 text-center">今月はアポなし。家庭と仕事に専念中……</div>
         </div>
       </div>
 
-      <!-- 配偶者警戒度 ＆ 家庭ケアボタン -->
-      <div class="bg-slate-950/90 border border-slate-850 rounded-xl p-2 sm:p-2.5 text-xs flex items-center justify-between gap-2 shadow">
-        <div class="flex items-center gap-1.5 min-w-0 flex-1">
-          <span class="text-slate-300 font-bold flex items-center gap-1 flex-shrink-0 text-[11px]">
-            <span>🏠 家庭:</span>
-          </span>
-          <span id="spouseSituationLog" class="text-slate-400 text-[10px] sm:text-[10.5px] truncate flex-1">
-            平穏な週末。特に怪しまれる様子はない。
-          </span>
-        </div>
-
-        <div class="flex items-center gap-1.5 flex-shrink-0">
-          <div id="largeSpouseAlertBadge" class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/80">
-            <span class="text-[9px] text-slate-400">警戒</span>
-            <span id="largeSpouseAlertVal" class="text-[10px] font-black text-amber-400">Lv.3/5</span>
-          </div>
-
-          <button type="button" onclick="buyLiveFamilyCare(event)" id="btnLiveFamilyCare" title="活動費2消費：家族サービスで警戒度を-2" class="px-2 py-0.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 text-emerald-300 font-bold text-[9.5px] sm:text-[10px] transition active:scale-95 flex items-center gap-1">
-            <span>🏡</span><span>家庭ケア</span>
-          </button>
-        </div>
+      <!-- 家庭状況ログ（警戒度バッジとケアボタンは上部・決算モーダルへ移動したためシンプル表示） -->
+      <div class="bg-slate-950/90 border border-slate-850 rounded-xl p-2 sm:p-2.5 text-xs flex items-center gap-1.5 shadow">
+        <span class="text-slate-300 font-bold flex items-center gap-1 flex-shrink-0 text-[11px]">
+          <span>🏠 家庭:</span>
+        </span>
+        <span id="spouseSituationLog" class="text-slate-400 text-[10px] sm:text-[10.5px] truncate flex-1">
+          平穏な週末。特に怪しまれる様子はない。
+        </span>
       </div>
 
       <div id="clickMonthDetail" class="hidden bg-purple-950/70 border border-purple-700/80 rounded-xl p-3 text-xs space-y-1">
@@ -566,13 +555,13 @@
 
   <!-- 年次マイルストーンモーダル -->
   <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3.5 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
       <div class="text-center space-y-0.5">
         <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold" id="milestoneHeaderTag">12-Month Milestone</span>
         <h3 class="text-base sm:text-lg font-bold text-white" id="twoYearTitle">1年目の決算：41歳の現在</h3>
       </div>
 
-      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-2">
+      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-2.5 space-y-1.5">
         <div class="text-[11px] font-bold text-amber-300">📊 直近1年間の戦果</div>
         <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
           <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
@@ -591,13 +580,13 @@
       </div>
 
       <!-- 継続中パートナー一覧 -->
-      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-3 space-y-1.5">
+      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-2.5 space-y-1.5">
         <div class="text-xs font-bold text-purple-300">💖 現在継続中のパートナー</div>
         <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs"></div>
       </div>
 
       <!-- 次期の婚外方針再設定 -->
-      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
+      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-2 text-xs">
         <div class="font-bold text-purple-300">🎯 次期の婚外方針を見直す</div>
         <div class="grid grid-cols-2 gap-2">
           <div>
@@ -619,14 +608,23 @@
         </div>
       </div>
 
-      <!-- 加齢減衰と自動再投資結果 -->
-      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5 text-xs">
+      <!-- 加齢減衰と自己投資結果 ＆ 家庭ケア（移設） -->
+      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 space-y-2 text-xs">
         <div class="flex justify-between items-center">
           <span class="font-bold text-slate-300">📉 加齢減衰と自己投資結果</span>
           <span class="text-emerald-400 font-bold" id="milestoneIncomeReport">年収: Lv.5</span>
         </div>
         <div class="text-[11px] text-slate-300" id="milestoneStatReport">
-          ✨外見: 5 ｜ ⚡体力: 5 ｜ 🔥性欲: 5 ｜ 💳今期活動費: Lv.2
+          ✨外見: 5 ｜ ⚡体力: 5 ｜ 🔥性欲: 5 ｜ 💳今期活動費: 4
+        </div>
+        <!-- 1年決算モーダル内に移設した家庭ケア枠 -->
+        <div class="pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-2">
+          <div class="text-[11px] text-amber-300 font-bold">
+            🚨 現在の家庭警戒度: <span id="milestoneAlertVal">Lv.3/5</span>
+          </div>
+          <button type="button" onclick="buyMilestoneFamilyCare(event)" id="btnMilestoneFamilyCare" class="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/80 text-emerald-300 font-bold text-[10.5px] transition active:scale-95 flex items-center gap-1 cursor-pointer">
+            <span>🏡</span><span>家庭ケア (-2費で警戒-2)</span>
+          </button>
         </div>
       </div>
 

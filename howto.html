@@ -26,7 +26,7 @@
       </svg>
       <span class="text-base sm:text-lg font-black tracking-wider text-white">📖 遊び方ガイド</span>
     </div>
-    <a href="index.html" onclick="if(window.opener){window.close();return false;}" class="px-3 py-1.5 rounded-full text-xs font-bold bg-purple-900/80 hover:bg-purple-800 border border-purple-500/60 text-purple-100 transition active:scale-95">
+    <a href="index.html?skip=1" onclick="return backToGameTab(event);" class="px-3 py-1.5 rounded-full text-xs font-bold bg-purple-900/80 hover:bg-purple-800 border border-purple-500/60 text-purple-100 transition active:scale-95">
       ✕ ゲームに戻る
     </a>
   </header>
@@ -316,13 +316,23 @@
 
     <!-- 戻るボタン -->
     <div class="pt-2">
-      <a href="index.html" onclick="if(window.opener){window.close();return false;}" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+      <a href="index.html?skip=1" onclick="return backToGameTab(event);" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
         <span>ゲーム画面へ戻る ▶</span>
       </a>
     </div>
   </main>
 
   <script>
+    function backToGameTab(e) {
+      if (window.opener && !window.opener.closed) {
+        if (e) e.preventDefault();
+        window.opener.focus();
+        window.close();
+        return false;
+      }
+      return true;
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       const av1 = document.getElementById("guideAvatar1");
       if (av1 && window.FEMALE_AVATARS_DATA && window.FEMALE_AVATARS_DATA["F03"]) {

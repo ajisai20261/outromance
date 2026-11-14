@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（スリム化・6×2列完全版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（最新完全版）
    ============================================================ */
 
 /* --- AvatarCacheManager ブリッジ（avatars.js の実データを直接バインド） --- */
@@ -343,9 +343,9 @@ function updateLiveStats() {
   const libEl = document.getElementById("liveStatLibido");
   if (libEl) libEl.innerText = `${appState.stats.libido}`;
   const budEl = document.getElementById("liveStatBudget");
-  if (budEl) budEl.innerText = `Lv.${appState.stats.budget}`;
+  if (budEl) budEl.innerText = `${appState.stats.budget}`;
   const alertEl = document.getElementById("largeSpouseAlertVal");
-  if (alertEl) alertEl.innerText = `Lv.${appState.stats.spouseAlert}/5`;
+  if (alertEl) alertEl.innerText = `${appState.stats.spouseAlert}/5`;
 
   const maxP = appState.stats.maxPartners || 2;
   const activeCount = appState.sim.activePartnerIds.length;
@@ -358,9 +358,10 @@ function updateLiveStats() {
     totalCountEl.innerText = `${appState.sim.partners.length}人`;
   }
 
+  // ブーストボタンの活性制御（消費1に変更）
   const btnBoost = document.getElementById("btnBoostMatching");
   if (btnBoost) {
-    const canBoost = (appState.stats.budget >= 2 && activeCount < 4);
+    const canBoost = (appState.stats.budget >= 1 && activeCount < 4);
     btnBoost.disabled = !canBoost;
     if (!canBoost) {
       btnBoost.className = "px-2.5 py-0.5 rounded-full font-bold text-[10.5px] bg-slate-900 border border-slate-800 text-slate-600 cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none flex-shrink-0";
@@ -368,35 +369,24 @@ function updateLiveStats() {
       btnBoost.className = "px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 cursor-pointer flex-shrink-0";
     }
   }
-
-  const btnCare = document.getElementById("btnLiveFamilyCare");
-  if (btnCare) {
-    const canCare = (appState.stats.budget >= 2 && appState.stats.spouseAlert > 1);
-    btnCare.disabled = !canCare;
-    if (!canCare) {
-      btnCare.className = "px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-600 font-bold text-[9.5px] sm:text-[10px] cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none";
-    } else {
-      btnCare.className = "px-2 py-0.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 text-emerald-300 font-bold text-[9.5px] sm:text-[10px] transition active:scale-95 flex items-center gap-1 cursor-pointer";
-    }
-  }
 }
 
-// 🆙ブースト機能：マチアプ高額プラン仕様
+// 🆙ブースト機能：マチアプ高額プラン仕様（消費1へ引き下げ）
 function triggerBoostMatching(e) {
   if (e) e.stopPropagation();
-  if (appState.stats.budget < 2) return;
+  if (appState.stats.budget < 1) return;
   if (appState.sim.activePartnerIds.length >= 4) return;
 
   try { initAudio(); } catch(e) {}
   triggerVibrate([50, 60, 50, 60, 80]);
-  appState.stats.budget = Math.max(0, appState.stats.budget - 2);
+  appState.stats.budget = Math.max(0, appState.stats.budget - 1);
 
   const emptySlots = 4 - appState.sim.activePartnerIds.length;
   const currentRealAge = getRealAge(appState.sim.currentMonth);
   const isUserMale = (appState.user.gender === "male");
   const matchedList = [];
 
-  // ① 基本1人確定マッチング（高額プラン保証枠）
+  // ① 基本1人確定マッチング（保証枠）
   const p1 = createSynthesizedPartner(appState.sim.currentMonth, currentRealAge);
   p1.lastSexScore = (typeof calculateSexScore === "function") ? calculateSexScore(p1, (appState.sim.currentMonth % 12) + 1, false, 0) : 60;
   p1.maxSexScore = p1.lastSexScore;
@@ -408,18 +398,17 @@ function triggerBoostMatching(e) {
   if (p1.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
   if (p1.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
 
-  // ② 追加枠の確率計算（ステータス反映）
+  // ② 追加枠の確率計算（ステータス反映・100人斬り支援のため確率強化）
   const extraSlots = emptySlots - 1;
   if (extraSlots > 0) {
-    let extraChance = 0.40;
+    let extraChance = 0.50;
     if (isUserMale) {
       extraChance += (appState.stats.budget - 2) * 0.08;
       extraChance += (appState.stats.looks - 4) * 0.05;
     } else {
       extraChance += (appState.stats.looks - 4) * 0.10;
-      extraChance += (appState.stats.budget - 2) * 0.03;
     }
-    extraChance = Math.max(0.20, Math.min(0.85, extraChance));
+    extraChance = Math.max(0.30, Math.min(0.90, extraChance));
 
     for (let i = 0; i < extraSlots; i++) {
       if (Math.random() < extraChance) {
@@ -480,7 +469,8 @@ function showBoostToast(matchedList) {
   }, 3800);
 }
 
-function buyLiveFamilyCare(e) {
+// 1年決算モーダル内での家庭ケア実行処理
+function buyMilestoneFamilyCare(e) {
   if (e) e.stopPropagation();
   if (appState.stats.budget < 2) return;
   if (appState.stats.spouseAlert <= 1) return;
@@ -493,10 +483,34 @@ function buyLiveFamilyCare(e) {
   triggerVibrate(20);
 
   const sitEl = document.getElementById("spouseSituationLog");
-  if (sitEl) sitEl.innerText = "週末に家族サービスを奮発。パートナーの機嫌が目に見えて和らいだ。";
+  if (sitEl) sitEl.innerText = "決算の節目に家族サービスを奮発。パートナーの機嫌が目に見えて和らいだ。";
 
+  // モーダル内の表示更新
+  const statRep = document.getElementById("milestoneStatReport");
+  if (statRep) {
+    statRep.innerText = `✨外見: ${appState.stats.looks} ｜ ⚡体力: ${appState.stats.stamina} ｜ 🔥性欲: ${appState.stats.libido} ｜ 💳今期活動費: ${appState.stats.budget}`;
+  }
+  updateMilestoneCareButton();
+
+  // 背景の進行画面ステータスも即時同期
   updateLiveStats();
   renderAlertAndFlash(false, true);
+}
+
+function updateMilestoneCareButton() {
+  const alertValEl = document.getElementById("milestoneAlertVal");
+  if (alertValEl) alertValEl.innerText = `Lv.${appState.stats.spouseAlert}/5`;
+
+  const btnCare = document.getElementById("btnMilestoneFamilyCare");
+  if (btnCare) {
+    const canCare = (appState.stats.budget >= 2 && appState.stats.spouseAlert > 1);
+    btnCare.disabled = !canCare;
+    if (!canCare) {
+      btnCare.className = "px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-600 font-bold text-[10.5px] cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none";
+    } else {
+      btnCare.className = "px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/80 text-emerald-300 font-bold text-[10.5px] transition active:scale-95 flex items-center gap-1 cursor-pointer";
+    }
+  }
 }
 
 function initScreenTapHandler() {
@@ -549,7 +563,6 @@ function refresh12MatrixGrid() {
 
     const dot = document.createElement("div");
     dot.id = "grid-dot-" + i;
-    // 大きめ正円＋外枠リング用パディング（6列レイアウトで視認性・タップ感大幅向上）
     dot.className = "w-full aspect-square rounded-full transition-all duration-300 cursor-pointer hover:scale-110 active:scale-95 flex items-center justify-center p-[2.5px] bg-slate-800 border border-slate-700/60 shadow-inner";
     dot.onclick = (e) => { e.stopPropagation(); showClickMonthDetail(absMonth); };
 
@@ -664,26 +677,21 @@ function showLawsuitToast(p) {
 }
 
 function renderAlertAndFlash(isCrisis, isSilent = false) {
-  const alertBadge = document.getElementById("alertStateText");
   const alertLv = appState.stats.spouseAlert;
   const largeVal = document.getElementById("largeSpouseAlertVal");
   const largeBadge = document.getElementById("largeSpouseAlertBadge");
   const sitEl = document.getElementById("spouseSituationLog");
 
   if (largeVal) {
-    largeVal.innerText = `Lv.${alertLv}/5`;
+    largeVal.innerText = `${alertLv}/5`;
   }
 
   if (alertLv >= 5) {
-    if (alertBadge) {
-      alertBadge.innerText = "🚨 離婚危機";
-      alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500 font-black animate-ping";
-    }
     if (largeBadge) {
-      largeBadge.className = "flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-500 animate-pulse flex-shrink-0";
+      largeBadge.className = "text-rose-400 font-black animate-pulse";
     }
     if (largeVal) {
-      largeVal.className = "text-[10px] font-black text-rose-300";
+      largeVal.className = "font-black text-rose-300";
     }
     if (sitEl) sitEl.innerText = "家庭内は完全な臨戦態勢。スマホの着信音ひとつで怒号が飛ぶ。";
   } else if (isCrisis || alertLv === 4) {
@@ -696,15 +704,11 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
       playAlarm();
       triggerVibrate([100, 50, 100]);
     }
-    if (alertBadge) {
-      alertBadge.innerText = "⚠️ 身バレ危機";
-      alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700 animate-pulse";
-    }
     if (largeBadge) {
-      largeBadge.className = "flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-600 flex-shrink-0";
+      largeBadge.className = "text-rose-400 font-bold animate-pulse";
     }
     if (largeVal) {
-      largeVal.className = "text-[10px] font-black text-rose-400";
+      largeVal.className = "font-black text-rose-300";
     }
     const spouseEvents = [
       "休日の夕方、スマホの通知を凝視され冷や汗が流れた。",
@@ -713,16 +717,11 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
     ];
     if (sitEl) sitEl.innerText = spouseEvents[Math.floor(Math.random() * spouseEvents.length)];
   } else {
-    const activeCount = appState.sim.activePartnerIds.length;
-    if (alertBadge) {
-      alertBadge.innerText = (activeCount > 2) ? "多忙密会" : "平穏";
-      alertBadge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40";
-    }
     if (largeBadge) {
-      largeBadge.className = "flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/80 flex-shrink-0";
+      largeBadge.className = "";
     }
     if (largeVal) {
-      largeVal.className = "text-[10px] font-black text-amber-400";
+      largeVal.className = "font-bold text-amber-300";
     }
     if (sitEl && sitEl.innerText.indexOf("家族サービス") === -1) {
       sitEl.innerText = "平穏な週末。特に怪しまれる様子はない。";
@@ -732,17 +731,6 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
 
 function renderRealtimeMonthlyLog(mIdx, calMonth) {
   try {
-    const seasons = ["", "新春の気配", "初春・バレンタイン", "桃の節句・春の兆し", "夜桜の季節", "初夏の大型連休", "梅雨の雨宿り", "盛夏の気配", "お盆の帰省・酷暑", "初秋の哀愁", "秋晴れ・味覚", "木枯らしの街角", "聖夜・年末の慌ただしさ"];
-    
-    const seasonBadge = document.getElementById("seasonBadge");
-    if (seasonBadge) {
-      const emoji = (typeof MONTH_EMOJIS !== "undefined" && MONTH_EMOJIS[calMonth]) ? MONTH_EMOJIS[calMonth] : "🌸";
-      seasonBadge.innerText = `${emoji} ${calMonth}月`;
-    }
-
-    const monthTitle = document.getElementById("monthTitleLog");
-    if (monthTitle) monthTitle.innerText = seasons[calMonth] || "穏やかな午後の逢瀬";
-
     // 最上段：【婚外○年目 名前 ○歳】の短縮コンパクト形式へ動的更新
     const simAgeEl = document.getElementById("simCurrentAge");
     if (simAgeEl) {
@@ -1000,8 +988,9 @@ function onMilestoneStyleChange() {
 
   const statRep = document.getElementById("milestoneStatReport");
   if (statRep) {
-    statRep.innerText = `✨外見: ${appState.stats.looks} ｜ ⚡体力: ${appState.stats.stamina} ｜ 🔥性欲: ${appState.stats.libido} ｜ 💳今期活動費: Lv.${appState.stats.budget}`;
+    statRep.innerText = `✨外見: ${appState.stats.looks} ｜ ⚡体力: ${appState.stats.stamina} ｜ 🔥性欲: ${appState.stats.libido} ｜ 💳今期活動費: ${appState.stats.budget}`;
   }
+  updateMilestoneCareButton();
 }
 
 function renderYearlyMilestoneModal() {

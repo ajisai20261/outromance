@@ -27,7 +27,7 @@
   <div id="flashOverlay" class="fixed inset-0 pointer-events-none z-50 transition-colors"></div>
 
   <!-- 常設ヘッダー -->
-  <header class="relative z-30 w-full max-w-xl mx-auto px-3 sm:px-4 py-2 flex items-center justify-between border-b border-white/5 gap-2">
+  <header class="relative z-30 w-full max-w-xl mx-auto px-3 sm:px-4 py-2 flex items-center justify-between border-b border-white/5 gap-1.5">
     <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
       <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 drop-shadow-[0_0_8px_rgba(157,78,221,0.5)]" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <!-- ヘッダー右側：操作系 -->
+    <!-- ヘッダー右側：操作系 ＋ 遊び方 ＋ BGM -->
     <div class="flex items-center gap-1 sm:gap-1.5">
       <div id="headerControls" class="hidden flex items-center gap-1">
         <button id="pausePlayBtn" onclick="togglePauseSimulation()" title="一時停止/再開" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-[11px] transition active:scale-95">
@@ -69,6 +69,10 @@
           1年後⏩
         </button>
       </div>
+
+      <a href="howto.html" target="_blank" rel="noopener noreferrer" title="遊び方・ルール解説" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-950/85 hover:bg-purple-900 border border-purple-500/70 text-purple-200 flex items-center gap-1 transition active:scale-95 flex-shrink-0">
+        <span>📖</span><span>遊び方</span>
+      </a>
 
       <button id="soundToggleBtn" onclick="toggleSound()" class="px-2.5 py-1 rounded-full text-[11px] bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 flex items-center gap-1 transition flex-shrink-0">
         <span id="soundIcon">🔇</span>
@@ -95,9 +99,14 @@
           <p>・マッチングアプリのように、<strong class="text-rose-300">実際に出会いを提供するゲームではありません</strong>。</p>
           <p>・成人向けの直接的な性的描写はありませんが、テーマの性質上、<strong class="text-amber-300 font-bold">18歳未満の方のプレイはご遠慮ください</strong>。</p>
         </div>
-        <button onclick="acceptDisclaimer()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
-          <span>上記を確認して始める ▶</span>
-        </button>
+        <div class="space-y-2">
+          <button onclick="acceptDisclaimer()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
+            <span>上記を確認して始める ▶</span>
+          </button>
+          <a href="howto.html" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-6 rounded-xl font-bold text-xs bg-slate-800/85 hover:bg-slate-700 border border-slate-700 text-purple-200 transition active:scale-95 flex items-center justify-center gap-1.5">
+            <span>📖 詳しい遊び方・攻略ガイドを見る</span>
+          </a>
+        </div>
       </div>
     </section>
 

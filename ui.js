@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（上部アクショントースト対応 完全版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（最新完全版）
    ============================================================ */
 
 /* --- AvatarCacheManager ブリッジ（avatars.js の実データを直接バインド） --- */
@@ -373,7 +373,6 @@ function updateLiveStats() {
   }
 }
 
-// 他の上部トーストを即座に隠してレイアウトの重複を防ぐ
 function hideAllTopToastsExcept(keepId) {
   ["newPartnerToast", "actionPartnerToast", "boostToast", "breakupPartnerToast", "lawsuitToast"].forEach(id => {
     if (id !== keepId) {
@@ -479,14 +478,14 @@ function showBoostToast(matchedList) {
   }, 3500);
 }
 
-// 1年決算モーダル内での家庭ケア実行処理
+// 1年決算モーダル内での家庭ケア実行処理（活動費1消費で崩壊度-2）
 function buyMilestoneFamilyCare(e) {
   if (e) e.stopPropagation();
-  if (appState.stats.budget < 2) return;
+  if (appState.stats.budget < 1) return;
   if (appState.stats.spouseAlert <= 1) return;
 
   try { initAudio(); } catch(e) {}
-  appState.stats.budget = Math.max(0, appState.stats.budget - 2);
+  appState.stats.budget = Math.max(0, appState.stats.budget - 1);
   appState.stats.spouseAlert = Math.max(1, appState.stats.spouseAlert - 2);
 
   if (isSoundOn) playTone(659.25, 0.12);
@@ -508,7 +507,7 @@ function updateMilestoneCareButton() {
 
   const btnCare = document.getElementById("btnMilestoneFamilyCare");
   if (btnCare) {
-    const canCare = (appState.stats.budget >= 2 && appState.stats.spouseAlert > 1);
+    const canCare = (appState.stats.budget >= 1 && appState.stats.spouseAlert > 1);
     btnCare.disabled = !canCare;
     if (!canCare) {
       btnCare.className = "px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-600 font-bold text-[10.5px] cursor-not-allowed opacity-50 flex items-center gap-1 shadow-none";
@@ -638,7 +637,7 @@ function showNewPartnerToast(p, isDouble = false) {
   }, 3000);
 }
 
-// 【新規】「💓刺激」「🎁贈物」実行時の上部ポップアップトースト表示
+// 「💓刺激」「🎁贈物」実行時の上部ポップアップトースト表示
 function showActionPartnerToast(p, actionType, actionText) {
   const toast = document.getElementById("actionPartnerToast");
   if (!toast || !p) return;
@@ -830,7 +829,6 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
       }
       if (!actionText) actionText = "隠れ家ホテルで濃密な午後を過ごした。";
       usedTexts.add(actionText);
-      // 同じ月内で再描画された場合に文面が変わらないようキャッシュ
       p.lastActionText = actionText;
 
       const score = p.lastSexScore || 50;
@@ -876,10 +874,10 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
                 ${catBadge}
               </div>
               <div class="flex items-center gap-1.5 flex-shrink-0">
-                <button type="button" onclick="giveStimulus('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：大人のおもちゃで密会度を急上昇" class="px-2 py-0.5 rounded-lg text-[10px] transition ${stimBtnClass} flex items-center gap-0.5">
+                <button type="button" onclick="giveStimulus('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="密会度を急上昇させる" class="px-2 py-0.5 rounded-lg text-[10px] transition ${stimBtnClass} flex items-center gap-0.5">
                   <span>💓</span><span>刺激</span>
                 </button>
-                <button type="button" onclick="giveGift('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="活動費1消費：プレゼントで関係継続・破局防止" class="px-2 py-0.5 rounded-lg text-[10px] transition ${giftBtnClass} flex items-center gap-0.5">
+                <button type="button" onclick="giveGift('${p.id}', event)" ${!hasBudget ? 'disabled' : ''} title="プレゼントで破局を防止する" class="px-2 py-0.5 rounded-lg text-[10px] transition ${giftBtnClass} flex items-center gap-0.5">
                   <span>🎁</span><span>贈物</span>
                 </button>
                 <button type="button" onclick="manualBreakup('${p.id}', event)" title="関係を解消する" class="px-2 py-0.5 rounded-lg text-[10px] transition ${breakBtnClass} flex items-center gap-0.5">
@@ -926,7 +924,6 @@ function giveStimulus(partnerId, e) {
   const actionText = textList[Math.floor(Math.random() * textList.length)];
   partner.lastActionText = actionText;
 
-  // 上部アクショントースト表示
   showActionPartnerToast(partner, "stimulus", actionText);
 
   const mIdx = appState.sim.currentMonth;
@@ -953,7 +950,6 @@ function giveGift(partnerId, e) {
   const actionText = textList[Math.floor(Math.random() * textList.length)];
   partner.lastActionText = actionText;
 
-  // 上部アクショントースト表示
   showActionPartnerToast(partner, "gift", actionText);
 
   const mIdx = appState.sim.currentMonth;
@@ -1350,7 +1346,6 @@ function calculateAndRenderResult() {
   const endingDesc = document.getElementById("resEndingDesc");
   if (endingDesc) endingDesc.innerText = desc;
 
-  // 案A：年齢表記を統一し、同一人物なら「👑 最長交際と二冠達成！」を表示
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
   const longestP = sortedByDuration[0] || { id: "", name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null, color: "#a855f7" };
   

@@ -1,10 +1,28 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" prefix="og: https://ogp.me/ns#">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>遊び方ガイド | アウトロマンス 〜既婚者たちの裏歴史〜</title>
+  <title>アウトロマンス: 婚外5年シミュレーター 〜既婚者たちの裏歴史〜 | Ajisai Game Studio</title>
+  <meta name="description" content="舞台は2020年代の東京首都圏。既婚男性・既婚女性のどちらの視点でも遊べる、秘密の恋愛5年間（60ヶ月）シミュレーター。家庭崩壊を回避しつつ、あなただけの裏歴史を駆け抜けろ！">
+
+  <!-- OGP (LINE / Facebook / Discord 等) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ajisai Game Studio">
+  <meta property="og:title" content="アウトロマンス: 婚外5年シミュレーター 〜既婚者たちの裏歴史〜">
+  <meta property="og:description" content="2020年代の東京首都圏を舞台に、5年間（60ヶ月）の秘密の恋愛をシミュレート。男女両視点対応・1080×1080成績表カード生成機能付き！">
+  <meta property="og:url" content="https://ajisai20261.github.io/outromance/">
+  <meta property="og:image" content="https://ajisai20261.github.io/outromance/title_kv.jpg">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- X (Twitter) Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="アウトロマンス: 婚外5年シミュレーター 〜既婚者たちの裏歴史〜">
+  <meta name="twitter:description" content="2020年代の東京首都圏で5年間の秘密の恋愛を駆け抜けるブラウザシミュレーション。あなたの5年後の称号は？">
+  <meta name="twitter:image" content="https://ajisai20261.github.io/outromance/title_kv.jpg">
+
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <link rel="stylesheet" href="style.css?v=20261116">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,335 +30,676 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;600;900&display=swap" rel="stylesheet">
 
   <script src="avatars.js?v=20261116"></script>
+  <script src="data.js?v=20261116"></script>
+  <script src="sim.js?v=20261116"></script>
+  <script src="events.js?v=20261116"></script>
+  <script src="ui.js?v=20261116"></script>
+  <script src="card.js?v=20261116"></script>
+  <script src="game.js?v=20261116" defer></script>
 </head>
-<body class="app-container relative flex flex-col justify-between selection:bg-purple-500 selection:text-white text-slate-200">
+<body class="app-container relative flex flex-col justify-between selection:bg-purple-500 selection:text-white">
+  <audio id="bgmAudio" src="theme.mp3" loop preload="auto"></audio>
+
   <div class="bg-ambient"></div>
+  <div id="flashOverlay" class="fixed inset-0 pointer-events-none z-50 transition-colors"></div>
 
   <!-- 常設ヘッダー -->
-  <header class="relative z-30 w-full max-w-xl mx-auto px-3 sm:px-4 py-3 flex items-center justify-between border-b border-white/10 bg-slate-950/75 backdrop-blur-md sticky top-0">
-    <div class="flex items-center gap-2">
-      <svg class="w-6 h-6 text-purple-400 flex-shrink-0" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 5L20.5 10.5L26 13L20.5 15.5L18 21L15.5 15.5L10 13L15.5 10.5L18 5Z" fill="#c084fc"/>
-        <path d="M26 16L27.8 20.2L32 22L27.8 23.8L26 28L24.2 23.8L20 22L24.2 20.2L26 16Z" fill="#f472b6"/>
-        <path d="M10 16L11.8 20.2L16 22L11.8 23.8L10 28L8.2 23.8L4 22L8.2 20.2L10 16Z" fill="#38bdf8"/>
+  <header class="relative z-30 w-full max-w-xl mx-auto px-3 sm:px-4 py-2 flex items-center justify-between border-b border-white/5 gap-1.5">
+    <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+      <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 drop-shadow-[0_0_8px_rgba(157,78,221,0.5)]" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hgrad1" x1="10" y1="5" x2="26" y2="33" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#c084fc"/>
+            <stop offset="1" stop-color="#818cf8"/>
+          </linearGradient>
+          <linearGradient id="hgrad2" x1="20" y1="16" x2="32" y2="28" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#f472b6"/>
+            <stop offset="1" stop-color="#c084fc"/>
+          </linearGradient>
+          <linearGradient id="hgrad3" x1="4" y1="16" x2="16" y2="28" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#38bdf8"/>
+            <stop offset="1" stop-color="#818cf8"/>
+          </linearGradient>
+        </defs>
+        <path d="M18 5L20.5 10.5L26 13L20.5 15.5L18 21L15.5 15.5L10 13L15.5 10.5L18 5Z" fill="url(#hgrad1)"/>
+        <path d="M26 16L27.8 20.2L32 22L27.8 23.8L26 28L24.2 23.8L20 22L24.2 20.2L26 16Z" fill="url(#hgrad2)"/>
+        <path d="M10 16L11.8 20.2L16 22L11.8 23.8L10 28L8.2 23.8L4 22L8.2 20.2L10 16Z" fill="url(#hgrad3)"/>
+        <path d="M18 21L19.8 25.2L24 27L19.8 28.8L18 33L16.2 28.8L12 27L16.2 25.2L18 21Z" fill="url(#hgrad1)"/>
+        <circle cx="18" cy="18" r="3" fill="#ffffff" fill-opacity="0.9"/>
       </svg>
-      <span class="text-base sm:text-lg font-black tracking-wider text-white">📖 遊び方ガイド</span>
+      <div>
+        <div class="font-cinzel text-[11px] sm:text-xs tracking-wider text-purple-300 font-bold leading-none">AJISAI</div>
+        <div class="text-[8px] sm:text-[9px] text-slate-400 tracking-tighter scale-90 -ml-1">GAME STUDIO</div>
+      </div>
     </div>
-    <a href="index.html?skip=1" onclick="return backToGameTab(event);" class="px-3 py-1.5 rounded-full text-xs font-bold bg-purple-900/80 hover:bg-purple-800 border border-purple-500/60 text-purple-100 transition active:scale-95">
-      ✕ ゲームに戻る
-    </a>
+
+    <!-- ヘッダー右側：操作系 ＋ 遊び方 ＋ BGM -->
+    <div class="flex items-center gap-1 sm:gap-1.5">
+      <div id="headerControls" class="hidden flex items-center gap-1">
+        <button id="pausePlayBtn" onclick="togglePauseSimulation()" title="一時停止/再開" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-[11px] transition active:scale-95">
+          ⏸️
+        </button>
+        <button id="speedToggleBtn" onclick="toggleSpeed()" title="速度変更" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-purple-300 font-bold text-[10.5px] transition active:scale-95">
+          1.0x
+        </button>
+        <button onclick="skipToEndOfYear()" title="1年後へスキップ" class="px-2 py-1 rounded-lg bg-purple-950/80 hover:bg-purple-900 border border-purple-700 text-purple-200 text-[10px] font-semibold transition active:scale-95 whitespace-nowrap">
+          1年後⏩
+        </button>
+      </div>
+
+      <a href="howto.html" target="outromance_howto" title="遊び方・ルール解説" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-950/85 hover:bg-purple-900 border border-purple-500/70 text-purple-200 flex items-center gap-1 transition active:scale-95 flex-shrink-0">
+        <span>📖</span><span>遊び方</span>
+      </a>
+
+      <button id="soundToggleBtn" onclick="toggleSound()" class="px-2.5 py-1 rounded-full text-[11px] bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 flex items-center gap-1 transition flex-shrink-0">
+        <span id="soundIcon">🔇</span>
+        <span id="soundText">BGM: OFF</span>
+      </button>
+    </div>
   </header>
 
   <!-- メインコンテンツ -->
-  <main class="relative z-10 flex-1 w-full max-w-xl mx-auto px-4 py-5 space-y-6 pb-16">
+  <main class="relative z-10 flex-1 w-full max-w-xl mx-auto px-4 py-2 flex flex-col justify-start pb-safe">
 
-    <!-- タイトルバナー（2020年代の首都圏・男女両視点プレイを強調） -->
-    <section class="text-center space-y-2.5 bg-slate-900/85 border border-purple-500/40 rounded-2xl p-5 shadow-2xl">
-      <div class="inline-block px-3.5 py-0.5 rounded-full text-[10px] font-bold tracking-[0.25em] bg-purple-950 border border-purple-600 text-purple-300 uppercase">
-        HOW TO PLAY
-      </div>
-      <h1 class="text-2xl sm:text-3xl font-black tracking-wide text-white">
-        遊び方・ルール解説
-      </h1>
-      <div class="pt-1 pb-1.5 border-y border-purple-500/25">
-        <div class="text-[11px] font-bold tracking-[0.2em] text-purple-200">婚外5年シミュレーター</div>
-        <div class="text-lg sm:text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-100 to-indigo-300">
-          アウトロマンス <span class="text-xs sm:text-sm text-pink-300">〜既婚者たちの<span class="text-rose-400 font-black">裏</span>歴史〜</span>
+    <!-- STEP 0-PRE: ディスクレーマー -->
+    <section id="stepDisclaimer" class="min-h-[75vh] flex flex-col items-center justify-center text-center py-6">
+      <div class="bg-slate-900/90 border border-purple-500/40 rounded-2xl p-5 sm:p-6 space-y-4 max-w-md shadow-2xl">
+        <div class="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-widest bg-purple-950 border border-purple-600 text-purple-300 uppercase">
+          プレイ前の確認事項
+        </div>
+        <h2 class="text-base sm:text-lg font-black text-white leading-snug">
+          本作をお楽しみいただく皆様へ
+        </h2>
+        <div class="text-xs text-slate-300 space-y-2.5 text-left leading-relaxed border-y border-slate-800 py-3.5">
+          <p>・<strong class="text-pink-300 font-bold">本作は婚外恋愛（不倫）を扱ったシミュレーションゲームです。</strong></p>
+          <p>・本作は<strong class="text-purple-300">すべてフィクション</strong>であり、実在の人物・団体・事件等とは一切関係ありません。</p>
+          <p>・マッチングアプリのように、<strong class="text-rose-300">実際に出会いを提供するゲームではありません</strong>。</p>
+          <p>・成人向けの直接的な性的描写はありませんが、テーマの性質上、<strong class="text-amber-300 font-bold">18歳未満の方のプレイはご遠慮ください</strong>。</p>
+        </div>
+        <div class="space-y-2">
+          <button onclick="acceptDisclaimer()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
+            <span>上記を確認して始める ▶</span>
+          </button>
+          <a href="howto.html" target="outromance_howto" class="w-full py-2.5 px-6 rounded-xl font-bold text-xs bg-slate-800/85 hover:bg-slate-700 border border-slate-700 text-purple-200 transition active:scale-95 flex items-center justify-center gap-1.5">
+            <span>📖 詳しい遊び方・攻略ガイドを見る</span>
+          </a>
         </div>
       </div>
-      <div class="flex flex-wrap items-center justify-center gap-1.5 pt-0.5">
-        <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-indigo-950/90 border border-indigo-500/60 text-indigo-200">🏙️ 舞台：2020年代の東京首都圏</span>
-        <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-pink-950/90 border border-pink-500/60 text-pink-200">👫 男性・女性どちらでもプレイ可能</span>
-      </div>
-      <p class="text-xs text-slate-300 leading-relaxed pt-0.5">
-        舞台は<strong class="text-purple-200">2020年代の東京首都圏</strong>。巨大な鉄道網と繁華街が交錯する大都市の水面下で、<strong class="text-pink-300">既婚男性・既婚女性のどちらの立場でも</strong>、秘密の恋愛を<strong class="text-pink-300">5年間（60ヶ月）</strong>シミュレートできる人間ドラマ＆戦略ゲームです。
-      </p>
     </section>
 
-    <!-- キャラ吹き出しナビゲーション -->
-    <div class="flex items-start gap-3 bg-purple-950/40 border border-purple-500/30 rounded-2xl p-3.5">
-      <div class="avatar-frame-lg flex-shrink-0 ring-2 ring-pink-400">
-        <img id="guideAvatar1" src="" alt="案内役">
+    <!-- STEP 0: シネマティック・プロローグ -->
+    <section id="step0" onclick="advancePrologue(event)" class="hidden min-h-[80vh] flex flex-col items-center justify-start pt-6 sm:pt-8 relative overflow-hidden text-center py-6 cursor-pointer select-none">
+      <div id="keyVisualBg" class="kv-background"></div>
+
+      <div id="prologueWrapper" class="w-full flex flex-col items-center justify-center transition-opacity duration-300 relative z-10">
+        <div class="space-y-4 font-serif-jp text-white text-sm sm:text-[15px] tracking-[0.16em] leading-[2.2em] max-w-md px-3 mx-auto">
+          <p id="pText1" class="fade-seq font-semibold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]">
+            2020年代<br>世界最大の人口を誇る、東京首都圏。
+          </p>
+          <p id="pText2" class="fade-seq font-semibold text-slate-100 drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]">
+            点在する繁華街と、それらを結ぶ鉄道網。<br>そして屈指の治安に守られた水面下で――
+          </p>
+          <p id="pText3" class="fade-seq font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-purple-100 to-indigo-200 drop-shadow-[0_0_10px_rgba(255,255,255,0.85)]">
+            既婚者同士の恋愛<br>“婚外”が静かに広がっていた。
+          </p>
+
+          <div id="pTitleCard" class="fade-seq pt-3 pb-2.5 my-2 border-y border-purple-500/40 bg-black/50 backdrop-blur-md rounded-2xl px-3 shadow-2xl">
+            <div class="text-[11px] sm:text-xs font-bold tracking-[0.25em] text-purple-200 uppercase mb-1 drop-shadow-[0_0_6px_rgba(192,132,252,0.6)]">
+              婚外5年シミュレーター
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-100 to-indigo-300 drop-shadow-[0_0_20px_rgba(157,78,221,0.9)]">
+              アウトロマンス
+            </h1>
+            <div class="text-xs sm:text-sm font-bold text-pink-300 tracking-[0.2em] mt-1.5 drop-shadow-[0_0_6px_rgba(244,114,182,0.6)]">
+              〜既婚者たちの<span class="text-rose-400 drop-shadow-[0_0_10px_rgba(244,63,94,0.9)] font-black text-sm sm:text-base mx-0.5">裏</span>歴史〜
+            </div>
+          </div>
+
+          <p id="pText4" class="fade-seq text-white font-bold drop-shadow-[0_0_10px_rgba(255,255,255,0.85)]">
+            あなたも婚外の道に足を踏み入れる。
+          </p>
+        </div>
+
+        <div id="pActionBtn" class="fade-seq mt-6 w-full max-w-xs">
+          <button onclick="goToStep1A(event)" class="w-full py-3.5 px-6 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.6)] transition transform active:scale-95 flex items-center justify-center gap-2">
+            <span>スタート ▶</span>
+          </button>
+        </div>
       </div>
-      <div class="space-y-1 text-xs">
-        <div class="font-bold text-pink-300 text-[11px]">ミホ（34歳 / 広報・東京）</div>
-        <p class="text-slate-200 leading-relaxed">
-          「最初に<strong>男性・女性のどちらで遊ぶか</strong>を選べるのがポイントよ。男性なら活動費、女性なら外見のステータスが重要になったり、相手との掛け合いも変化するわ。家庭崩壊度が限界に達して<strong class="text-rose-400">離婚になる前に5年間を完走</strong>しましょう！」
+    </section>
+
+    <!-- STEP 1-A: プレイヤー基本設定 -->
+    <section id="step1a" class="hidden space-y-4 py-2">
+      <div class="text-center space-y-1">
+        <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-A</span>
+        <h2 class="text-lg font-bold text-white">あなたの性別とお名前</h2>
+        <p class="text-xs text-slate-400">東京首都圏で婚外を始めるあなたの基本情報</p>
+      </div>
+
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="grid grid-cols-2 gap-3 items-center">
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">性別</label>
+            <select id="userGender" onchange="onGenderChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              <option value="male" selected>男性</option>
+              <option value="female">女性</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">お名前（5文字以内）</label>
+            <input type="text" id="userName" value="ユウスケ" maxlength="5" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          </div>
+        </div>
+        <p class="text-[10px] text-amber-300/80 leading-relaxed pt-2">
+          ※SNSシェア機能があるため本名での入力はお控えください（5文字まで）。
         </p>
       </div>
-    </div>
 
-    <!-- 1. ゲームの流れ -->
-    <section class="space-y-3">
-      <h2 class="text-sm sm:text-base font-black text-white flex items-center gap-2 border-l-4 border-pink-500 pl-2.5">
-        <span>1. ゲームの基本フロー（全3ステップ）</span>
-      </h2>
+      <button onclick="goToStep1B()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+        <span>婚外スタイルの決定へ ›</span>
+      </button>
+    </section>
 
-      <div class="space-y-2.5 text-xs">
-        <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3.5 space-y-1.5">
-          <div class="font-bold text-purple-300">STEP 1：性別・プロフィールと婚外スタイルの決定</div>
-          <p class="text-slate-300 leading-relaxed">
-            最初に<strong class="text-white">あなたの性別（男性／女性）</strong>とお名前（5文字以内）を登録し、開始年齢（35〜55歳）・狙いたい年齢層・3つの婚外スタイルを決定します。
-          </p>
-          <div class="grid grid-cols-3 gap-1.5 pt-1 text-center text-[10px]">
-            <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
-              <div class="text-sm">💍</div>
-              <div class="font-bold text-white mt-0.5">純愛継続型</div>
-              <div class="text-slate-400 text-[9px]">定員1人・体力重視</div>
+    <!-- STEP 1-B: 開始条件 ＆ スタイル設定 -->
+    <section id="step1b" class="hidden space-y-4 py-2">
+      <div class="bg-purple-950/50 border border-purple-500/40 rounded-xl px-4 py-2.5 flex items-center justify-center shadow-lg">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-purple-300 font-semibold">プレイヤー:</span>
+          <span id="step1bUserBadge" class="text-sm font-black text-white">ユウスケ（40歳スタート）</span>
+        </div>
+      </div>
+
+      <div class="text-center space-y-0.5">
+        <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold">Step 1-B</span>
+        <h2 class="text-base sm:text-lg font-bold text-white">婚外の開始条件とスタイル</h2>
+      </div>
+
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 grid grid-cols-2 gap-3 shadow-xl">
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-200">婚外を始める年齢</label>
+          <select id="userAge" onchange="onStartAgeChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="35">35歳</option>
+            <option value="40" selected>40歳</option>
+            <option value="45">45歳</option>
+            <option value="50">50歳</option>
+            <option value="55">55歳</option>
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-200">狙いたい年齢層</label>
+          <select id="targetAgePref" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="same" selected>同年代</option>
+            <option value="older">年上</option>
+            <option value="younger">年下</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <div class="text-[11px] font-bold text-purple-300">
+          <span>🎯 婚外スタイル選択（タップで自動配分）</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+          <button type="button" onclick="applyStylePreset('pure')" id="presetBtnPure" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-purple-500 opacity-90 scale-100">
+            <div class="text-sm sm:text-base mb-0.5">💍</div>
+            <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">純愛継続型</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">1人集中・体力重視<br>5年の絆エンド狙い</div>
+          </button>
+          <button type="button" onclick="applyStylePreset('balanced')" id="presetBtnBalanced" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-purple-950/60 border-purple-500 ring-1 ring-purple-500/50 scale-[1.02]">
+            <div class="text-sm sm:text-base mb-0.5">🍷</div>
+            <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">分散余裕型</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">2人並行の王道<br>平穏と逢瀬の両立</div>
+          </button>
+          <button type="button" onclick="applyStylePreset('carnage')" id="presetBtnCarnage" class="p-2 sm:p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700/80 hover:border-pink-500 opacity-90 scale-100">
+            <div class="text-sm sm:text-base mb-0.5">⚔️</div>
+            <div class="text-[11px] sm:text-xs font-bold text-white leading-tight">修羅乱舞型</div>
+            <div class="text-[8.5px] sm:text-[9px] text-slate-400 leading-tight mt-1">4人枠・活動費特化<br>100人斬り狙い</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 space-y-2 text-xs">
+        <div class="flex justify-between items-center text-slate-400">
+          <span>初期スペック</span>
+          <span class="text-emerald-400 font-bold" id="lblPreviewIncome">本業年収: Lv.5</span>
+        </div>
+        <div class="grid grid-cols-4 gap-2 text-center text-[10.5px]">
+          <div class="bg-slate-950 p-1.5 rounded border border-slate-800"><span class="text-amber-300 block text-[9.5px]">✨外見</span><span id="prevStatLooks" class="font-bold text-white">5</span></div>
+          <div class="bg-slate-950 p-1.5 rounded border border-slate-800"><span class="text-cyan-400 block text-[9.5px]">⚡体力</span><span id="prevStatStamina" class="font-bold text-white">5</span></div>
+          <div class="bg-slate-950 p-1.5 rounded border border-slate-800"><span class="text-rose-400 block text-[9.5px]">🔥性欲</span><span id="prevStatLibido" class="font-bold text-white">5</span></div>
+          <div class="bg-slate-950 p-1.5 rounded border border-slate-800"><span class="text-pink-300 block text-[9.5px]">💳活動費</span><span id="prevStatBudget" class="font-bold text-white">Lv.2</span></div>
+        </div>
+      </div>
+
+      <button onclick="startSimulation()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.35)] transition active:scale-95 flex items-center justify-center gap-2">
+        <span>この設定で5年の婚外へ旅立つ！ 🚀</span>
+      </button>
+
+      <button onclick="backToStep1A()" class="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center gap-1.5 shadow">
+        <span>‹ 基本設定（性別・お名前）に戻る</span>
+      </button>
+    </section>
+
+    <!-- STEP 2: 進行画面（スリム化・5ステータス上段集約版） -->
+    <section id="step2" class="hidden space-y-2 pb-8 select-none cursor-pointer">
+      
+      <!-- ステータス集約枠 -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 sm:p-2.5 space-y-1.5 shadow-lg">
+        <div class="flex items-center justify-between text-xs pb-1.5 border-b border-slate-800/80">
+          <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <span id="simCurrentAge" class="font-bold truncate block text-xs sm:text-[13px]">
+              <span class="text-purple-300">婚外1年目</span> <span class="text-white font-black">ユウスケ</span> <span class="text-slate-300">40歳</span>
+            </span>
+            <div class="text-[10px] text-slate-400 flex items-center gap-1 flex-shrink-0">
+              <span>交際:</span><span id="simActiveCount" class="font-bold text-purple-300">0/2人</span>
+              <span class="text-slate-600">/</span>
+              <span>累計:</span><span id="simTotalPartners" class="font-bold text-pink-300">0人</span>
             </div>
-            <div class="bg-slate-950 p-2 rounded-lg border border-purple-500/50">
-              <div class="text-sm">🍷</div>
-              <div class="font-bold text-white mt-0.5">分散余裕型</div>
-              <div class="text-slate-400 text-[9px]">定員2人・バランス型</div>
+          </div>
+
+          <!-- 上段右端に配置したブーストボタン -->
+          <button type="button" onclick="triggerBoostMatching(event)" id="btnBoostMatching" title="空いている交際枠を一挙に埋める" class="px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 flex-shrink-0">
+            <span>🆙</span><span>ブースト</span>
+          </button>
+        </div>
+
+        <!-- 5大ステータス -->
+        <div class="flex items-center justify-between text-center text-[9.5px] sm:text-[11px] px-0.5 whitespace-nowrap">
+          <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white">5</span></div>
+          <div class="text-slate-700">|</div>
+          <div><span class="text-cyan-400 font-medium">⚡体力</span> <span id="liveStatStamina" class="font-bold text-white">5</span></div>
+          <div class="text-slate-700">|</div>
+          <div><span class="text-rose-400 font-medium">🔥性欲</span> <span id="liveStatLibido" class="font-bold text-white">5</span></div>
+          <div class="text-slate-700">|</div>
+          <div><span class="text-pink-300 font-medium">💳活動費</span> <span id="liveStatBudget" class="font-bold text-white">4</span></div>
+          <div class="text-slate-700">|</div>
+          <div id="largeSpouseAlertBadge"><span class="text-amber-400 font-medium">🚨家庭崩壊度</span> <span id="largeSpouseAlertVal" class="font-bold text-amber-300">1/5</span></div>
+        </div>
+      </div>
+
+      <!-- 12ヶ月マトリックス -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-1.5 sm:p-2 shadow-xl">
+        <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800/80">
+          <div id="matrixGridRow" class="grid grid-cols-6 gap-1.5 sm:gap-2 items-center"></div>
+        </div>
+      </div>
+
+      <!-- マッチング通知トースト -->
+      <div id="newPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-purple-950 via-pink-950 to-slate-900 border-2 border-pink-500 rounded-xl p-2.5 shadow-2xl">
+        <div class="flex items-center gap-2.5">
+          <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="toastPartnerImg"></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-1">
+              <div class="space-y-0.5 min-w-0">
+                <div class="text-[9.5px] font-bold text-pink-300 flex items-center gap-1 truncate">
+                  <span class="animate-ping w-1.5 h-1.5 rounded-full bg-pink-400 inline-block flex-shrink-0"></span>
+                  <span id="toastHeaderTitle" class="truncate">💖 NEW MATCHED!</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-xs sm:text-sm font-black text-white" id="toastPartnerName">カナコ (36歳)</span>
+                  <span id="toastPartnerBadge"></span>
+                </div>
+                <div class="text-[9.5px] text-purple-200 truncate" id="toastPartnerAreaJob">東京・中目黒 ｜ 一般事務</div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <span id="toastPartnerChem" class="inline-block px-1.5 py-0.5 rounded text-[9px] font-black bg-pink-950 border border-pink-600 text-pink-200">相性 S</span>
+              </div>
             </div>
-            <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
-              <div class="text-sm">⚔️</div>
-              <div class="font-bold text-white mt-0.5">修羅乱舞型</div>
-              <div class="text-slate-400 text-[9px]">定員4人・活動費特化</div>
-            </div>
           </div>
         </div>
-
-        <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3.5 space-y-1.5">
-          <div class="font-bold text-purple-300">STEP 2：月次進行とリアルタイム介入</div>
-          <p class="text-slate-300 leading-relaxed">
-            1ヶ月ごとに自動で出会い・密会・破局が進行します。<strong class="text-amber-300">画面の空きスペースをタップすると即座に次の月へ早送り</strong>できるほか、ヘッダーの <span class="px-1.5 py-0.5 bg-slate-800 rounded text-[10px]">⏸️</span> <span class="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] text-purple-300">1.0x</span> <span class="px-1.5 py-0.5 bg-purple-950 border border-purple-700 rounded text-[10px]">1年後⏩</span> でテンポを自在に変えられます。
-          </p>
-          <p class="text-[10.5px] text-slate-400">
-            ※12ヶ月マトリックスの丸いアイコンをタップすると、過去の月の記憶を振り返れます。
-          </p>
-        </div>
-
-        <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3.5 space-y-1.5">
-          <div class="font-bold text-purple-300">STEP 3：年次決算 ＆ 5年後リザルト</div>
-          <p class="text-slate-300 leading-relaxed">
-            1年（12ヶ月）ごとに決算モーダルが開き、活動費の補充・スタイルや狙う年齢層の変更・家庭ケアが行えます。60ヶ月完走すると「獲得称号」とSNSシェア用の<strong class="text-pink-300">1080×1080成績表カード</strong>が生成されます。
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. 狙う年齢層（年上・年下・同年代）の特徴 -->
-    <section class="space-y-3">
-      <h2 class="text-sm sm:text-base font-black text-white flex items-center gap-2 border-l-4 border-indigo-400 pl-2.5">
-        <span>2. 「狙いたい年齢層」による違い（年上・年下・同年代）</span>
-      </h2>
-      <p class="text-[11px] text-slate-300 leading-relaxed">
-        相手の年齢層によって、<strong class="text-white">新規マッチングのしやすさ</strong>と<strong class="text-white">交際関係の長続きしやすさ（維持難易度）</strong>が大きく変化します（年次決算でも切り替え可能です）。
-      </p>
-
-      <div class="space-y-2 text-xs">
-        <div class="bg-indigo-950/35 border border-indigo-500/40 rounded-xl p-3 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-indigo-300">🍷 年上狙い（マッチング率：高 ／ 維持：しやすい）</span>
-          </div>
-          <p class="text-[11px] text-slate-300 leading-relaxed">
-            落ち着いた大人の余裕と包容力があり、<strong class="text-emerald-300">新規マッチングが成立しやすく、交際後も破局しにくい（維持しやすい）</strong>傾向があります。長期継続や「+20歳年上愛」実績を狙う際に有力です。
-          </p>
-        </div>
-
-        <div class="bg-pink-950/30 border border-pink-500/40 rounded-xl p-3 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-pink-300">🍓 年下狙い（マッチング率：やや低 ／ 維持：しにくい）</span>
-          </div>
-          <p class="text-[11px] text-slate-300 leading-relaxed">
-            同年代・年上に比べて<strong class="text-amber-300">マッチングのハードルがやや高く、交際後も心変わりや環境の変化で破局しやすい（維持しにくい）</strong>傾向があります。また「年下独身」相手は別れ話で揉めて家庭崩壊度が上がるリスクも秘めています。
-          </p>
-        </div>
-
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 space-y-1">
-          <div class="font-bold text-slate-200">⚖️ 同年代（マッチング率：標準 ／ 維持：標準）</div>
-          <p class="text-[11px] text-slate-300 leading-relaxed">
-            生活リズムや価値観が近く、出会いと関係維持のバランスが取れた王道の設定です。
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. 5大ステータスの見方（UI再現図解） -->
-    <section class="space-y-3">
-      <h2 class="text-sm sm:text-base font-black text-white flex items-center gap-2 border-l-4 border-purple-500 pl-2.5">
-        <span>3. 5大ステータスの役割</span>
-      </h2>
-
-      <!-- ミニUIモック -->
-      <div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 shadow-lg">
-        <div class="text-[9.5px] text-slate-400 mb-1.5 text-center">▼ 進行画面上部のステータスバー</div>
-        <div class="bg-slate-950 border border-slate-800 rounded-lg py-2 px-2 flex items-center justify-between text-center text-[10px] sm:text-xs">
-          <div><span class="text-amber-300">✨外見</span> <span class="font-bold text-white">5</span></div>
-          <div class="text-slate-700">|</div>
-          <div><span class="text-cyan-400">⚡体力</span> <span class="font-bold text-white">5</span></div>
-          <div class="text-slate-700">|</div>
-          <div><span class="text-rose-400">🔥性欲</span> <span class="font-bold text-white">5</span></div>
-          <div class="text-slate-700">|</div>
-          <div><span class="text-pink-300">💳活動費</span> <span class="font-bold text-white">4</span></div>
-          <div class="text-slate-700">|</div>
-          <div><span class="text-amber-400">🚨家庭崩壊度</span> <span class="font-bold text-amber-300">1/5</span></div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 gap-2 text-xs">
-        <div class="bg-slate-900/75 border border-slate-800 rounded-xl p-3 flex items-start gap-2.5">
-          <span class="text-base">✨</span>
-          <div>
-            <div class="font-bold text-amber-300">外見（Looks）</div>
-            <p class="text-slate-300 text-[11px] leading-relaxed">新規マッチングの成立率や、特に<strong class="text-white">女性プレイヤー時のマッチング基礎率・関係維持率</strong>に大きく影響します。</p>
-          </div>
-        </div>
-        <div class="bg-slate-900/75 border border-slate-800 rounded-xl p-3 flex items-start gap-2.5">
-          <span class="text-base">⚡</span>
-          <div>
-            <div class="font-bold text-cyan-400">体力（Stamina）</div>
-            <p class="text-slate-300 text-[11px] leading-relaxed">家庭での振る舞いに余裕が生まれ、<strong class="text-white">家庭崩壊度の上昇を抑え、自然鎮静率もアップ</strong>します。複数交際時の命綱です。</p>
-          </div>
-        </div>
-        <div class="bg-slate-900/75 border border-slate-800 rounded-xl p-3 flex items-start gap-2.5">
-          <span class="text-base">🔥</span>
-          <div>
-            <div class="font-bold text-rose-400">性欲（Libido）</div>
-            <p class="text-slate-300 text-[11px] leading-relaxed">毎月の「密会スコア（pt）」を底上げし、高相性の相手とさらに離れがたくなります。</p>
-          </div>
-        </div>
-        <div class="bg-slate-900/75 border border-slate-800 rounded-xl p-3 flex items-start gap-2.5">
-          <span class="text-base">💳</span>
-          <div>
-            <div class="font-bold text-pink-300">活動費（Budget）</div>
-            <p class="text-slate-300 text-[11px] leading-relaxed">各種アクションを実行するための資金です。さらに<strong class="text-white">男性プレイヤーの場合は新規マッチングの基礎成立率や関係維持にも直結</strong>する重要ステータスです（毎年の決算時に補充）。</p>
-          </div>
-        </div>
-        <div class="bg-rose-950/30 border border-rose-800/60 rounded-xl p-3 flex items-start gap-2.5">
-          <span class="text-base">🚨</span>
-          <div>
-            <div class="font-bold text-rose-400">家庭崩壊度（Alert：初期値 1/5）</div>
-            <p class="text-slate-300 text-[11px] leading-relaxed">交際人数が多いほど上昇しやすくなります。<strong class="text-rose-300">Lv.3以上で慰謝料リスク</strong>が発生し、<strong class="text-rose-300">Lv.5に達すると離婚ゲームオーバー</strong>の危機に陥ります。</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. アクションコマンド解説 -->
-    <section class="space-y-3">
-      <h2 class="text-sm sm:text-base font-black text-white flex items-center gap-2 border-l-4 border-amber-400 pl-2.5">
-        <span>4. 局面を動かすコマンド一覧</span>
-      </h2>
-      <p class="text-[11px] text-slate-400">※「別れ」以外のコマンドはすべて <strong class="text-pink-300">💳活動費を 1 消費</strong> して実行します。</p>
-
-      <div class="space-y-2 text-xs">
-        <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
-          <div class="space-y-0.5">
-            <div class="font-bold text-amber-300">ブースト（画面上部）</div>
-            <p class="text-[11px] text-slate-300">空いている交際枠（最大4人まで）に新規マッチングを一気に呼び込みます。</p>
-          </div>
-          <span class="px-2.5 py-1 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 text-white border border-pink-300 flex-shrink-0">🆙 ブースト</span>
-        </div>
-
-        <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
-          <div class="space-y-0.5">
-            <div class="font-bold text-pink-300">刺激（パートナー欄）</div>
-            <p class="text-[11px] text-slate-300">秘密のアイテムを投入し、その月の密会スコアを即座に <strong class="text-amber-300">+25pt</strong> 引き上げます。</p>
-          </div>
-          <span class="px-2.5 py-1 rounded-lg font-bold text-[10.5px] bg-gradient-to-r from-pink-600 to-purple-600 text-white border border-pink-400/60 flex-shrink-0">💓 刺激</span>
-        </div>
-
-        <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
-          <div class="space-y-0.5">
-            <div class="font-bold text-indigo-300">贈物（パートナー欄）</div>
-            <p class="text-[11px] text-slate-300">プレゼントで絆を深め、<strong class="text-emerald-300">6ヶ月間の自然破局防止プロテクト</strong>を付与します。</p>
-          </div>
-          <span class="px-2.5 py-1 rounded-lg font-bold text-[10.5px] bg-gradient-to-r from-purple-600 to-indigo-600 text-white border border-purple-400/60 flex-shrink-0">🎁 贈物</span>
-        </div>
-
-        <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
-          <div class="space-y-0.5">
-            <div class="font-bold text-slate-200">別れ（パートナー欄・コスト0）</div>
-            <p class="text-[11px] text-slate-300">関係を解消して枠を空けます。ただし「年下独身」などは別れ話で揉めて崩壊度が上がることも。</p>
-          </div>
-          <span class="px-2.5 py-1 rounded-lg font-bold text-[10.5px] bg-slate-800 text-slate-200 border border-slate-700 flex-shrink-0">👋 別れ</span>
-        </div>
-
-        <div class="bg-slate-900/85 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
-          <div class="space-y-0.5">
-            <div class="font-bold text-emerald-300">家庭ケア（1年ごとの決算画面限定）</div>
-            <p class="text-[11px] text-slate-300">家族サービスを行い、<strong class="text-emerald-300">家庭崩壊度を -2 鎮静</strong>させます。</p>
-          </div>
-          <span class="px-2.5 py-1 rounded-lg font-bold text-[10.5px] bg-emerald-950 text-emerald-300 border border-emerald-600/80 flex-shrink-0">🏡 家庭ケア</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- キャラ吹き出し：攻略のコツ -->
-    <div class="flex items-start gap-3 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-3.5">
-      <div class="avatar-frame-lg flex-shrink-0 ring-2 ring-indigo-400">
-        <img id="guideAvatar2" src="" alt="攻略アドバイス">
-      </div>
-      <div class="space-y-1 text-xs">
-        <div class="font-bold text-indigo-300 text-[11px]">ケンジ（42歳 / 外資コンサル・神奈川）</div>
-        <p class="text-slate-200 leading-relaxed">
-          「<strong>『100人斬り』</strong>を狙うなら修羅乱舞型でブーストを連打し、早めに『別れ』て回転率を上げるのが鉄則だ。逆に<strong>『五年の絆』</strong>なら純愛継続型で1人に絞り、6ヶ月ごとに『贈物』で破局プロテクトをかけ続けて守り抜くといい。」
+        <p id="toastPartnerQuote" class="text-[9.5px] text-slate-300 italic pt-1 mt-1 border-t border-white/10 leading-snug truncate">
+          「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」
         </p>
       </div>
-    </div>
 
-    <!-- 5. やり込みアチーブメント一覧 -->
-    <section class="space-y-3">
-      <h2 class="text-sm sm:text-base font-black text-white flex items-center gap-2 border-l-4 border-emerald-400 pl-2.5">
-        <span>5. 全6種のやり込み実績</span>
-      </h2>
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-          <div class="font-bold text-rose-300">⚔️ 100人斬り</div>
-          <div class="text-[10.5px] text-slate-400 mt-0.5">5年間で累計100人以上と交際する</div>
+      <!-- アクション（💓刺激 / 🎁贈物）実行上部トースト -->
+      <div id="actionPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-pink-950 via-purple-950 to-slate-900 border-2 border-pink-400 rounded-xl p-2.5 shadow-2xl">
+        <div class="flex items-center gap-2.5">
+          <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="toastActionImg"></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-1">
+              <div class="space-y-0.5 min-w-0">
+                <div class="text-[9.5px] font-black text-pink-300 flex items-center gap-1 truncate">
+                  <span id="toastActionHeader" class="truncate">💓 SPECIAL STIMULUS!</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-xs sm:text-sm font-black text-white" id="toastActionName">カナコ (36歳)</span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <span id="toastActionBadge" class="inline-block px-1.5 py-0.5 rounded text-[9.5px] font-black bg-amber-950 border border-amber-500 text-amber-200">⚡ +25pt UP</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-          <div class="font-bold text-amber-300">💍 五年の絆</div>
-          <div class="text-[10.5px] text-slate-400 mt-0.5">同じ相手と60ヶ月間一度も別れず完走</div>
+        <p id="toastActionQuote" class="text-[9.5px] text-slate-200 pt-1 mt-1 border-t border-white/10 leading-snug">
+          秘密のアイテムを持ち込み、理性が吹き飛ぶほどの悦楽に溺れた。
+        </p>
+      </div>
+
+      <!-- ブースト一括マッチング通知トースト -->
+      <div id="boostToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-amber-950 via-purple-950 to-pink-950 border-2 border-amber-400 rounded-xl p-3 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-amber-400/30 pb-1.5 mb-2">
+          <div class="flex items-center gap-1.5 text-xs font-black text-amber-300">
+            <span class="text-base animate-bounce">🆙</span>
+            <span>BOOST FEVER!</span>
+          </div>
+          <span class="text-[10px] text-pink-200 font-bold" id="boostToastCount">3人マッチング成立！</span>
         </div>
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-          <div class="font-bold text-purple-300">⚡ 歓喜の特異点</div>
-          <div class="text-[10.5px] text-slate-400 mt-0.5">密会スコア 150pt 以上を記録する</div>
+        <div class="flex items-center justify-center gap-2.5" id="boostAvatarsContainer"></div>
+        <p class="text-[10px] text-amber-100/90 text-center italic pt-1.5 mt-1 border-t border-white/10 leading-snug">
+          注目度が急上昇し、空き枠に熱烈なメッセージが殺到！
+        </p>
+      </div>
+
+      <!-- 破局トースト -->
+      <div id="breakupPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-slate-950 via-purple-950/60 to-slate-900 border-2 border-purple-400/80 rounded-xl p-2.5 shadow-2xl">
+        <div class="flex items-center gap-2.5">
+          <div class="avatar-frame-lg flex-shrink-0 grayscale contrast-125"><img src="" alt="" id="toastBreakupImg"></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-1">
+              <div class="space-y-0.5 min-w-0">
+                <div class="text-[9.5px] font-bold text-purple-300 flex items-center gap-1 truncate">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block flex-shrink-0"></span>
+                  <span id="toastBreakupTag" class="truncate">🍂 PARTNER BREAKUP</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-xs sm:text-sm font-black text-slate-200 truncate" id="toastBreakupName">カナコ (37歳)</span>
+                  <span id="toastBreakupPeriod" class="text-[9.5px] text-slate-400">4ヶ月で関係解消</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-          <div class="font-bold text-indigo-300">🍷 20歳以上年上</div>
-          <div class="text-[10.5px] text-slate-400 mt-0.5">自分より20歳以上年上の相手と交際</div>
+        <p id="toastBreakupQuote" class="text-[9.5px] text-purple-200 italic pt-1 mt-1 border-t border-purple-500/20 leading-snug truncate">
+          「今までありがとう。日常に戻らなきゃいけないの。」
+        </p>
+      </div>
+
+      <!-- 慰謝料トースト -->
+      <div id="lawsuitToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-amber-950 via-rose-950 to-slate-950 border-2 border-amber-500 rounded-xl p-2.5 shadow-2xl">
+        <div class="flex items-center gap-2.5">
+          <div class="text-2xl flex-shrink-0 animate-bounce">⚖️</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[11px] font-black text-amber-300">相手の配偶者から内容証明郵便！</div>
+            <div class="text-xs font-bold text-white truncate" id="toastLawsuitPartnerName">サオリ (33歳) の夫に発覚</div>
+            <div class="text-[9px] text-rose-300 pt-0.5 leading-tight">示談金支払いにより本業年収Lvが低下（-1 Lv）</div>
+          </div>
         </div>
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-          <div class="font-bold text-pink-300">🍓 20歳以上年下</div>
-          <div class="text-[10.5px] text-slate-400 mt-0.5">自分より20歳以上年下の相手と交際</div>
+      </div>
+
+      <!-- 月次逢瀬ログ -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 sm:p-2.5">
+        <div id="currentMonthPartnersLog" class="space-y-1.5 min-h-[46px]">
+          <div class="text-xs text-slate-500 italic py-2 text-center">今月はアポなし。家庭と仕事に専念中……</div>
         </div>
-        <div class="bg-slate-900/80 border border-amber-500/40 rounded-xl p-2.5">
-          <div class="font-bold text-yellow-300">👑 全能の覇皇</div>
-          <div class="text-[10.5px] text-slate-400 mt-0.5">離婚せずに上記5実績を1プレイで同時制覇</div>
+      </div>
+
+      <div id="clickMonthDetail" class="hidden bg-purple-950/70 border border-purple-700/80 rounded-xl p-3 text-xs space-y-1">
+        <div class="flex justify-between font-bold text-purple-200">
+          <span id="detailMonthHeader">40歳 1月の記憶</span>
+          <button onclick="closeClickDetail()" class="text-slate-400 hover:text-white">✕</button>
         </div>
+        <div id="detailMonthContent" class="text-slate-300 space-y-1.5 text-[11px]"></div>
       </div>
     </section>
 
-    <!-- 戻るボタン -->
-    <div class="pt-2">
-      <a href="index.html?skip=1" onclick="return backToGameTab(event);" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
-        <span>ゲーム画面へ戻る ▶</span>
-      </a>
-    </div>
+    <!-- STEP 3: 最終リザルト -->
+    <section id="step3" class="hidden space-y-4 py-3 pb-12">
+      <div class="text-center space-y-1.5 border-b border-purple-900/40 pb-3">
+        <div id="resAgeTrackHeader" class="text-xs sm:text-sm font-bold text-purple-300 font-serif-jp tracking-wider">
+          40歳から45歳へ――駆け抜けた逢瀬の軌跡
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-wide">
+          <span id="resPlayerNameHeader">ユウスケ</span> <span class="text-sm sm:text-base font-normal text-slate-300">さんの5年間</span>
+        </h1>
+        <div class="pt-1">
+          <div class="text-xs text-amber-300 font-semibold tracking-wider">
+            称号：<span id="resTitleBadge" class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 drop-shadow-[0_0_12px_rgba(244,63,94,0.4)]">『首都圏の彷徨い人』</span>
+          </div>
+          <div id="resAchieveBadgeList" class="flex flex-wrap items-center justify-center gap-1.5 pt-1.5"></div>
+          <p id="resEndingDesc" class="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed pt-1"></p>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 grid grid-cols-3 gap-2 text-center shadow-lg">
+        <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/60">
+          <div class="text-[9.5px] text-slate-400">累計交際人数</div>
+          <div id="resTotalCount" class="text-lg sm:text-xl font-black text-pink-400 mt-0.5">8人</div>
+        </div>
+        <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/60">
+          <div class="text-[9.5px] text-slate-400">肌を重ねた回数</div>
+          <div id="resSexCount" class="text-lg sm:text-xl font-black text-rose-400 mt-0.5">142回</div>
+        </div>
+        <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/60">
+          <div class="text-[9.5px] text-slate-400">密会時間</div>
+          <div id="resTotalHours" class="text-lg sm:text-xl font-black text-cyan-400 mt-0.5">403時間</div>
+        </div>
+      </div>
+
+      <!-- 5-Year Epilogue -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2 font-serif-jp text-xs leading-relaxed text-slate-300">
+        <div class="text-[10px] font-sans font-bold text-purple-400 uppercase tracking-widest">5-Year Epilogue</div>
+        <div id="epilogueText" class="space-y-2"></div>
+      </div>
+
+      <!-- パートナー記憶カード -->
+      <div class="space-y-3">
+        <div class="bg-gradient-to-b from-purple-950/40 to-slate-900/90 border border-purple-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="longestPartnerImg"></div>
+            <div class="flex-1 min-w-0 space-y-0.5">
+              <span class="text-[10px] tracking-wider text-pink-400 font-bold uppercase block">👑 最長交際パートナーの記憶</span>
+              <h3 id="longestPartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">エリコ (40歳→45歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
+              <div id="longestPartnerPeriod" class="text-xs text-purple-300 pt-0.5">交際60ヶ月（5年間完走）</div>
+            </div>
+          </div>
+          <div class="p-2 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-200 text-xs leading-relaxed italic" id="longestPartnerLineText">
+            「気づけばもう何年も一緒にいるな。日常のすぐ隣に君がいるのが、すっかり当たり前になったよ。」
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-b from-rose-950/30 to-slate-900/90 border border-rose-500/40 rounded-2xl p-4 space-y-2.5 shadow-xl">
+          <div class="flex items-center gap-3">
+            <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="highestScorePartnerImg"></div>
+            <div class="flex-1 min-w-0 space-y-0.5">
+              <span class="text-[10px] tracking-wider text-amber-400 font-bold uppercase block">🔥 歴代最高密会スコアの記憶</span>
+              <h3 id="highestScorePartnerNameAge" class="text-sm sm:text-base font-bold text-white leading-snug truncate">サオリ (32歳)<br><span class="text-[10px] text-indigo-300 font-normal">🏷️平日昼 ｜ 相性 S</span></h3>
+              <div id="highestScoreDetail" class="text-xs text-amber-300 pt-0.5">最高スコア: 154 pt</div>
+            </div>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-300 text-xs leading-relaxed" id="highestScoreMemories">
+            「ホテルのシーツを掴んだまま息が止まりそうになったあの夜は、一生忘れられない。」
+          </div>
+        </div>
+      </div>
+
+      <!-- 5年アチーブメント -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+        <div class="text-[11px] font-bold text-amber-300 flex items-center justify-between">
+          <span>🏆 5年アチーブメント（やり込み実績）</span>
+          <span class="text-[9px] text-slate-500">点灯数: <span id="achieveUnlockedCount" class="text-amber-400 font-bold">0</span> / 6</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div id="achieveCard100" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
+            <div class="text-lg mb-0.5">⚔️</div>
+            <div class="text-[10px] font-bold text-white">100人斬り</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">5年で累計100人</div>
+          </div>
+          <div id="achieveCard5Y" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
+            <div class="text-lg mb-0.5">💍</div>
+            <div class="text-[10px] font-bold text-white">五年の絆</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">同一相手60ヶ月完走</div>
+          </div>
+          <div id="achieveCardScore120" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
+            <div class="text-lg mb-0.5">⚡</div>
+            <div class="text-[10px] font-bold text-white">歓喜の特異点</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">密会150pt突破</div>
+          </div>
+          <div id="achieveCardAgeOlder" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
+            <div class="text-lg mb-0.5">🍷</div>
+            <div class="text-[10px] font-bold text-white">20歳以上年上</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">大人の抱擁と逢瀬</div>
+          </div>
+          <div id="achieveCardAgeYounger" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
+            <div class="text-lg mb-0.5">🍓</div>
+            <div class="text-[10px] font-bold text-white">20歳以上年下</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">若き熱情に溺れる</div>
+          </div>
+          <div id="achieveCardGrandSlam" class="p-2 rounded-xl border text-center transition-all bg-slate-950/60 border-slate-800 opacity-40">
+            <div class="text-lg mb-0.5">👑</div>
+            <div class="text-[10px] font-bold text-white">全能の覇皇</div>
+            <div class="text-[8px] text-slate-400 leading-tight mt-0.5">主要実績を同時制覇</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 全交際履歴アコーディオン -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div id="allHistoryWrapper" class="hidden space-y-2">
+          <div class="flex items-center justify-between text-[11px] border-b border-slate-800 pb-1.5">
+            <span class="font-bold text-slate-300">交際履歴一覧</span>
+            <div class="flex items-center gap-1">
+              <span class="text-[9.5px] text-slate-500">並び順:</span>
+              <button type="button" id="sortBtnDuration" onclick="sortPartnersHistory('duration')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-900 text-purple-200 border border-purple-500 transition">期間順</button>
+              <button type="button" id="sortBtnAge" onclick="sortPartnersHistory('age')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 transition">年齢順</button>
+              <button type="button" id="sortBtnScore" onclick="sortPartnersHistory('score')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 transition">密会pt順</button>
+            </div>
+          </div>
+          <div id="allPartnersList" class="space-y-2 text-xs max-h-64 overflow-y-auto pt-1"></div>
+        </div>
+
+        <button id="toggleAllPartnersBtn" onclick="toggleAllPartners()" class="w-full py-2.5 text-xs font-semibold text-purple-400 hover:text-purple-300 border border-purple-900/60 rounded-xl bg-purple-950/30 transition">
+          すべての交際履歴（全0人）を確認する ▼
+        </button>
+      </div>
+
+      <!-- アクションボタン群 -->
+      <div class="space-y-2.5 pt-2">
+        <button onclick="shareOnX()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-100 shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+          <span>𝕏 で結果をポスト・シェア</span>
+        </button>
+
+        <button onclick="restartApp()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-800 via-indigo-800 to-slate-900 hover:from-purple-700 hover:to-indigo-700 text-white border border-purple-500/50 shadow-xl transition active:scale-95 flex items-center justify-center gap-2">
+          <span>↺ もう一度最初からプレイする</span>
+        </button>
+
+        <button onclick="generateSquareCard()" class="w-full py-2.5 px-6 rounded-xl font-bold text-xs bg-slate-950/80 hover:bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 transition active:scale-95 flex items-center justify-center gap-2">
+          <span>📷 成績表カードを画像保存（1080×1080）</span>
+        </button>
+      </div>
+    </section>
   </main>
 
-  <script>
-    function backToGameTab(e) {
-      if (window.opener && !window.opener.closed) {
-        if (e) e.preventDefault();
-        window.opener.focus();
-        window.close();
-        return false;
-      }
-      return true;
-    }
+  <!-- 年次マイルストーンモーダル -->
+  <div id="twoYearModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-purple-500/50 rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-3 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+      <div class="text-center space-y-0.5">
+        <span class="text-[10px] tracking-widest text-purple-400 uppercase font-bold" id="milestoneHeaderTag">12-Month Milestone</span>
+        <h3 class="text-base sm:text-lg font-bold text-white" id="twoYearTitle">1年目の決算：41歳の現在</h3>
+      </div>
 
+      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-2.5 space-y-1.5">
+        <div class="text-[11px] font-bold text-amber-300">📊 直近1年間の戦果</div>
+        <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
+          <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+            <span class="text-[9px] text-slate-400 block">累計交際</span>
+            <span id="twoYearSummaryTotal" class="font-bold text-pink-400">0人</span>
+          </div>
+          <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+            <span class="text-[9px] text-slate-400 block">最長期間</span>
+            <span id="twoYearSummaryLongest" class="font-bold text-purple-300">0ヶ月</span>
+          </div>
+          <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+            <span class="text-[9px] text-slate-400 block">最高密会度</span>
+            <span id="twoYearSummaryScore" class="font-bold text-amber-300">0 pt</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 継続中パートナー一覧 -->
+      <div class="bg-slate-950/80 border border-purple-900/60 rounded-xl p-2.5 space-y-1.5">
+        <div class="text-xs font-bold text-purple-300">💖 現在継続中のパートナー</div>
+        <div id="twoYearActivePartnersList" class="space-y-1.5 text-xs"></div>
+      </div>
+
+      <!-- 次期の婚外方針再設定 -->
+      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-2 text-xs">
+        <div class="font-bold text-purple-300">🎯 次期の婚外方針を見直す</div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <span class="text-[10px] text-slate-400 block mb-1">婚外スタイル</span>
+            <select id="milestoneStyleSelect" onchange="onMilestoneStyleChange()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+              <option value="pure">💍 純愛継続型 (1人)</option>
+              <option value="balanced" selected>🍷 分散余裕型 (2人)</option>
+              <option value="carnage">⚔️ 修羅乱舞型 (4人)</option>
+            </select>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 block mb-1">狙う年齢層</span>
+            <select id="milestoneAgePrefSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+              <option value="same" selected>同年代</option>
+              <option value="older">年上</option>
+              <option value="younger">年下</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 加齢減衰と自己投資結果 ＆ 家庭ケア -->
+      <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 space-y-2 text-xs">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-slate-300">📉 加齢減衰と自己投資結果</span>
+          <span class="text-emerald-400 font-bold" id="milestoneIncomeReport">年収: Lv.5</span>
+        </div>
+        <div class="text-[11px] text-slate-300" id="milestoneStatReport">
+          ✨外見: 5 ｜ ⚡体力: 5 ｜ 🔥性欲: 5 ｜ 💳今期活動費: 4
+        </div>
+        <div class="pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-2">
+          <div class="text-[11px] text-amber-300 font-bold">
+            🚨 現在の家庭崩壊度: <span id="milestoneAlertVal">Lv.1/5</span>
+          </div>
+          <button type="button" onclick="buyMilestoneFamilyCare(event)" id="btnMilestoneFamilyCare" class="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/80 text-emerald-300 font-bold text-[10.5px] transition active:scale-95 flex items-center gap-1 cursor-pointer">
+            <span>🏡</span><span>家庭ケア（崩壊度-2）</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 進行ボタン -->
+      <div class="space-y-2 pt-1 border-t border-slate-800">
+        <button id="btnResumeNextYear" onclick="resumeNextYear()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+          <span>この方針で次の1年を進める ›</span>
+        </button>
+        <button onclick="retireFromTwoYear()" class="w-full py-2 rounded-xl text-xs font-bold text-rose-300 hover:text-white border border-rose-800/80 bg-rose-950/30 transition active:scale-95">
+          🚪 ここで婚外活動を終える（自主引退）
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 画像保存モーダル -->
+  <div id="imageSaveModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-purple-500/40 rounded-2xl max-w-sm w-full p-4 space-y-3 text-center shadow-2xl">
+      <div class="text-xs font-bold text-purple-300">画像を長押しして「写真に追加」</div>
+      <div class="rounded-xl overflow-hidden border border-slate-800 shadow-lg">
+        <img id="generatedCardImage" class="w-full h-auto block" alt="5年成績表カード">
+      </div>
+      <button onclick="closeImageModal()" class="w-full py-2 rounded-xl text-xs bg-slate-800 text-slate-300 hover:bg-slate-700">
+        閉じる
+      </button>
+    </div>
+  </div>
+
+  <canvas id="exportCanvas" width="1080" height="1080" class="hidden"></canvas>
+
+  <script>
+    // マニュアルページから直接戻った場合（?skip=1）は確認画面をスキップ
     window.addEventListener("DOMContentLoaded", () => {
-      const av1 = document.getElementById("guideAvatar1");
-      if (av1 && window.FEMALE_AVATARS_DATA && window.FEMALE_AVATARS_DATA["F03"]) {
-        av1.src = window.FEMALE_AVATARS_DATA["F03"];
-      }
-      const av2 = document.getElementById("guideAvatar2");
-      if (av2 && window.MALE_AVATARS_DATA && window.MALE_AVATARS_DATA["M04"]) {
-        av2.src = window.MALE_AVATARS_DATA["M04"];
+      if (window.location.search.includes("skip=1") && typeof acceptDisclaimer === "function") {
+        acceptDisclaimer();
+        window.history.replaceState({}, "", window.location.pathname);
       }
     });
   </script>

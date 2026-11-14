@@ -47,7 +47,7 @@ var prologueAutoTimer = null;
 var tapStartX = 0, tapStartY = 0;
 var isTapInitialized = false;
 var lastTapAdvanceTime = 0;
-var milestoneModalOpenedTime = 0; // 決算モーダル表示時刻（誤タップ防止判定用）
+var milestoneModalOpenedTime = 0;
 var currentHistorySortType = "duration";
 
 var simSpeedMs = 5000;
@@ -259,7 +259,8 @@ function rerollStats() {
   appState.baseLooks = appState.stats.looks;
   appState.baseLibido = appState.stats.libido;
   appState.baseStamina = appState.stats.stamina;
-  appState.stats.spouseAlert = 3;
+  // 家庭崩壊度の初期値は1（婚外に足を踏み入れたばかりの状態）
+  appState.stats.spouseAlert = 1;
 }
 
 function applyStylePreset(presetType) {
@@ -358,7 +359,6 @@ function updateLiveStats() {
     totalCountEl.innerText = `${appState.sim.partners.length}人`;
   }
 
-  // ブーストボタンの活性制御（消費1に変更）
   const btnBoost = document.getElementById("btnBoostMatching");
   if (btnBoost) {
     const canBoost = (appState.stats.budget >= 1 && activeCount < 4);
@@ -371,7 +371,7 @@ function updateLiveStats() {
   }
 }
 
-// 🆙ブースト機能：マチアプ高額プラン仕様（消費1へ引き下げ）
+// 🆙ブースト機能（活動費1消費）
 function triggerBoostMatching(e) {
   if (e) e.stopPropagation();
   if (appState.stats.budget < 1) return;
@@ -386,7 +386,6 @@ function triggerBoostMatching(e) {
   const isUserMale = (appState.user.gender === "male");
   const matchedList = [];
 
-  // ① 基本1人確定マッチング（保証枠）
   const p1 = createSynthesizedPartner(appState.sim.currentMonth, currentRealAge);
   p1.lastSexScore = (typeof calculateSexScore === "function") ? calculateSexScore(p1, (appState.sim.currentMonth % 12) + 1, false, 0) : 60;
   p1.maxSexScore = p1.lastSexScore;
@@ -398,7 +397,6 @@ function triggerBoostMatching(e) {
   if (p1.startAge >= currentRealAge + 20) appState.sim.metOlder20Plus = true;
   if (p1.startAge <= currentRealAge - 20) appState.sim.metYounger20Plus = true;
 
-  // ② 追加枠の確率計算（ステータス反映・100人斬り支援のため確率強化）
   const extraSlots = emptySlots - 1;
   if (extraSlots > 0) {
     let extraChance = 0.50;
@@ -482,17 +480,12 @@ function buyMilestoneFamilyCare(e) {
   if (isSoundOn) playTone(659.25, 0.12);
   triggerVibrate(20);
 
-  const sitEl = document.getElementById("spouseSituationLog");
-  if (sitEl) sitEl.innerText = "決算の節目に家族サービスを奮発。パートナーの機嫌が目に見えて和らいだ。";
-
-  // モーダル内の表示更新
   const statRep = document.getElementById("milestoneStatReport");
   if (statRep) {
     statRep.innerText = `✨外見: ${appState.stats.looks} ｜ ⚡体力: ${appState.stats.stamina} ｜ 🔥性欲: ${appState.stats.libido} ｜ 💳今期活動費: ${appState.stats.budget}`;
   }
   updateMilestoneCareButton();
 
-  // 背景の進行画面ステータスも即時同期
   updateLiveStats();
   renderAlertAndFlash(false, true);
 }
@@ -544,7 +537,6 @@ function triggerScreenTapAdvance() {
   }
 }
 
-// 6×2列マトリックス生成（絵文字＋月ラベルの2段組み大きめ表示）
 function refresh12MatrixGrid() {
   const currentYear = Math.floor(appState.sim.currentMonth / 12) + 1;
   const startM = (currentYear - 1) * 12 + 1;
@@ -680,7 +672,6 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
   const alertLv = appState.stats.spouseAlert;
   const largeVal = document.getElementById("largeSpouseAlertVal");
   const largeBadge = document.getElementById("largeSpouseAlertBadge");
-  const sitEl = document.getElementById("spouseSituationLog");
 
   if (largeVal) {
     largeVal.innerText = `${alertLv}/5`;
@@ -693,7 +684,6 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
     if (largeVal) {
       largeVal.className = "font-black text-rose-300";
     }
-    if (sitEl) sitEl.innerText = "家庭内は完全な臨戦態勢。スマホの着信音ひとつで怒号が飛ぶ。";
   } else if (isCrisis || alertLv === 4) {
     if (!isSilent && !appState.sim.isSkipping && !appState.sim.isPaused) {
       const overlay = document.getElementById("flashOverlay");
@@ -710,12 +700,6 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
     if (largeVal) {
       largeVal.className = "font-black text-rose-300";
     }
-    const spouseEvents = [
-      "休日の夕方、スマホの通知を凝視され冷や汗が流れた。",
-      "「最近、怪しい用事多くない？」と真顔で問い詰められた。",
-      "手帳を見咎められ、必死に仕事の言い訳を重ねた。"
-    ];
-    if (sitEl) sitEl.innerText = spouseEvents[Math.floor(Math.random() * spouseEvents.length)];
   } else {
     if (largeBadge) {
       largeBadge.className = "";
@@ -723,15 +707,11 @@ function renderAlertAndFlash(isCrisis, isSilent = false) {
     if (largeVal) {
       largeVal.className = "font-bold text-amber-300";
     }
-    if (sitEl && sitEl.innerText.indexOf("家族サービス") === -1) {
-      sitEl.innerText = "平穏な週末。特に怪しまれる様子はない。";
-    }
   }
 }
 
 function renderRealtimeMonthlyLog(mIdx, calMonth) {
   try {
-    // 最上段：【婚外○年目 名前 ○歳】の短縮コンパクト形式へ動的更新
     const simAgeEl = document.getElementById("simCurrentAge");
     if (simAgeEl) {
       const currentAge = typeof getRealAge === "function" ? getRealAge(mIdx) : (appState.user.startAge || 40);
@@ -998,7 +978,6 @@ function renderYearlyMilestoneModal() {
   const currentAge = getRealAge(mIdx);
   const yearIndex = mIdx / 12;
 
-  // モーダル表示時刻を記録（タイムスタンプ式ガード）
   milestoneModalOpenedTime = performance.now();
 
   const titleEl = document.getElementById("twoYearTitle");
@@ -1028,7 +1007,6 @@ function renderYearlyMilestoneModal() {
 
   onMilestoneStyleChange();
 
-  // モーダル全体を1秒間タップ無効化（CSS pointer-eventsガード）
   const modalBox = document.querySelector("#twoYearModal > div");
   if (modalBox) {
     modalBox.classList.add("pointer-events-none");
@@ -1082,7 +1060,6 @@ function renderActivePartnersListInMilestone() {
 }
 
 function resumeNextYear() {
-  // 表示から0.8秒以内のタップは誤爆とみなして無効化
   if (performance.now() - milestoneModalOpenedTime < 800) return;
 
   const styleSel = document.getElementById("milestoneStyleSelect");
@@ -1103,7 +1080,6 @@ function resumeNextYear() {
 }
 
 function retireFromTwoYear() {
-  // 表示から1.0秒以内のタップは誤爆とみなして無効化
   if (performance.now() - milestoneModalOpenedTime < 1000) return;
 
   clearTimeout(simTimer);
@@ -1289,30 +1265,41 @@ function calculateAndRenderResult() {
   const endingDesc = document.getElementById("resEndingDesc");
   if (endingDesc) endingDesc.innerText = desc;
 
+  // 案A：年齢表記を統一し、同一人物なら「👑 最長交際と二冠達成！」を表示
   const sortedByDuration = [...appState.sim.partners].sort((a,b) => b.durationMonths - a.durationMonths);
-  const longestP = sortedByDuration[0] || { name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null, color: "#a855f7" };
+  const longestP = sortedByDuration[0] || { id: "", name: "なし", startAge: 40, endAge: 40, durationMonths: 0, chemistry: "A", avatarId: "F01", tag: "平日昼", endMonth: null, color: "#a855f7" };
   
   const isLongestActive = (longestP.endMonth === null || longestP.endMonth >= 60);
   longestP.lastLine = (typeof generateLastLineText === "function") 
     ? generateLastLineText(longestP, isTargetPartnerMale, isLongestActive) 
     : "「今までありがとう。日常に戻るね。」";
 
+  const longAgeDisp = (longestP.endAge && longestP.endAge > longestP.startAge)
+    ? `${longestP.startAge}歳→${longestP.endAge}歳`
+    : `${longestP.startAge}歳`;
+
   const longImg = document.getElementById("longestPartnerImg");
   if (longImg) longImg.src = getSafeAvatarSrc(longestP.avatarId, longestP.name, longestP.color);
   const longName = document.getElementById("longestPartnerNameAge");
-  if (longName) longName.innerHTML = `${longestP.name} (${longestP.endAge || longestP.startAge}歳 / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${longestP.tag} ｜ 相性 ${longestP.chemistry}</span>`;
+  if (longName) longName.innerHTML = `${longestP.name} (${longAgeDisp} / ${longestP.job || "一般事務"} / ${longestP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${longestP.tag} ｜ 相性 ${longestP.chemistry}</span>`;
   const longPeriod = document.getElementById("longestPartnerPeriod");
   if (longPeriod) longPeriod.innerText = `交際${longestP.durationMonths}ヶ月（約${(longestP.durationMonths/12).toFixed(1)}年）${isLongestActive ? " 【現在も継続中】" : ""}`;
   const longLine = document.getElementById("longestPartnerLineText");
   if (longLine) longLine.innerText = longestP.lastLine;
 
   const highestScoreP = appState.sim.highestScorePartner || longestP;
+  const isSameTopPartner = Boolean(longestP.id && highestScoreP.id && longestP.id === highestScoreP.id);
   const highImg = document.getElementById("highestScorePartnerImg");
   if (highImg) highImg.src = getSafeAvatarSrc(highestScoreP.avatarId, highestScoreP.name, highestScoreP.color);
   const highName = document.getElementById("highestScorePartnerNameAge");
   if (highName) highName.innerHTML = `${highestScoreP.name} (${highestScoreP.startAge}歳 / ${highestScoreP.job || "一般事務"} / ${highestScoreP.area || "東京"})<br><span class="text-[10px] text-indigo-300">🏷️${highestScoreP.tag} ｜ 相性 ${highestScoreP.chemistry}</span>`;
   const highDetail = document.getElementById("highestScoreDetail");
-  if (highDetail) highDetail.innerText = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt`;
+  if (highDetail) {
+    const crownBadge = isSameTopPartner
+      ? ` <span class="ml-1 px-1.5 py-0.5 rounded bg-amber-950 border border-amber-500 text-amber-300 text-[9.5px] font-black">👑 最長交際と二冠達成！</span>`
+      : "";
+    highDetail.innerHTML = `最高密会スコア: ${appState.sim.globalMaxSexScore || highestScoreP.maxSexScore} pt${crownBadge}`;
+  }
 
   renderAllPartnersList(currentHistorySortType);
 

@@ -6,19 +6,19 @@
   <title>アウトロマンス: 婚外5年シミュレーター 〜既婚者たちの裏歴史〜 | Ajisai Game Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <link rel="stylesheet" href="style.css?v=20261115">
+  <link rel="stylesheet" href="style.css?v=20261116">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;600;900&display=swap" rel="stylesheet">
 
-  <script src="avatars.js?v=20261115"></script>
-  <script src="data.js?v=20261115"></script>
-  <script src="sim.js?v=20261115"></script>
-  <script src="events.js?v=20261115"></script>
-  <script src="ui.js?v=20261115"></script>
-  <script src="card.js?v=20261115"></script>
-  <script src="game.js?v=20261115" defer></script>
+  <script src="avatars.js?v=20261116"></script>
+  <script src="data.js?v=20261116"></script>
+  <script src="sim.js?v=20261116"></script>
+  <script src="events.js?v=20261116"></script>
+  <script src="ui.js?v=20261116"></script>
+  <script src="card.js?v=20261116"></script>
+  <script src="game.js?v=20261116" defer></script>
 </head>
 <body class="app-container relative flex flex-col justify-between selection:bg-purple-500 selection:text-white">
   <audio id="bgmAudio" src="theme.mp3" loop preload="auto"></audio>
@@ -259,7 +259,7 @@
     <!-- STEP 2: 進行画面（スリム化・5ステータス上段集約版） -->
     <section id="step2" class="hidden space-y-2 pb-8 select-none cursor-pointer">
       
-      <!-- ステータス集約枠（最上段：婚外○年目＋ブーストボタン / 2段目：5ステータス横並び） -->
+      <!-- ステータス集約枠 -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 sm:p-2.5 space-y-1.5 shadow-lg">
         <div class="flex items-center justify-between text-xs pb-1.5 border-b border-slate-800/80">
           <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
@@ -273,13 +273,13 @@
             </div>
           </div>
 
-          <!-- 上段右端に配置したブーストボタン（消費1） -->
-          <button type="button" onclick="triggerBoostMatching(event)" id="btnBoostMatching" title="活動費1消費：空いている交際枠を一挙に埋める" class="px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 flex-shrink-0">
+          <!-- 上段右端に配置したブーストボタン -->
+          <button type="button" onclick="triggerBoostMatching(event)" id="btnBoostMatching" title="空いている交際枠を一挙に埋める" class="px-2.5 py-0.5 rounded-full font-black text-[10.5px] bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)] border border-pink-300 transition active:scale-95 flex items-center gap-1 flex-shrink-0">
             <span>🆙</span><span>ブースト</span>
           </button>
         </div>
 
-        <!-- 5大ステータス（活動費4＋家庭崩壊度1/5を横並び） -->
+        <!-- 5大ステータス -->
         <div class="flex items-center justify-between text-center text-[9.5px] sm:text-[11px] px-0.5 whitespace-nowrap">
           <div><span class="text-amber-300 font-medium">✨外見</span> <span id="liveStatLooks" class="font-bold text-white">5</span></div>
           <div class="text-slate-700">|</div>
@@ -293,7 +293,7 @@
         </div>
       </div>
 
-      <!-- 12ヶ月マトリックス（6×2列の円のみ） -->
+      <!-- 12ヶ月マトリックス -->
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-1.5 sm:p-2 shadow-xl">
         <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800/80">
           <div id="matrixGridRow" class="grid grid-cols-6 gap-1.5 sm:gap-2 items-center"></div>
@@ -636,7 +636,7 @@
             🚨 現在の家庭崩壊度: <span id="milestoneAlertVal">Lv.1/5</span>
           </div>
           <button type="button" onclick="buyMilestoneFamilyCare(event)" id="btnMilestoneFamilyCare" class="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/80 text-emerald-300 font-bold text-[10.5px] transition active:scale-95 flex items-center gap-1 cursor-pointer">
-            <span>🏡</span><span>家庭ケア (-2費で崩壊度-2)</span>
+            <span>🏡</span><span>家庭ケア（崩壊度-2）</span>
           </button>
         </div>
       </div>

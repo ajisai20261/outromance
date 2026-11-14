@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js - OUTROMANCE UI描画・演出・音響制御（最新完全版）
+   ui.js - OUTROMANCE UI描画・演出・音響制御（上部アクショントースト対応 完全版）
    ============================================================ */
 
 /* --- AvatarCacheManager ブリッジ（avatars.js の実データを直接バインド） --- */
@@ -52,6 +52,8 @@ var currentHistorySortType = "duration";
 
 var simSpeedMs = 5000;
 var simTimer = null;
+var actionToastTimer = null;
+var actionToastHideTimer = null;
 
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -259,7 +261,7 @@ function rerollStats() {
   appState.baseLooks = appState.stats.looks;
   appState.baseLibido = appState.stats.libido;
   appState.baseStamina = appState.stats.stamina;
-  // 家庭崩壊度の初期値は1（婚外に足を踏み入れたばかりの状態）
+  // 家庭崩壊度の初期値は1
   appState.stats.spouseAlert = 1;
 }
 
@@ -371,6 +373,15 @@ function updateLiveStats() {
   }
 }
 
+// 他の上部トーストを即座に隠してレイアウトの重複を防ぐ
+function hideAllTopToastsExcept(keepId) {
+  ["newPartnerToast", "actionPartnerToast", "boostToast", "breakupPartnerToast", "lawsuitToast"].forEach(id => {
+    if (id !== keepId) {
+      document.getElementById(id)?.classList.add("hidden");
+    }
+  });
+}
+
 // 🆙ブースト機能（活動費1消費）
 function triggerBoostMatching(e) {
   if (e) e.stopPropagation();
@@ -436,6 +447,7 @@ function triggerBoostMatching(e) {
 function showBoostToast(matchedList) {
   const toast = document.getElementById("boostToast");
   if (!toast) return;
+  hideAllTopToastsExcept("boostToast");
 
   const countEl = document.getElementById("boostToastCount");
   if (countEl) countEl.innerText = `${matchedList.length}人マッチング成立！`;
@@ -463,8 +475,8 @@ function showBoostToast(matchedList) {
   setTimeout(() => {
     toast.classList.remove("scale-100", "opacity-100");
     toast.classList.add("scale-95", "opacity-0");
-    setTimeout(() => toast.classList.add("hidden"), 3800);
-  }, 3800);
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 3500);
 }
 
 // 1年決算モーダル内での家庭ケア実行処理
@@ -600,6 +612,8 @@ function updateMatrixDot(mIdx) {
 function showNewPartnerToast(p, isDouble = false) {
   const toast = document.getElementById("newPartnerToast");
   if (!toast) return;
+  hideAllTopToastsExcept("newPartnerToast");
+
   document.getElementById("toastPartnerImg").src = getSafeAvatarSrc(p.avatarId, p.name, p.color);
   document.getElementById("toastPartnerName").innerText = `${p.name} (${p.startAge}歳)`;
   document.getElementById("toastPartnerAreaJob").innerText = `${p.area} ｜ ${p.job}`;
@@ -620,13 +634,71 @@ function showNewPartnerToast(p, isDouble = false) {
   setTimeout(() => {
     toast.classList.remove("scale-100", "opacity-100");
     toast.classList.add("scale-95", "opacity-0");
-    setTimeout(() => toast.classList.add("hidden"), 3200);
-  }, 3200);
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 3000);
+}
+
+// 【新規】「💓刺激」「🎁贈物」実行時の上部ポップアップトースト表示
+function showActionPartnerToast(p, actionType, actionText) {
+  const toast = document.getElementById("actionPartnerToast");
+  if (!toast || !p) return;
+
+  hideAllTopToastsExcept("actionPartnerToast");
+  clearTimeout(actionToastTimer);
+  clearTimeout(actionToastHideTimer);
+
+  const imgEl = document.getElementById("toastActionImg");
+  if (imgEl) imgEl.src = getSafeAvatarSrc(p.avatarId, p.name, p.color);
+
+  const nameEl = document.getElementById("toastActionName");
+  if (nameEl) nameEl.innerText = `${p.name} (${p.age}歳)`;
+
+  const headerEl = document.getElementById("toastActionHeader");
+  const badgeEl = document.getElementById("toastActionBadge");
+  const quoteEl = document.getElementById("toastActionQuote");
+
+  if (actionType === "stimulus") {
+    toast.className = "transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-pink-950 via-purple-950 to-slate-900 border-2 border-pink-400 rounded-xl p-2.5 shadow-2xl";
+    if (headerEl) {
+      headerEl.className = "truncate text-pink-300";
+      headerEl.innerText = "💓 SPECIAL STIMULUS!（密会度急上昇）";
+    }
+    if (badgeEl) {
+      badgeEl.className = "inline-block px-1.5 py-0.5 rounded text-[9.5px] font-black bg-amber-950 border border-amber-500 text-amber-200";
+      badgeEl.innerText = `⚡ +25pt (${p.lastSexScore}pt)`;
+    }
+  } else {
+    toast.className = "transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-emerald-950 via-indigo-950 to-slate-900 border-2 border-emerald-400 rounded-xl p-2.5 shadow-2xl";
+    if (headerEl) {
+      headerEl.className = "truncate text-emerald-300";
+      headerEl.innerText = "🎁 SPECIAL GIFT!（絆の贈り物）";
+    }
+    if (badgeEl) {
+      badgeEl.className = "inline-block px-1.5 py-0.5 rounded text-[9.5px] font-black bg-emerald-950 border border-emerald-500 text-emerald-200";
+      badgeEl.innerText = "🛡️ 6ヶ月破局防止";
+    }
+  }
+
+  if (quoteEl) quoteEl.innerText = actionText;
+
+  toast.classList.remove("hidden");
+  setTimeout(() => {
+    toast.classList.remove("scale-95", "opacity-0");
+    toast.classList.add("scale-100", "opacity-100");
+  }, 10);
+
+  actionToastTimer = setTimeout(() => {
+    toast.classList.remove("scale-100", "opacity-100");
+    toast.classList.add("scale-95", "opacity-0");
+    actionToastHideTimer = setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 2800);
 }
 
 function showBreakupPartnerToast(p, isUserMale, isManual = false, isTroubled = false) {
   const toast = document.getElementById("breakupPartnerToast");
   if (!toast) return;
+  hideAllTopToastsExcept("breakupPartnerToast");
+
   document.getElementById("toastBreakupImg").src = getSafeAvatarSrc(p.avatarId, p.name, p.color);
   document.getElementById("toastBreakupName").innerText = `${p.name} (${p.age}歳)`;
   document.getElementById("toastBreakupPeriod").innerText = `${p.durationMonths}ヶ月で関係解消`;
@@ -651,21 +723,23 @@ function showBreakupPartnerToast(p, isUserMale, isManual = false, isTroubled = f
   setTimeout(() => {
     toast.classList.remove("scale-100", "opacity-100");
     toast.classList.add("scale-95", "opacity-0");
-    setTimeout(() => toast.classList.add("hidden"), 3200);
-  }, 3200);
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 3000);
 }
 
 function showLawsuitToast(p) {
   const toast = document.getElementById("lawsuitToast");
   if (!toast) return;
+  hideAllTopToastsExcept("lawsuitToast");
+
   document.getElementById("toastLawsuitPartnerName").innerText = `${p.name} (${p.age}歳) の配偶者に発覚`;
   toast.classList.remove("hidden");
   setTimeout(() => { toast.classList.remove("scale-95", "opacity-0"); toast.classList.add("scale-100", "opacity-100"); }, 10);
   setTimeout(() => {
     toast.classList.remove("scale-100", "opacity-100");
     toast.classList.add("scale-95", "opacity-0");
-    setTimeout(() => toast.classList.add("hidden"), 3600);
-  }, 3600);
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 3500);
 }
 
 function renderAlertAndFlash(isCrisis, isSilent = false) {
@@ -756,6 +830,8 @@ function renderRealtimeMonthlyLog(mIdx, calMonth) {
       }
       if (!actionText) actionText = "隠れ家ホテルで濃密な午後を過ごした。";
       usedTexts.add(actionText);
+      // 同じ月内で再描画された場合に文面が変わらないようキャッシュ
+      p.lastActionText = actionText;
 
       const score = p.lastSexScore || 50;
       let scoreBadge = "";
@@ -847,7 +923,11 @@ function giveStimulus(partnerId, e) {
   playLimitBreakChime();
 
   const textList = (typeof STIMULUS_TEXTS !== "undefined") ? STIMULUS_TEXTS : ["理性を吹き飛ばすほどの悦楽に溺れた。"];
-  partner.lastActionText = textList[Math.floor(Math.random() * textList.length)];
+  const actionText = textList[Math.floor(Math.random() * textList.length)];
+  partner.lastActionText = actionText;
+
+  // 上部アクショントースト表示
+  showActionPartnerToast(partner, "stimulus", actionText);
 
   const mIdx = appState.sim.currentMonth;
   const calMonth = (mIdx % 12) + 1;
@@ -870,7 +950,11 @@ function giveGift(partnerId, e) {
   playRareChime();
 
   const textList = (typeof GIFT_TEXTS !== "undefined") ? GIFT_TEXTS : ["二人の絆がより確固たるものになった。"];
-  partner.lastActionText = textList[Math.floor(Math.random() * textList.length)];
+  const actionText = textList[Math.floor(Math.random() * textList.length)];
+  partner.lastActionText = actionText;
+
+  // 上部アクショントースト表示
+  showActionPartnerToast(partner, "gift", actionText);
 
   const mIdx = appState.sim.currentMonth;
   const calMonth = (mIdx % 12) + 1;
@@ -926,6 +1010,7 @@ function manualBreakup(partnerId, e) {
 
   appState.sim.activePartnerIds.splice(idx, 1);
   partner.endMonth = appState.sim.currentMonth;
+  partner.endAge = partner.age;
 
   let isTroubled = false;
   if (partner.tag === "年下独身" && Math.random() < 0.35) {

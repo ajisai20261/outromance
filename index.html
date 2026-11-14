@@ -6,19 +6,19 @@
   <title>アウトロマンス: 婚外5年シミュレーター 〜既婚者たちの裏歴史〜 | Ajisai Game Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <link rel="stylesheet" href="style.css?v=20261114">
+  <link rel="stylesheet" href="style.css?v=20261115">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;600;900&display=swap" rel="stylesheet">
 
-  <script src="avatars.js?v=20261114"></script>
-  <script src="data.js?v=20261114"></script>
-  <script src="sim.js?v=20261114"></script>
-  <script src="events.js?v=20261114"></script>
-  <script src="ui.js?v=20261114"></script>
-  <script src="card.js?v=20261114"></script>
-  <script src="game.js?v=20261114" defer></script>
+  <script src="avatars.js?v=20261115"></script>
+  <script src="data.js?v=20261115"></script>
+  <script src="sim.js?v=20261115"></script>
+  <script src="events.js?v=20261115"></script>
+  <script src="ui.js?v=20261115"></script>
+  <script src="card.js?v=20261115"></script>
+  <script src="game.js?v=20261115" defer></script>
 </head>
 <body class="app-container relative flex flex-col justify-between selection:bg-purple-500 selection:text-white">
   <audio id="bgmAudio" src="theme.mp3" loop preload="auto"></audio>
@@ -325,6 +325,31 @@
         </div>
         <p id="toastPartnerQuote" class="text-[9.5px] text-slate-300 italic pt-1 mt-1 border-t border-white/10 leading-snug truncate">
           「はじめまして。落ち着いてお話しできる大人の関係になれたら嬉しいです。」
+        </p>
+      </div>
+
+      <!-- アクション（💓刺激 / 🎁贈物）実行上部トースト -->
+      <div id="actionPartnerToast" class="hidden transition-all duration-300 transform scale-95 opacity-0 bg-gradient-to-r from-pink-950 via-purple-950 to-slate-900 border-2 border-pink-400 rounded-xl p-2.5 shadow-2xl">
+        <div class="flex items-center gap-2.5">
+          <div class="avatar-frame-lg flex-shrink-0"><img src="" alt="" id="toastActionImg"></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-1">
+              <div class="space-y-0.5 min-w-0">
+                <div class="text-[9.5px] font-black text-pink-300 flex items-center gap-1 truncate">
+                  <span id="toastActionHeader" class="truncate">💓 SPECIAL STIMULUS!</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-xs sm:text-sm font-black text-white" id="toastActionName">カナコ (36歳)</span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <span id="toastActionBadge" class="inline-block px-1.5 py-0.5 rounded text-[9.5px] font-black bg-amber-950 border border-amber-500 text-amber-200">⚡ +25pt UP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p id="toastActionQuote" class="text-[9.5px] text-slate-200 pt-1 mt-1 border-t border-white/10 leading-snug">
+          秘密のアイテムを持ち込み、理性が吹き飛ぶほどの悦楽に溺れた。
         </p>
       </div>
 

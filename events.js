@@ -1,8 +1,7 @@
 /* ============================================================
-   events.js - OUTROMANCE 動的イベント・セリフ・一都三県デート生成（衝突回避・完全版）
+   events.js - OUTROMANCE 動的イベント・セリフ・自然な密会描写（完全版）
    ============================================================ */
 
-// data.js との const 衝突を防ぐため window プロパティへ安全にフォールバック定義
 window.STIMULUS_TEXTS = window.STIMULUS_TEXTS || [
   "秘密のアイテムを持ち込み、理性が吹き飛ぶほどの悦楽に溺れた。",
   "普段の遠慮が消え去り、シーツを強く握りしめるほどの快感に震えた。",
@@ -68,12 +67,12 @@ window.pickPartnerQuote = function(gender, tag) {
       ? [
           "「通知オフ・現金払い徹底。絶対にバレない配慮をします。」",
           "「リスク管理は万全。安心してお任せ下さい。」",
-          "「地元から離れた場所で静かに会える方を探しています。」"
+          "「人目のつかない場所で静かに会える方を探しています。」"
         ]
       : [
           "「絶対に身バレしたくないので、慎重な方だと嬉しいです。」",
           "「連絡はアプリ内のみ希望。お互いの日常を守りましょう。」",
-          "「人目のつかない場所が好きです。秘密を共有しませんか？」"
+          "「静かな場所が好きです。二人だけの秘密を共有しませんか？」"
         ],
     "年下独身": isMale
       ? [
@@ -114,13 +113,27 @@ window.pickPartnerQuote = function(gender, tag) {
   return list[Math.floor(Math.random() * list.length)];
 };
 
-// 一都三県（東京・神奈川・埼玉・千葉）＆ 季節・タグ対応の月次逢瀬ログ生成
+// 都県別のリアルな密会スポット候補（本人の登録駅は自動除外して選出）
+const MEET_SPOTS_BY_PREF = {
+  "埼玉": ["池袋", "大宮", "赤羽", "上野", "新宿", "さいたま新都心", "川越"],
+  "神奈川": ["渋谷", "横浜", "恵比寿", "川崎", "新横浜", "品川", "二子玉川", "みなとみらい"],
+  "千葉": ["錦糸町", "東京", "上野", "船橋", "北千住", "海浜幕張", "舞浜", "柏"],
+  "東京": ["新宿", "渋谷", "銀座", "五反田", "恵比寿", "池袋", "上野", "赤坂", "品川", "三軒茶屋"]
+};
+
+// 自然な密会ログ生成（説明臭さをなくし、本人の地元を外した街で自然に落ち合う描写）
 window.generateMonthlyActionText = function(partner, calMonth, usedTexts) {
   const areaStr = (partner && partner.area) ? partner.area : "東京・中目黒";
   const parts = areaStr.split("・");
   const pref = parts[0] || "東京";
-  const spot = parts[1] || "銀座";
+  const homeSpot = parts[1] || "";
   const tag = (partner && partner.tag) ? partner.tag : "平日昼";
+
+  // 登録県に対応する密会候補から「本人の登録駅(homeSpot)」を除外
+  const rawSpots = MEET_SPOTS_BY_PREF[pref] || MEET_SPOTS_BY_PREF["東京"];
+  const filteredSpots = rawSpots.filter(s => s !== homeSpot);
+  const spotPool = filteredSpots.length > 0 ? filteredSpots : rawSpots;
+  const meetSpot = spotPool[Math.floor(Math.random() * spotPool.length)];
 
   const seasonPhrases = {
     1: "新年の慌ただしさを縫って",
@@ -138,70 +151,61 @@ window.generateMonthlyActionText = function(partner, calMonth, usedTexts) {
   };
   const sPhrase = seasonPhrases[calMonth] || "日常の隙間を縫って";
 
-  let localPool = [];
+  // 説明くささを排した自然な密会描写プール
+  let scenePool = [
+    `${sPhrase}、${meetSpot}の路地裏ホテルへ別々に入室。限られた時間の中で激しく愛し合った。`,
+    `${meetSpot}駅近くのカフェで軽くお茶をした後、静かなブティックホテルへ移動して濃密な時間を過ごした。`,
+    `${meetSpot}の隠れ家ラウンジでグラスを傾け、そのままタクシーでシティホテルへ雪崩れ込んだ。`,
+    `昼下がりの${meetSpot}で待ち合わせ。日常の仮面を脱ぎ捨てて深く溶け合った。`,
+    `${meetSpot}の駅ビルでさりげなく合流し、人混みを抜けて裏通りのホテルで熱い午後を過ごした。`,
+    `${sPhrase}、${meetSpot}のデザイナーズホテルへ直行。シーツを掴むほど深く求め合った。`,
+    `${meetSpot}で軽く食事を済ませた後、人目のつかないホテルで時計の針を忘れて抱き合った。`,
+    `仕事の合間を縫って${meetSpot}で密会。互いの体温を確かめるように何度も体を重ねた。`
+  ];
 
+  // 都県ごとの空気感をさりげなく混ぜる
   if (pref === "埼玉") {
-    localPool = [
-      `${sPhrase}、${spot}駅東口の路地裏ホテルへ直行。郊外ならではの気楽さで昼下がりから深く溶け合った。`,
-      `埼京線・京浜東北線を途中下車して${spot}で合流。都心よりも人目が少なく、ビジネスホテルで気兼ねなく密会を重ねた。`,
-      `${spot}周辺のロードサイドホテルへ車で滑り込み、日常を完全に忘れて肌を重ねた。`,
-      `${spot}駅近くのカフェで軽くお茶をした後、隣の駅の静かなホテルへ移動して濃密な時間を過ごした。`,
-      `埼玉エリアの${spot}で待ち合わせ。地元から離れた開放感の中、時間を忘れて激しく求め合った。`,
-      `${spot}の駅ビル裏にある隠れ家ホテルへ別々に入室し、人目を忍んで熱い午後を過ごした。`
-    ];
+    scenePool.push(`${meetSpot}駅東口のホテル街へ滑り込み、気兼ねない空気の中で昼下がりから深く溶け合った。`);
+    scenePool.push(`${meetSpot}周辺のロードサイドホテルへ車で入り、日常を完全に忘れて肌を重ねた。`);
   } else if (pref === "神奈川") {
-    localPool = [
-      `${sPhrase}、${spot}で待ち合わせて横浜方面のデザイナーズホテルへ。洗練された空間で濃密な時間を過ごした。`,
-      `神奈川エリアの${spot}で合流。海風を感じるベイエリアのホテルで時間を忘れて抱き合った。`,
-      `${spot}駅近くの隠れ家バルで軽くグラスを傾け、そのまま隣駅のブティックホテルへ雪崩れ込んだ。`,
-      `都内を避けて${spot}周辺で密会。落ち着いた大人の雰囲気の中、シーツを掴むほど深く愛し合った。`,
-      `${spot}の駅改札外でさりげなく合流し、人混みを抜けて裏通りのホテルで熱い午後を過ごした。`,
-      `みなとみらい線・東横線沿線の${spot}で逢瀬。夜景を眺めながら背徳のひとときに溺れた。`
-    ];
+    scenePool.push(`${meetSpot}の海風を感じるベイエリアのホテルで、夜景を眺めながら背徳のひとときに溺れた。`);
+    scenePool.push(`${meetSpot}駅近くの隠れ家バルからホテルへ移動し、洗練された空間で濃密な夜を過ごした。`);
   } else if (pref === "千葉") {
-    localPool = [
-      `${sPhrase}、総武線・京葉線を降りて${spot}で密会。都心から離れた開放感からか、いつも以上に大胆に求め合った。`,
-      `千葉エリアの${spot}から湾岸方面へ足を伸ばし、リゾート感漂うホテルの部屋で熱い午後を過ごした。`,
-      `${spot}駅前の喧騒を抜け、静かな裏通りのホテルへ別々に入室。互いの体温を確かめ合った。`,
-      `東京から川を越えて${spot}へ。知り合いに会う心配がない安心感から、時間を忘れて溺れ合った。`,
-      `${spot}近くのラウンジで落ち合った後、車で少し移動して隠れ家的なホテルで背徳の時間を満喫した。`,
-      `${spot}の駅周辺で軽く食事を済ませた後、人目のつかないホテルで濃密な愛を交わした。`
-    ];
+    scenePool.push(`${meetSpot}の湾岸エリアにあるリゾート感漂うホテルの部屋で、時間を忘れて溺れ合った。`);
+    scenePool.push(`${meetSpot}駅前の喧騒を抜け、静かな裏通りのビジネスホテルでいつも以上に大胆に求め合った。`);
   } else {
-    // 東京
-    localPool = [
-      `${sPhrase}、${spot}の隠れ家ラウンジでグラスを傾けた後、都心のシティホテルで背徳の夜を過ごした。`,
-      `人混みを避けて${spot}で待ち合わせ。昼下がりのデイユースで息が上がるほど求め合った。`,
-      `${spot}の路地裏にあるホテルへ別々に入室。限られた時間の中で激しく愛し合った。`,
-      `${spot}駅近くのカフェで合流し、タクシーで少し離れたデザイナーズホテルへ直行した。`,
-      `仕事の合間を縫って${spot}で密会。日常の仮面を脱ぎ捨てて深く溶け合った。`,
-      `都心から少し外れた${spot}の静かなホテルで、時計の針を忘れて何度も求め合った。`
-    ];
+    scenePool.push(`${meetSpot}の高級ホテルのバーで待ち合わせ、そのまま上層階の部屋で背徳の夜を過ごした。`);
   }
 
-  // 裏事情タグ固有の特別描写をブレンド
+  // 裏事情タグ固有の自然なシチュエーションを追加
   if (tag === "平日昼") {
-    localPool.push(`平日の昼下がり、${spot}のホテルでデイユース利用。背徳感に煽られいつも以上に燃え上がった。`);
+    scenePool.push(`平日の昼下がり、${meetSpot}のホテルでデイユース利用。背徳感に煽られいつも以上に燃え上がった。`);
   } else if (tag === "夜間遠征") {
-    localPool.push(`終電間際の${spot}で合流し、そのまま朝までホテルに篭って何度も体を重ねた。`);
+    scenePool.push(`終電間際の${meetSpot}で合流し、そのまま朝までホテルに篭って何度も体を重ねた。`);
   } else if (tag === "割り切り") {
-    localPool.push(`${spot}のホテル前で現地集合・現地解散。無駄な会話もなく本能のままに求め合った。`);
+    scenePool.push(`${meetSpot}のホテル前で現地集合・現地解散。無駄な会話もなく本能のままに求め合った。`);
   } else if (tag === "冷えきり") {
-    localPool.push(`${spot}の静かな部屋で「家ではこんなことできない」と吐息を漏らしながら強く抱き合った。`);
+    scenePool.push(`${meetSpot}の静かな部屋で「家ではこんなことできない」と吐息を漏らしながら強く抱き合った。`);
   } else if (tag === "年下独身") {
-    localPool.push(`${spot}で待ち合わせた瞬間から無邪気に腕を絡められ、ホテルに入るなり激しく求められた。`);
+    scenePool.push(`${meetSpot}で待ち合わせた瞬間から無邪気に腕を絡められ、ホテルに入るなり激しく求められた。`);
   } else if (tag === "秘密厳守") {
-    localPool.push(`${spot}の駅から少し歩いた人目のないホテルを厳選。徹底した秘密主義の中で深く愛し合った。`);
+    scenePool.push(`${meetSpot}の駅から少し歩いた人目のないホテルを厳選。徹底した秘密主義の中で深く愛し合った。`);
   }
 
-  const candidates = localPool.filter(txt => !usedTexts || !usedTexts.has(txt));
-  const finalPool = candidates.length > 0 ? candidates : localPool;
+  const candidates = scenePool.filter(txt => !usedTexts || !usedTexts.has(txt));
+  const finalPool = candidates.length > 0 ? candidates : scenePool;
   return finalPool[Math.floor(Math.random() * finalPool.length)];
 };
 
 // リザルト画面用：最長交際パートナーの記憶セリフ生成
 window.generateLastLineText = function(partner, isTargetPartnerMale, isLongestActive) {
-  const spot = (partner && partner.area ? partner.area : "東京・銀座").split("・")[1] || "あの街";
+  const areaStr = (partner && partner.area) ? partner.area : "東京・銀座";
+  const parts = areaStr.split("・");
+  const pref = parts[0] || "東京";
+  const homeSpot = parts[1] || "";
+  const rawSpots = MEET_SPOTS_BY_PREF[pref] || MEET_SPOTS_BY_PREF["東京"];
+  const filtered = rawSpots.filter(s => s !== homeSpot);
+  const spot = (filtered.length > 0 ? filtered[0] : rawSpots[0]) || "あの街";
 
   if (isLongestActive) {
     return isTargetPartnerMale

@@ -6,7 +6,7 @@
   <title>アウトロマンス: 婚外5年シミュレーター 〜既婚者たちの裏歴史〜 | Ajisai Game Studio</title>
   <meta name="description" content="舞台は2020年代の東京首都圏。既婚男性・既婚女性のどちらの視点でも遊べる、秘密の恋愛5年間（60ヶ月）シミュレーター。家庭崩壊を回避しつつ、あなただけの裏歴史を駆け抜けろ！">
 
-  <!-- OGP (LINE / Facebook / Discord 等) -->
+  <!-- OGP (LINE / Facebook / Discord 等) ※独自ドメイン移行時はここを新URLに変更 -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Ajisai Game Studio">
   <meta property="og:title" content="アウトロマンス: 婚外5年シミュレーター 〜既婚者たちの裏歴史〜">
@@ -23,19 +23,19 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <link rel="stylesheet" href="style.css?v=20261116">
+  <link rel="stylesheet" href="style.css?v=20261117">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;600;900&display=swap" rel="stylesheet">
 
-  <script src="avatars.js?v=20261116"></script>
-  <script src="data.js?v=20261116"></script>
-  <script src="sim.js?v=20261116"></script>
-  <script src="events.js?v=20261116"></script>
-  <script src="ui.js?v=20261116"></script>
-  <script src="card.js?v=20261116"></script>
-  <script src="game.js?v=20261116" defer></script>
+  <script src="avatars.js?v=20261117"></script>
+  <script src="data.js?v=20261117"></script>
+  <script src="sim.js?v=20261117"></script>
+  <script src="events.js?v=20261117"></script>
+  <script src="ui.js?v=20261117"></script>
+  <script src="card.js?v=20261117"></script>
+  <script src="game.js?v=20261117" defer></script>
 </head>
 <body class="app-container relative flex flex-col justify-between selection:bg-purple-500 selection:text-white">
   <audio id="bgmAudio" src="theme.mp3" loop preload="auto"></audio>
@@ -116,14 +116,9 @@
           <p>・マッチングアプリのように、<strong class="text-rose-300">実際に出会いを提供するゲームではありません</strong>。</p>
           <p>・成人向けの直接的な性的描写はありませんが、テーマの性質上、<strong class="text-amber-300 font-bold">18歳未満の方のプレイはご遠慮ください</strong>。</p>
         </div>
-        <div class="space-y-2">
-          <button onclick="acceptDisclaimer()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
-            <span>上記を確認して始める ▶</span>
-          </button>
-          <a href="howto.html" target="outromance_howto" class="w-full py-2.5 px-6 rounded-xl font-bold text-xs bg-slate-800/85 hover:bg-slate-700 border border-slate-700 text-purple-200 transition active:scale-95 flex items-center justify-center gap-1.5">
-            <span>📖 詳しい遊び方・攻略ガイドを見る</span>
-          </a>
-        </div>
+        <button onclick="acceptDisclaimer()" class="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)] transition transform active:scale-95 flex items-center justify-center gap-2">
+          <span>上記を確認して始める ▶</span>
+        </button>
       </div>
     </section>
 
@@ -695,7 +690,6 @@
   <canvas id="exportCanvas" width="1080" height="1080" class="hidden"></canvas>
 
   <script>
-    // マニュアルページから直接戻った場合（?skip=1）は確認画面をスキップ
     window.addEventListener("DOMContentLoaded", () => {
       if (window.location.search.includes("skip=1") && typeof acceptDisclaimer === "function") {
         acceptDisclaimer();

@@ -1087,6 +1087,7 @@ function renderYearlyMilestoneModal() {
   if (agePrefSel) agePrefSel.value = appState.stats.targetAgePref || "same";
 
   onMilestoneStyleChange();
+  updateAffiliatePrCards();
 
   const modalBox = document.querySelector("#twoYearModal > div");
   if (modalBox) {
@@ -1400,6 +1401,8 @@ function calculateAndRenderResult() {
   }
   const epiEl = document.getElementById("epilogueText");
   if (epiEl) epiEl.innerHTML = epilogueHtml;
+
+  updateAffiliatePrCards();
 }
 
 function updateAchievementCard(elId, isAchieved, activeClass) {
@@ -1420,4 +1423,43 @@ function toggleAllPartners() {
     wrap.classList.add("hidden");
     btn.innerText = `すべての交際履歴（全${appState.sim.partners.length}人）を確認する ▼`;
   }
+}
+
+// 性別に応じたアフィリエイトPR枠の自動出し分け（性別ラベルなし）
+function updateAffiliatePrCards() {
+  const isFemale = (typeof appState !== "undefined" && appState.user && appState.user.gender === "female");
+
+  const prData = isFemale
+    ? {
+        subTag: "女性完全無料・身バレ防止",
+        title: "プライバシー重視の既婚者専用「Healmate（ヒールメイト）」",
+        desc: "写真ぼかし機能・ニックネーム制で身バレを徹底防止。女性は完全無料で、心から安らげる大人の関係を。",
+        url: "https://healmate.jp/?utm_source=affiliate_hlmt&utm_medium=affiliate&utm_campaign=Vm7q9n7fgjep1u7"
+      }
+    : {
+        subTag: "無料登録・ブラウザ完結",
+        title: "AIが毎日の相性を提案「Cuddle（カドル）」",
+        desc: "登録者数100万人超の既婚者専用マッチング。アプリ不要・ブラウザ完結で、首都圏の同世代との新しい出会いをサポート。",
+        url: "https://www.cuddle-jp.com/?utm_source=07441a48-50e1-70cb-f914-09e0176f9c8d&utm_medium=affiliate&utm_campaign=affiliate"
+      };
+
+  const resSub = document.getElementById("resultPrSubTag");
+  const resTitle = document.getElementById("resultPrTitle");
+  const resDesc = document.getElementById("resultPrDesc");
+  const resLink = document.getElementById("resultPrLink");
+
+  if (resSub) resSub.innerText = prData.subTag;
+  if (resTitle) resTitle.innerText = prData.title;
+  if (resDesc) resDesc.innerText = prData.desc;
+  if (resLink) resLink.href = prData.url;
+
+  const mileSub = document.getElementById("milestonePrSubTag");
+  const mileTitle = document.getElementById("milestonePrTitle");
+  const mileDesc = document.getElementById("milestonePrDesc");
+  const mileLink = document.getElementById("milestonePrLink");
+
+  if (mileSub) mileSub.innerText = prData.subTag;
+  if (mileTitle) mileTitle.innerText = prData.title;
+  if (mileDesc) mileDesc.innerText = prData.desc;
+  if (mileLink) mileLink.href = prData.url;
 }

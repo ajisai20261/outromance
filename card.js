@@ -289,14 +289,15 @@ async function generateSquareCard() {
     ctx.fillText(card.sub2, cx + pCardW / 2, avY + avSize + 150);
   });
 
+  // 7. フッター（案Bハッシュタグ反映）
   ctx.textAlign = "center";
-  ctx.fillStyle = "#94a3b8";
-  ctx.font = "bold 21px 'Noto Sans JP', sans-serif";
-  ctx.fillText("Ajisai Game Studio  |  #アウトロマンス  #婚外5年シミュレーター", W / 2, 986);
+  ctx.fillStyle = "#c084fc";
+  ctx.font = "bold 20px 'Noto Sans JP', sans-serif";
+  ctx.fillText("#アウトロマンス  #婚外恋愛  #フリーゲーム  #35歳以上既婚者推奨", W / 2, 984);
 
   ctx.fillStyle = "#64748b";
-  ctx.font = "18px 'Noto Sans JP', sans-serif";
-  ctx.fillText("※本作はフィクションです。実在の人物・団体とは一切関係ありません。", W / 2, 1022);
+  ctx.font = "17px 'Noto Sans JP', sans-serif";
+  ctx.fillText("Ajisai Game Studio  |  ※本作はフィクションです。実在の人物・団体とは関係ありません。", W / 2, 1020);
 
   const dataUrl = canvas.toDataURL("image/png");
   const outImg = document.getElementById("generatedCardImage");
@@ -308,7 +309,8 @@ function closeImageModal() {
   document.getElementById("imageSaveModal")?.classList.add("hidden");
 }
 
-if (typeof window.shareOnX !== "function") {
+// SNSシェア関数（案Bハッシュタグ反映・game.jsより確実に優先適用）
+function defineOutromanceShareOnX() {
   window.shareOnX = function() {
     const userName = appState.user.name || "ユウスケ";
     const startAge = appState.user.startAge || 40;
@@ -323,11 +325,14 @@ if (typeof window.shareOnX !== "function") {
       `${userName}（${startAge}歳→${finalAge}歳）の称号は…`,
       `${titleText} でした！`,
       `累計交際：${totalPartners}人 ／ 最高密会度：${maxScore}pt`,
-      `#アウトロマンス #婚外5年シミュレーター`
+      `#アウトロマンス #婚外恋愛 #フリーゲーム #35歳以上既婚者推奨`
     ].join("\n");
 
-    const url = window.location.href;
+    const url = window.location.href.split("?")[0];
     const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   };
 }
+
+defineOutromanceShareOnX();
+window.addEventListener("DOMContentLoaded", defineOutromanceShareOnX);

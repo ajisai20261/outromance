@@ -1437,8 +1437,8 @@ function updateAffiliatePrCards() {
         url: "https://healmate.jp/?utm_source=affiliate_hlmt&utm_medium=affiliate&utm_campaign=Vm7q9n7fgjep1u7"
       }
     : {
-        subTag: "無料登録・ブラウザ完結",
-        title: "AIが毎日の相性を提案「Cuddle（カドル）」",
+        subTag: "AIマッチング・ブラウザ完結",
+        title: "「Cuddle（カドル）」",
         desc: "登録者数100万人超の既婚者専用マッチング。アプリ不要・ブラウザ完結で、首都圏の同世代との新しい出会いをサポート。",
         url: "https://www.cuddle-jp.com/?utm_source=07441a48-50e1-70cb-f914-09e0176f9c8d&utm_medium=affiliate&utm_campaign=affiliate"
       };

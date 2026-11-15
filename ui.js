@@ -1432,7 +1432,7 @@ function updateAffiliatePrCards() {
   const prData = isFemale
     ? {
         subTag: "女性完全無料・身バレ防止",
-        title: "プライバシー重視の既婚者専用「Healmate（ヒールメイト）」",
+        title: "「Healmate（ヒールメイト）」",
         desc: "写真ぼかし機能・ニックネーム制で身バレを徹底防止。女性は完全無料で、心から安らげる大人の関係を。",
         url: "https://healmate.jp/?utm_source=affiliate_hlmt&utm_medium=affiliate&utm_campaign=Vm7q9n7fgjep1u7"
       }
